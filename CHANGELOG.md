@@ -1,5 +1,18 @@
 # Changelog
 
+## 03.06.2026 (Version 1.6.0)
+
+- ENH: Standortbestimmung mit Ladezustand, deaktiviertem Button und zweitem Ortungsversuch stabilisiert
+- ENH: Routenbewertung als uebersichtlicher Score-Guide mit Skala, Schwellen und Faktoren dargestellt
+- ENH: Standortmeldungen fuer unsichere Browser-Kontexte und Berechtigungsstatus nachgeschaerft
+
+## 03.06.2026 (Version 1.5.0)
+
+- ENH: Sichtbarer ODAS-Instanztitel auf Schulwegsicherheit BW umgestellt
+- FIX: Fuzzy-Suche fuer Moerike/Maerike-Faelle praezisiert
+- ENH: Score-Skala in der Routenbewertung erklaert
+- ENH: Standortfehlermeldungen mit Desktop-/Mobile-Hinweisen erweitert
+
 ## 03.06.2026 (Version 1.4.0)
 
 - ENH: Schulsuche mit Suchindex, Tippfehler-Toleranz, Umlaut-/OE-Normalisierung und besserer Ort-/Adress-Sortierung verbessert

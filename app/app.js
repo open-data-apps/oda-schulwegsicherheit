@@ -1,4 +1,5 @@
 const SCHULWEGSAFE_DEFAULTS = {
+  title: "Schulwegsicherheit BW",
   center: [48.6616, 9.3501],
   zoom: 9,
   schoolRadiusMeters: 1000,
@@ -44,6 +45,7 @@ function createRuntime(configdata, rootElement) {
     startAddressLabel: "",
     routeMode: "foot",
     geocodeTimer: null,
+    isLocating: false,
     search: {
       activeSchoolResultIndex: -1,
       visibleSchoolResults: [],
@@ -71,6 +73,7 @@ function createRuntime(configdata, rootElement) {
 
 function normalizeConfig(configdata = {}) {
   return {
+    titel: String(configdata.titel || SCHULWEGSAFE_DEFAULTS.title).trim() || SCHULWEGSAFE_DEFAULTS.title,
     proxyAktiv: String(configdata.proxyAktiv || "nein").trim().toLowerCase(),
     schoolsDataUrl: String(configdata.schoolsDataUrl || "").trim(),
     accidentDataUrl: String(configdata.accidentDataUrl || "").trim(),
@@ -94,6 +97,7 @@ function teardownRuntime() {
 }
 
 function renderShell(runtime) {
+  const appTitle = runtime.config.titel || SCHULWEGSAFE_DEFAULTS.title;
   runtime.rootElement.innerHTML = `
     <section class="sws-app">
       <div class="sws-workbench">
@@ -101,7 +105,7 @@ function renderShell(runtime) {
           <div class="sws-brand">
             <span class="sws-brand-mark" aria-hidden="true">S</span>
             <div>
-              <h2>SchulwegSafe</h2>
+              <h2>${escapeHtml(appTitle)}</h2>
               <p>Baden-Wuerttemberg · Schulwege datenbasiert einschaetzen</p>
             </div>
           </div>
@@ -130,7 +134,7 @@ function renderShell(runtime) {
 
             <div class="sws-actions">
               <button type="button" class="btn btn-primary" id="apply-start-button">Route berechnen</button>
-              <button type="button" class="btn btn-outline-secondary" id="geo-locate-button">Standort</button>
+              <button type="button" class="btn btn-outline-secondary" id="geo-locate-button" data-default-label="Standort">Standort</button>
             </div>
           </div>
 
@@ -161,6 +165,7 @@ function renderShell(runtime) {
           <section class="sws-panel">
             <h3>Routenbewertung</h3>
             <div id="route-mode-note" class="sws-muted">Noch keine Bewertung vorhanden.</div>
+            <div id="route-score-help" class="sws-score-help">${escapeHtml(getScoreExplanation())}</div>
             <div id="route-alternatives" class="sws-route-list"></div>
           </section>
 
@@ -182,6 +187,7 @@ function renderShell(runtime) {
     hazardKpis: runtime.rootElement.querySelector("#hazard-kpis"),
     scoreSummary: runtime.rootElement.querySelector("#score-summary"),
     routeModeNote: runtime.rootElement.querySelector("#route-mode-note"),
+    routeScoreHelp: runtime.rootElement.querySelector("#route-score-help"),
     routeAlternatives: runtime.rootElement.querySelector("#route-alternatives"),
     hazardList: runtime.rootElement.querySelector("#hazard-list"),
     startAddressInput: runtime.rootElement.querySelector("#start-address-input"),
@@ -290,31 +296,81 @@ function bindUi(runtime) {
   });
 
   runtime.ui.geoLocateButton.addEventListener("click", () => {
-    hideSearchResults(runtime);
-    hideStartAddressResults(runtime);
-    if (!globalThis.navigator || !navigator.geolocation) {
-      setStatus(runtime, "warning", "Standortbestimmung ist in dieser Umgebung nicht verfuegbar.");
-      return;
+    handleGeolocationClick(runtime).catch((error) => {
+      setGeolocationLoading(runtime, false);
+      setStatus(runtime, "warning", getGeolocationErrorMessage(error));
+    });
+  });
+}
+
+async function handleGeolocationClick(runtime) {
+  hideSearchResults(runtime);
+  hideStartAddressResults(runtime);
+
+  if (runtime.isLocating) {
+    return;
+  }
+  if (!isGeolocationSupported()) {
+    setStatus(runtime, "warning", getGeolocationUnavailableMessage());
+    return;
+  }
+  if (!isGeolocationContextAllowed()) {
+    setStatus(runtime, "warning", getGeolocationInsecureContextMessage());
+    return;
+  }
+
+  setGeolocationLoading(runtime, true);
+  setStatus(runtime, "info", "Standort wird gesucht. Bitte Browserfreigabe bestaetigen, falls eine Abfrage erscheint.", { loading: true });
+
+  try {
+    const permissionState = await getGeolocationPermissionState();
+    if (permissionState === "denied") {
+      throw { code: 1 };
     }
 
-    setStatus(runtime, "info", "Standort wird bestimmt.");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        updateStartPoint(runtime, {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          label: "Aktueller Standort",
-        }, "Aktueller Standort uebernommen.");
-        if (runtime.selectedSchool) {
-          evaluateRoute(runtime).catch((error) => {
-            handleRuntimeError(runtime, error, "Die Route konnte nicht berechnet werden.");
-          });
-        }
-      },
-      () => setStatus(runtime, "warning", "Der Standort konnte nicht gelesen werden."),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    );
-  });
+    let position;
+    try {
+      position = await getCurrentPositionOnce({
+        enableHighAccuracy: false,
+        timeout: 12000,
+        maximumAge: 120000,
+      });
+    } catch (firstError) {
+      if (firstError.code === 1) {
+        throw firstError;
+      }
+      setStatus(runtime, "info", "Standort noch nicht gefunden. Es wird mit genauerer Ortung erneut versucht.", { loading: true });
+      position = await getCurrentPositionOnce({
+        enableHighAccuracy: true,
+        timeout: 18000,
+        maximumAge: 0,
+      });
+    }
+
+    const latitude = Number(position?.coords?.latitude);
+    const longitude = Number(position?.coords?.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      throw new Error("Keine gueltigen Standortkoordinaten erhalten.");
+    }
+
+    const accuracy = Number(position.coords.accuracy);
+    const label = Number.isFinite(accuracy)
+      ? `Aktueller Standort (ca. ${Math.round(accuracy)} m genau)`
+      : "Aktueller Standort";
+    updateStartPoint(runtime, {
+      lat: latitude,
+      lon: longitude,
+      label,
+    }, `${label} uebernommen.`);
+
+    if (runtime.selectedSchool) {
+      await evaluateRoute(runtime);
+    }
+  } catch (error) {
+    setStatus(runtime, "warning", getGeolocationErrorMessage(error));
+  } finally {
+    setGeolocationLoading(runtime, false);
+  }
 }
 
 async function initializeRuntime(runtime) {
@@ -973,11 +1029,23 @@ function isLikelySameSearchToken(term, token) {
   if (token.startsWith(term) || term.startsWith(token)) {
     return true;
   }
+  if (!haveCompatibleFuzzyPrefix(term, token)) {
+    return false;
+  }
   const maxDistance = Math.max(1, Math.min(2, Math.floor(Math.max(term.length, token.length) / 5)));
   if (Math.abs(term.length - token.length) > maxDistance) {
     return false;
   }
   return levenshteinDistance(term, token, maxDistance) <= maxDistance;
+}
+
+function haveCompatibleFuzzyPrefix(term, token) {
+  const left = String(term || "").slice(0, 2);
+  const right = String(token || "").slice(0, 2);
+  if (left.length < 2 || right.length < 2) {
+    return left === right;
+  }
+  return left === right;
 }
 
 function levenshteinDistance(left, right, maxDistance = 3) {
@@ -1329,6 +1397,7 @@ function renderScoreSummary(runtime, payload) {
       <strong>-</strong>
     `;
     runtime.ui.routeModeNote.textContent = "Noch keine Bewertung vorhanden.";
+    renderScoreGuide(runtime, null);
     runtime.ui.routeAlternatives.innerHTML = "";
     runtime.ui.hazardList.textContent = "Nach der Bewertung erscheinen hier die wichtigsten Punkte im Routenkorridor.";
     return;
@@ -1344,6 +1413,7 @@ function renderScoreSummary(runtime, payload) {
     <strong>${bestRoute.scoreResult.score.toFixed(1)}</strong>
   `;
   runtime.ui.routeModeNote.textContent = `${payload.modeLabel}: ${bestRoute.label}, ${formatDistance(bestRoute.distance)}${bestRoute.duration ? `, ca. ${formatDuration(bestRoute.duration)}` : ""}.`;
+  renderScoreGuide(runtime, bestRoute.scoreResult);
   runtime.ui.routeAlternatives.innerHTML = payload.alternatives
     .map((route, index) => `
       <div class="sws-route-item ${index === 0 ? "is-best" : ""}">
@@ -1361,6 +1431,50 @@ function getCompactScoreLabel(modeLabel = "") {
   if (modeLabel.includes("Autoroute")) return "Autoroute";
   if (modeLabel.includes("Routing")) return "Routenbewertung";
   return modeLabel || "Score";
+}
+
+function getScoreExplanation(score) {
+  if (Number.isFinite(Number(score))) {
+    return `Score ${Number(score).toFixed(1)} von 100. Skala: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = niedrig, 2 bis unter 6 = mittel, ab 6 = hoch.`;
+  }
+  return "Skala 0-100: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = niedrig, 2 bis unter 6 = mittel, ab 6 = hoch.";
+}
+
+function renderScoreGuide(runtime, scoreResult) {
+  if (!runtime.ui?.routeScoreHelp) {
+    return;
+  }
+  const hasScore = Number.isFinite(Number(scoreResult?.score));
+  const score = hasScore ? Number(scoreResult.score) : 0;
+  const level = hasScore ? scoreResult.level : "";
+  const meterWidth = Math.max(0, Math.min(100, score));
+  const levelClass = level ? ` is-${escapeHtml(level)}` : "";
+  const label = hasScore
+    ? `Aktueller Wert ${score.toFixed(1)} von 100`
+    : "Noch kein aktueller Wert";
+
+  runtime.ui.routeScoreHelp.innerHTML = `
+    <div class="sws-score-guide">
+      <div class="sws-score-guide-head">
+        <strong>So wird die Route bewertet</strong>
+        <span>${escapeHtml(label)}</span>
+      </div>
+      <div class="sws-score-meter${levelClass}" aria-label="${escapeHtml(label)}">
+        <span style="width: ${meterWidth}%"></span>
+      </div>
+      <div class="sws-score-scale" aria-label="Score-Skala">
+        <span><strong>Niedrig</strong><small>0 bis &lt; 2</small></span>
+        <span><strong>Mittel</strong><small>2 bis &lt; 6</small></span>
+        <span><strong>Hoch</strong><small>ab 6</small></span>
+      </div>
+      <div class="sws-score-factors" aria-label="Bewertungsfaktoren">
+        <span>50-m-Routenkorridor</span>
+        <span>Kinderbeteiligung staerker</span>
+        <span>Fuss/Rad staerker</span>
+        <span>Neuere Unfaelle staerker</span>
+      </div>
+    </div>
+  `;
 }
 
 function formatDistance(distanceMeters) {
@@ -1750,7 +1864,75 @@ function describeAccident(properties) {
   return parts.join(", ") || "Schulwegzeit";
 }
 
-function setStatus(runtime, tone, message) {
+function getGeolocationUnavailableMessage() {
+  return "Standortbestimmung ist in dieser Umgebung nicht verfuegbar. Viele Desktop-Browser erlauben Standort nur auf HTTPS-Seiten oder localhost. Bitte pruefe die Browserfreigabe oder nutze alternativ Startadresse oder Kartenklick.";
+}
+
+function isGeolocationSupported() {
+  return Boolean(globalThis.navigator?.geolocation);
+}
+
+function isGeolocationContextAllowed() {
+  const hostname = String(globalThis.location?.hostname || "").toLowerCase();
+  return Boolean(globalThis.isSecureContext || hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1");
+}
+
+function getGeolocationInsecureContextMessage() {
+  return "Standortbestimmung ist nur in sicheren Browser-Kontexten moeglich. Bitte die App ueber HTTPS oder lokal ueber localhost oeffnen. Alternativ funktionieren Startadresse oder Kartenklick.";
+}
+
+async function getGeolocationPermissionState() {
+  if (!globalThis.navigator?.permissions?.query) {
+    return "unknown";
+  }
+  try {
+    const permission = await globalThis.navigator.permissions.query({ name: "geolocation" });
+    return permission?.state || "unknown";
+  } catch (error) {
+    return "unknown";
+  }
+}
+
+function getCurrentPositionOnce(options) {
+  return new Promise((resolve, reject) => {
+    globalThis.navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  });
+}
+
+function setGeolocationLoading(runtime, isLoading) {
+  runtime.isLocating = Boolean(isLoading);
+  if (!runtime.ui?.geoLocateButton) {
+    return;
+  }
+  runtime.ui.geoLocateButton.disabled = Boolean(isLoading);
+  runtime.ui.geoLocateButton.setAttribute("aria-busy", isLoading ? "true" : "false");
+  runtime.ui.geoLocateButton.innerHTML = isLoading
+    ? `<span class="sws-inline-spinner" aria-hidden="true"></span><span>Standort...</span>`
+    : escapeHtml(runtime.ui.geoLocateButton.dataset.defaultLabel || "Standort");
+}
+
+function getGeolocationErrorMessage(error = {}) {
+  const mobileHint = isLikelyMobileDevice()
+    ? " Auf dem Smartphone muessen zusaetzlich die Standortdienste im System aktiviert sein."
+    : " Auf dem Desktop hilft oft die Standortfreigabe im Browser oder Betriebssystem.";
+
+  if (error.code === 1) {
+    return `Der Standortzugriff wurde abgelehnt. Bitte erlaube den Standort im Browser.${mobileHint} Alternativ kannst du eine Startadresse eingeben oder den Startpunkt in die Karte klicken.`;
+  }
+  if (error.code === 2) {
+    return `Der Standort konnte technisch nicht ermittelt werden.${mobileHint} Versuche es erneut oder nutze Startadresse bzw. Kartenklick.`;
+  }
+  if (error.code === 3) {
+    return `Die Standortbestimmung hat zu lange gedauert.${mobileHint} Auf schwachem GPS/WLAN kann das passieren; Startadresse oder Kartenklick funktionieren weiterhin.`;
+  }
+  return `Der Standort konnte nicht gelesen werden.${mobileHint} Bitte pruefe Berechtigungen oder nutze Startadresse bzw. Kartenklick.`;
+}
+
+function isLikelyMobileDevice() {
+  return /android|iphone|ipad|ipod|mobile/i.test(String(globalThis.navigator?.userAgent || ""));
+}
+
+function setStatus(runtime, tone, message, options = {}) {
   const className = tone === "success"
     ? "alert-success"
     : tone === "warning"
@@ -1758,7 +1940,7 @@ function setStatus(runtime, tone, message) {
       : tone === "danger"
         ? "alert-danger"
         : "alert-info";
-  runtime.ui.status.className = `alert ${className} sws-status`;
+  runtime.ui.status.className = `alert ${className} sws-status${options.loading ? " is-loading" : ""}`;
   runtime.ui.status.textContent = message;
 }
 

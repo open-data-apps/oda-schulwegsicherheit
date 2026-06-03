@@ -1,6 +1,6 @@
-# SchulwegSafe
+# Schulwegsicherheit BW
 
-Die App **SchulwegSafe** bietet eine interaktive, map-zentrierte Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.
+Die App **Schulwegsicherheit BW** bietet eine interaktive, map-zentrierte Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.
 
 Die App ist fuer die Verwendung im [Open Data App Store](https://open-data-app-store.de/) gemacht und entspricht der [Open Data App](https://open-data-apps.github.io/open-data-app-docs/open-data-app-spezifikation/).
 
@@ -28,6 +28,8 @@ Die Konfiguration wird vom ODAS geladen. Die App zeigt folgende Inhalte:
 - **Startadresse**: Suche einer Startadresse per Nominatim, Kartenklick oder Standortfunktion
 - **Routing**: Berechnung realer Fuss-, Rad- oder Autorouten ueber einen OSRM-kompatiblen Routingdienst
 - **Bewertung**: Score entlang des berechneten Routenkorridors mit Distanz, Dauer und Unfallpunkt-Treffern
+- **Score-Erklaerung**: Uebersichtlicher Score-Guide mit Skala, Schwellenwerten und Bewertungsfaktoren direkt in der Routenbewertung
+- **Standort-Hinweise**: Ladeanzeige, robuster zweiter Ortungsversuch und verstaendliche Meldungen bei Browserfreigabe, Desktop-Einschraenkungen oder mobilen Standortdiensten
 
 ---
 
@@ -108,6 +110,8 @@ Der Inhaltsbereich wird in `app/app.js` erstellt. App-spezifisches Styling liegt
 Die App verwendet [Leaflet.js](https://leafletjs.com/) und [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat). Die Karte nutzt OpenStreetMap-Kacheln und benoetigt keinen Karten-API-Key.
 
 Fuer Startadressen wird die Nominatim-Suche von OpenStreetMap genutzt. Fuer Routen wird standardmaessig ein OSRM-kompatibler Routingdienst verwendet; ueber `routeServiceUrl` kann im ODAS-Betrieb ein geschuetzter eigener Routingdienst gesetzt werden.
+
+Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Routenkorridor keine relevanten Unfallpunkte liegen; jeder Treffer erhoeht den Wert, wobei Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle staerker gewichtet werden. Unter `2` gilt als niedrig, `2` bis unter `6` als mittel und ab `6` als hoch.
 
 ---
 

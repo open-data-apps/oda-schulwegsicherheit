@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.4.0",
+  "version": "1.6.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -16,7 +16,7 @@
     "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.",
     "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
     "## Nutzung",
-    "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
+    "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Standortbestimmung zeigt einen Ladezustand und nutzt einen zweiten Versuch, wenn der erste Browser-Standort nicht geliefert wird. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte. Die Score-Skala reicht von 0 bis 100; 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor, unter 2 gilt als niedrig, 2 bis unter 6 als mittel und ab 6 als hoch.",
     "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
     "## Datenquelle",
     "Schuldaten: JedeSchule/Datenschule, CC0. Unfalldaten: Unfallatlas der Statistischen Aemter des Bundes und der Laender, bereitgestellt ueber OpenGeodata.NRW unter Datenlizenz Deutschland Namensnennung 2.0.",
@@ -55,7 +55,7 @@
     "seitentitel": {
       "label": "Seitentitel",
       "hilfe": "Titel der Browser-Registerkarte",
-      "default": "SchulwegSafe",
+      "default": "Schulwegsicherheit BW",
       "format": {
         "typ": "string",
         "laenge": 60
@@ -65,7 +65,7 @@
     "titel": {
       "label": "App-Titel",
       "hilfe": "Titel in der Kopfzeile der App",
-      "default": "SchulwegSafe",
+      "default": "Schulwegsicherheit BW",
       "format": {
         "typ": "string",
         "laenge": 60
@@ -86,7 +86,7 @@
     "fusszeile": {
       "label": "Fusszeile",
       "hilfe": "Text in der Footer-Zeile",
-      "default": "(C) Copyright {{jahr}} | App: SchulwegSafe | Daten: JedeSchule und Unfallatlas | ODAS: {{odas.betreiber.name}}",
+      "default": "(C) Copyright {{jahr}} | App: Schulwegsicherheit BW | Daten: JedeSchule und Unfallatlas | ODAS: {{odas.betreiber.name}}",
       "format": {
         "typ": "string",
         "laenge": 180
@@ -122,7 +122,7 @@
         "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.",
         "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
         "## Nutzung",
-        "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
+        "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Standortbestimmung zeigt einen Ladezustand und nutzt einen zweiten Versuch, wenn der erste Browser-Standort nicht geliefert wird. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte. Die Score-Skala reicht von 0 bis 100; 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor, unter 2 gilt als niedrig, 2 bis unter 6 als mittel und ab 6 als hoch.",
         "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
         "## Datenquelle",
         "Schuldaten: JedeSchule/Datenschule, CC0. Unfalldaten: Unfallatlas der Statistischen Aemter des Bundes und der Laender, bereitgestellt ueber OpenGeodata.NRW unter Datenlizenz Deutschland Namensnennung 2.0.",
