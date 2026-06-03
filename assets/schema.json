@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SchulwegSafe Unfallatlas-Datensatz",
+  "description": "Von SchulwegSafe ausgewertete Kernfelder des Unfallatlas CSV-Downloads.",
+  "type": "object",
+  "properties": {
+    "UJAHR": {
+      "type": "integer",
+      "description": "Unfalljahr"
+    },
+    "UWOCHENTAG": {
+      "type": "integer",
+      "description": "Wochentag nach Unfallatlas-Codierung"
+    },
+    "USTUNDE": {
+      "type": "integer",
+      "description": "Unfallstunde"
+    },
+    "IstRad": {
+      "type": "integer",
+      "description": "1, wenn Radverkehr beteiligt war"
+    },
+    "IstFuss": {
+      "type": "integer",
+      "description": "1, wenn Fussverkehr beteiligt war"
+    },
+    "IstKind": {
+      "type": "integer",
+      "description": "1, wenn Kinder beteiligt waren"
+    },
+    "XGCSWGS84": {
+      "type": "number",
+      "description": "Laengengrad in WGS84"
+    },
+    "YGCSWGS84": {
+      "type": "number",
+      "description": "Breitengrad in WGS84"
+    }
+  },
+  "required": [
+    "UJAHR",
+    "UWOCHENTAG",
+    "USTUNDE",
+    "IstRad",
+    "IstFuss",
+    "XGCSWGS84",
+    "YGCSWGS84"
+  ]
+}

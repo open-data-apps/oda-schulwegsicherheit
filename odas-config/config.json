@@ -1,0 +1,43 @@
+{
+  "titel": "SchulwegSafe",
+  "seitentitel": "SchulwegSafe",
+  "icon": "assets/odas-app-icon.svg",
+  "brandingCSS": "",
+  "brandingCSSFile": "assets/branding.css",
+  "beschreibung": [
+    "## Ueber diese App\n",
+    "SchulwegSafe unterstuetzt Kommunen, Schulen und interessierte Fachstellen dabei, moegliche Schulwege anhand offener Geodaten zu betrachten. Die App kombiniert Schuldaten fuer Baden-Wuerttemberg mit den punktgenauen Unfallatlas-Daten und zeigt daraus eine kompakte Karten- und Bewertungsansicht.\n",
+    "Die Anwendung ist als statische ODAS-Webapp umgesetzt. Sie ersetzt keine amtliche Schulwegplanung und keine Navigation, macht aber auffaellige Bereiche und Bewertungsgrundlagen transparent sichtbar.\n",
+    "## Inhalte\n",
+    "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.\n",
+    "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.\n",
+    "## Nutzung\n",
+    "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.\n",
+    "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.\n",
+    "## Datenquelle\n",
+    "Schuldaten: JedeSchule/Datenschule, CC0. Unfalldaten: Unfallatlas der Statistischen Aemter des Bundes und der Laender, bereitgestellt ueber OpenGeodata.NRW unter Datenlizenz Deutschland Namensnennung 2.0.\n",
+    "Kartengrundlage: OpenStreetMap-Mitwirkende.\n",
+    "## Open Data App Store\n",
+    "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
+  ],
+  "kontakt": [
+    "Bei Fragen zur App oder zur technischen Bereitstellung wenden Sie sich bitte an das bereitstellende Team.<br>",
+    "E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a><br>",
+    "Telefon: <a href='tel:+49711310093100'>0711-31009-3100</a>"
+  ],
+  "impressum": [
+    "Ondics GmbH<br>",
+    "Blumenstrasse 19<br>",
+    "70182 Stuttgart<br>",
+    "<a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>"
+  ],
+  "datenschutz": [
+    "Diese App speichert keine Nutzerprofile im Browser-Code.<br>",
+    "Bei Nutzung der Standortfunktion wird die Position nur fuer die laufende Bewertung im Frontend verarbeitet."
+  ],
+  "fusszeile": "(C) Copyright 2026 | App: SchulwegSafe | Daten: JedeSchule und Unfallatlas | ODAS: Open Data App Store",
+  "proxyAktiv": "nein",
+  "schoolsDataUrl": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
+  "accidentDataUrl": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
+  "routeServiceUrl": ""
+}

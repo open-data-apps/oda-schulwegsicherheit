@@ -1,0 +1,227 @@
+{
+  "app-entwickler-id": "12343",
+  "app-entwickler-name": "ondics-gmbh",
+  "name-in-url": "schulwegsafe",
+  "name": "SchulwegSafe",
+  "version": "1.4.0",
+  "odas-app-icon": "assets/odas-app-icon.svg",
+  "app-icon": "assets/odas-app-icon.svg",
+  "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
+  "beschreibung": [
+    "_multiline_",
+    "## Ueber diese App",
+    "SchulwegSafe unterstuetzt Kommunen, Schulen und interessierte Fachstellen dabei, moegliche Schulwege anhand offener Geodaten zu betrachten. Die App kombiniert Schuldaten fuer Baden-Wuerttemberg mit den punktgenauen Unfallatlas-Daten und zeigt daraus eine kompakte Karten- und Bewertungsansicht.",
+    "Die Anwendung ist als statische ODAS-Webapp umgesetzt. Sie ersetzt keine amtliche Schulwegplanung und keine Navigation, macht aber auffaellige Bereiche und Bewertungsgrundlagen transparent sichtbar.",
+    "## Inhalte",
+    "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.",
+    "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
+    "## Nutzung",
+    "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
+    "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
+    "## Datenquelle",
+    "Schuldaten: JedeSchule/Datenschule, CC0. Unfalldaten: Unfallatlas der Statistischen Aemter des Bundes und der Laender, bereitgestellt ueber OpenGeodata.NRW unter Datenlizenz Deutschland Namensnennung 2.0.",
+    "Kartengrundlage: OpenStreetMap-Mitwirkende.",
+    "## Open Data App Store",
+    "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
+  ],
+  "tags-funktion": [
+    "Karte",
+    "Schulweg",
+    "Mobilitaet"
+  ],
+  "tags-dateityp": [
+    "JSON",
+    "CSV",
+    "ZIP"
+  ],
+  "tags-datenart": [
+    "Geodaten",
+    "Bildung",
+    "Verkehr"
+  ],
+  "screenshots": [
+    "assets/Desktop_Screenshot.png",
+    "assets/Mobile_Screenshot.png"
+  ],
+  "daten": {
+    "beschreibung": "Die App verarbeitet externe Schuldaten von JedeSchule/Datenschule und den Unfallatlas-CSV-ZIP-Download von OpenGeodata.NRW.",
+    "schema": "assets/schema.json",
+    "beispiel": "Unfallatlas 2024 CSV-ZIP und Baden-Wuerttemberg-Schuldaten von JedeSchule/Datenschule",
+    "beispiel-url": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip"
+  },
+  "branding-css": "",
+  "api-version": "1",
+  "instanz-config": {
+    "seitentitel": {
+      "label": "Seitentitel",
+      "hilfe": "Titel der Browser-Registerkarte",
+      "default": "SchulwegSafe",
+      "format": {
+        "typ": "string",
+        "laenge": 60
+      },
+      "erforderlich": "ja"
+    },
+    "titel": {
+      "label": "App-Titel",
+      "hilfe": "Titel in der Kopfzeile der App",
+      "default": "SchulwegSafe",
+      "format": {
+        "typ": "string",
+        "laenge": 60
+      },
+      "erforderlich": "ja"
+    },
+    "icon": {
+      "label": "Kopfzeilen-Icon",
+      "hilfe": "Relativer Pfad oder Bild-URL fuer das Logo in der Kopfzeile",
+      "default": "assets/odas-app-icon.svg",
+      "format": {
+        "typ": "image",
+        "hoehe": 120,
+        "breite": 120
+      },
+      "erforderlich": "ja"
+    },
+    "fusszeile": {
+      "label": "Fusszeile",
+      "hilfe": "Text in der Footer-Zeile",
+      "default": "(C) Copyright {{jahr}} | App: SchulwegSafe | Daten: JedeSchule und Unfallatlas | ODAS: {{odas.betreiber.name}}",
+      "format": {
+        "typ": "string",
+        "laenge": 180
+      },
+      "erforderlich": "ja"
+    },
+    "kontakt": {
+      "label": "Kontakt",
+      "hilfe": "Inhalt der Kontakt-Seite",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": [
+        "_multiline_",
+        "Bei Fragen zur App oder zur technischen Bereitstellung wenden Sie sich bitte an das bereitstellende Team.",
+        "E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a>",
+        "Telefon: <a href='tel:+49711310093100'>0711-31009-3100</a>"
+      ],
+      "erforderlich": "ja"
+    },
+    "beschreibung": {
+      "label": "Beschreibung",
+      "hilfe": "Inhalt der Seite Ueber diese App",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": [
+        "_multiline_",
+        "## Ueber diese App",
+        "SchulwegSafe unterstuetzt Kommunen, Schulen und interessierte Fachstellen dabei, moegliche Schulwege anhand offener Geodaten zu betrachten. Die App kombiniert Schuldaten fuer Baden-Wuerttemberg mit den punktgenauen Unfallatlas-Daten und zeigt daraus eine kompakte Karten- und Bewertungsansicht.",
+        "Die Anwendung ist als statische ODAS-Webapp umgesetzt. Sie ersetzt keine amtliche Schulwegplanung und keine Navigation, macht aber auffaellige Bereiche und Bewertungsgrundlagen transparent sichtbar.",
+        "## Inhalte",
+        "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.",
+        "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
+        "## Nutzung",
+        "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
+        "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
+        "## Datenquelle",
+        "Schuldaten: JedeSchule/Datenschule, CC0. Unfalldaten: Unfallatlas der Statistischen Aemter des Bundes und der Laender, bereitgestellt ueber OpenGeodata.NRW unter Datenlizenz Deutschland Namensnennung 2.0.",
+        "Kartengrundlage: OpenStreetMap-Mitwirkende.",
+        "## Open Data App Store",
+        "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
+      ],
+      "erforderlich": "ja"
+    },
+    "impressum": {
+      "label": "Impressum",
+      "hilfe": "Inhalt der Impressums-Seite",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": [
+        "_multiline_",
+        "### Anbieter",
+        "Ondics GmbH",
+        "Blumenstrasse 19",
+        "70182 Stuttgart",
+        "",
+        "Website: <a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>",
+        "E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a>"
+      ],
+      "erforderlich": "ja"
+    },
+    "datenschutz": {
+      "label": "Datenschutz",
+      "hilfe": "Inhalt der Datenschutz-Seite",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": [
+        "_multiline_",
+        "Diese App speichert keine Nutzerprofile im Browser-Code.",
+        "Bei Nutzung der Standortfunktion wird die Position nur fuer die laufende Bewertung im Frontend verarbeitet."
+      ],
+      "erforderlich": "ja"
+    },
+    "brandingCSS": {
+      "label": "Branding CSS",
+      "hilfe": "Optionaler direkter CSS-Code fuer Instanz-Anpassungen",
+      "default": "",
+      "format": {
+        "typ": "string",
+        "laenge": 4000
+      },
+      "erforderlich": "ja"
+    },
+    "brandingCSSFile": {
+      "label": "Branding CSS Datei",
+      "hilfe": "Relativer Pfad zu einer optionalen Branding-CSS-Datei",
+      "default": "assets/branding.css",
+      "format": {
+        "typ": "string",
+        "laenge": 255
+      },
+      "erforderlich": "ja"
+    },
+    "proxyAktiv": {
+      "label": "ODAS Proxy aktiv",
+      "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen",
+      "default": "nein",
+      "format": {
+        "typ": "dropdown",
+        "optionen": [
+          "nein",
+          "ja"
+        ]
+      },
+      "erforderlich": "ja"
+    },
+    "schoolsDataUrl": {
+      "label": "URL Schuldaten",
+      "hilfe": "URL zu den Baden-Wuerttemberg-Schuldaten als JSON",
+      "default": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
+      "format": {
+        "typ": "url"
+      },
+      "erforderlich": "ja"
+    },
+    "accidentDataUrl": {
+      "label": "URL Unfallatlas CSV-ZIP",
+      "hilfe": "URL zum Unfallatlas-CSV-ZIP-Download",
+      "default": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
+      "format": {
+        "typ": "url"
+      },
+      "erforderlich": "ja"
+    },
+    "routeServiceUrl": {
+      "label": "Optionaler Routing-Service",
+      "hilfe": "Optionale OSRM-kompatible Basis-URL oder geschuetzte Service-URL fuer Routen. Leer lassen fuer den voreingestellten OSRM-Routingdienst.",
+      "default": "",
+      "format": {
+        "typ": "url"
+      },
+      "erforderlich": "nein"
+    }
+  }
+}

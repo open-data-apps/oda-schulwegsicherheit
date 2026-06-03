@@ -1,0 +1,46 @@
+.title {
+  color: #ffffff;
+  letter-spacing: -0.03em;
+}
+
+body {
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 30%),
+    linear-gradient(180deg, #f5f9ff 0%, #eef4fb 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #1e293b;
+}
+
+header,
+.header,
+footer,
+.footer {
+  background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+a {
+  color: #0f766e;
+}
+
+a:hover,
+a:focus {
+  color: #155e75;
+}
+
+.btn-primary,
+button.btn-primary {
+  background-color: #0f766e;
+  border-color: #0f766e;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover {
+  background-color: #115e59;
+  border-color: #115e59;
+}
+
+.logo {
+  max-height: 84px;
+  object-fit: contain;
+}
