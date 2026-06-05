@@ -1,5 +1,10 @@
 # Changelog
 
+## 05.06.2026 (Version 1.7.0)
+
+- ENH: Hash-basiertes Routing fuer die Seitennavigation implementiert (ermoeglicht Browser vor/zurueck Navigation und Deep Linking/Bookmarks)
+- ENH: Aufraeumprozess (teardownRuntime) bei Seitenwechseln integriert, um aktive Karteninstanzen und Timer sauber zu beenden
+
 ## 03.06.2026 (Version 1.6.0)
 
 - ENH: Standortbestimmung mit Ladezustand, deaktiviertem Button und zweitem Ortungsversuch stabilisiert

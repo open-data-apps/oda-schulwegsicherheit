@@ -24,12 +24,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       console.log("Kein Custom Branding CSS in der Config gefunden.");
     }
-    loadPage("startseite");
+
+    // Hashchange Listener fuer die Navigation registrieren
+    window.addEventListener("hashchange", () => {
+      const page = getPageFromHash();
+      loadPage(page);
+    });
+
+    // Initialen Page-Load basierend auf dem aktuellen URL-Hash durchfuehren
+    const initialPage = getPageFromHash();
+    loadPage(initialPage);
   } catch (err) {
     console.error("Fehler:", err);
   }
   setupBurgerMenu();
 });
+
+function getPageFromHash() {
+  const hash = window.location.hash.substring(1);
+  const validPages = ["startseite", "beschreibung", "kontakt", "datenschutz", "impressum"];
+  return validPages.includes(hash) ? hash : "startseite";
+}
 
 function getConfigUrl() {
   const urlString = window.location.href;
@@ -163,6 +178,9 @@ function appendStylesheetWithFallback(urlValue) {
 }
 
 async function loadPage(page) {
+  if (typeof teardownRuntime === "function") {
+    teardownRuntime();
+  }
   let content;
   switch (page) {
     case "startseite":
@@ -198,10 +216,15 @@ function setupBurgerMenu() {
       link.getAttribute("data-page") ||
       link.getAttribute("href").replace("#", "").trim();
     if (pageName) {
-      // Stelle sicher, dass pageName gültig ist
       link.addEventListener("click", (event) => {
         event.preventDefault(); // Verhindere das standardmäßige Link-Verhalten
-        loadPage(pageName); // Lade die entsprechende Seite
+
+        if (window.location.hash.substring(1) === pageName) {
+          // Falls bereits auf der Seite, manuell laden, da hashchange nicht feuert
+          loadPage(pageName);
+        } else {
+          window.location.hash = pageName;
+        }
 
         const offcanvasNavbar = document.getElementById("offcanvasNavbar");
         const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasNavbar);

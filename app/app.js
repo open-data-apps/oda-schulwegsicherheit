@@ -16,10 +16,8 @@ const SCHULWEGSAFE_RUNTIME = {
   assetPromises: {},
 };
 
-function app(configdata = {}, enclosingHtmlDivElement) {
-  teardownRuntime();
-
-  // Override loadPage once to support the beautiful enhanced description page
+// Override loadPage to support the beautiful enhanced description page
+document.addEventListener("DOMContentLoaded", () => {
   if (window.loadPage && !window.loadPage.__swsOverridden) {
     const originalLoadPage = window.loadPage;
     window.loadPage = async function(page) {
@@ -34,6 +32,10 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     };
     window.loadPage.__swsOverridden = true;
   }
+});
+
+function app(configdata = {}, enclosingHtmlDivElement) {
+  teardownRuntime();
 
   const runtime = createRuntime(configdata, enclosingHtmlDivElement);
   SCHULWEGSAFE_RUNTIME.activeRuntime = runtime;
@@ -204,7 +206,7 @@ function renderShell(runtime) {
           <div class="modal-body pt-1 text-start">
             ${renderEnhancedScoringExplanation()}
             <div class="mt-3 text-end">
-              <a href="#beschreibung" class="small text-primary text-decoration-none" data-bs-dismiss="modal" onclick="loadPage('beschreibung');">Detaillierte Beschreibungsseite öffnen &rarr;</a>
+              <a href="#beschreibung" class="small text-primary text-decoration-none" data-bs-dismiss="modal" onclick="location.hash = 'beschreibung';">Detaillierte Beschreibungsseite öffnen &rarr;</a>
             </div>
           </div>
         </div>
@@ -2137,7 +2139,7 @@ function renderEnhancedDescriptionPage(config) {
   html += `
       </div>
       <div class="mt-4 text-start">
-        <a href="#startseite" class="btn btn-outline-primary" onclick="event.preventDefault(); loadPage('startseite');">
+        <a href="#startseite" class="btn btn-outline-primary" onclick="event.preventDefault(); location.hash = 'startseite';">
           &larr; Zurück zur Hauptseite
         </a>
       </div>
