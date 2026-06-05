@@ -1641,7 +1641,7 @@ async function fetchJsonResource(url, config) {
 }
 
 async function fetchBinaryResource(url, config) {
-  if (isProxyEnabled(config)) {
+  if (shouldUseProxy(url, config)) {
     const text = await fetchViaOdasProxy(url);
     return base64ToArrayBuffer(text);
   }
@@ -1653,7 +1653,7 @@ async function fetchBinaryResource(url, config) {
 }
 
 async function fetchOdasCompatibleText(targetUrl, config) {
-  if (isProxyEnabled(config)) {
+  if (shouldUseProxy(targetUrl, config)) {
     return fetchViaOdasProxy(targetUrl);
   }
   const response = await fetch(targetUrl);
@@ -1665,6 +1665,21 @@ async function fetchOdasCompatibleText(targetUrl, config) {
 
 function isProxyEnabled(config = {}) {
   return String(config.proxyAktiv || "").trim().toLowerCase() === "ja";
+}
+
+function shouldUseProxy(url, config = {}) {
+  if (!isProxyEnabled(config)) {
+    return false;
+  }
+  try {
+    const parsedUrl = new URL(url, window.location.origin);
+    // Nur Anfragen an die eigene Domain oder relative Pfade sollen ueber den Proxy laufen.
+    // Externe Ressourcen wie GitHub oder OpenGeodata.NRW koennen nicht ueber den ODAS-Portal-Proxy
+    // geladen werden (da dieser die Domain abschneidet) und muessen direkt geladen werden.
+    return parsedUrl.origin === window.location.origin;
+  } catch (error) {
+    return true;
+  }
 }
 
 function extractPathFromUrl(url) {

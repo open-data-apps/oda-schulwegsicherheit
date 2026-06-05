@@ -1,5 +1,10 @@
 # Changelog
 
+## 05.06.2026 (Version 1.7.1)
+
+- FIX: Filterung fuer ODAS-Proxy-Nutzung hinzugefuegt. Nur relative/interne Abrufe laufen ueber den Proxy, da dieser externe Domains (GitHub/OpenGeodata.NRW) nicht proxieren kann (behebt App-Fehler bei aktivem Proxy).
+- FIX: Feldtyp `proxyAktiv` in `app-package.json` von `dropdown` auf `string` umgestellt (behebt Inkompatibilitaet mit manchen ODAS-Versionen).
+
 ## 05.06.2026 (Version 1.7.0)
 
 - ENH: Hash-basiertes Routing fuer die Seitennavigation implementiert (ermoeglicht Browser vor/zurueck Navigation und Deep Linking/Bookmarks)

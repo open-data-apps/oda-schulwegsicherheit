@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -188,15 +188,12 @@
       "erforderlich": "ja"
     },
     "proxyAktiv": {
-      "label": "ODAS Proxy aktiv",
-      "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen",
+      "label": "ODAS Proxy aktiv (ja/nein)",
+      "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen ('ja' oder 'nein')",
       "default": "nein",
       "format": {
-        "typ": "dropdown",
-        "optionen": [
-          "nein",
-          "ja"
-        ]
+        "typ": "string",
+        "laenge": 4
       },
       "erforderlich": "ja"
     },
