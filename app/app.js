@@ -19,6 +19,22 @@ const SCHULWEGSAFE_RUNTIME = {
 function app(configdata = {}, enclosingHtmlDivElement) {
   teardownRuntime();
 
+  // Override loadPage once to support the beautiful enhanced description page
+  if (window.loadPage && !window.loadPage.__swsOverridden) {
+    const originalLoadPage = window.loadPage;
+    window.loadPage = async function(page) {
+      if (page === "beschreibung") {
+        const container = document.getElementById("main-content");
+        if (container) {
+          container.innerHTML = renderEnhancedDescriptionPage(configData);
+          return;
+        }
+      }
+      return originalLoadPage(page);
+    };
+    window.loadPage.__swsOverridden = true;
+  }
+
   const runtime = createRuntime(configdata, enclosingHtmlDivElement);
   SCHULWEGSAFE_RUNTIME.activeRuntime = runtime;
 
@@ -140,7 +156,7 @@ function renderShell(runtime) {
 
           <div class="sws-score-strip" id="score-summary">
             <div class="sws-score-copy">
-              <span class="sws-score-label">Score</span>
+              <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
               <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
             </div>
             <strong>-</strong>
@@ -176,6 +192,24 @@ function renderShell(runtime) {
         </div>
       </div>
     </section>
+
+    <!-- Modal für die Score-Erklärung -->
+    <div class="modal fade" id="score-info-modal" tabindex="-1" aria-labelledby="scoreInfoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-light border-bottom-0 pb-2">
+            <h5 class="modal-title fw-bold text-dark h6 mb-0" id="scoreInfoModalLabel">ℹ️ Route-Score Berechnung</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+          </div>
+          <div class="modal-body pt-1 text-start">
+            ${renderEnhancedScoringExplanation()}
+            <div class="mt-3 text-end">
+              <a href="#beschreibung" class="small text-primary text-decoration-none" data-bs-dismiss="modal" onclick="loadPage('beschreibung');">Detaillierte Beschreibungsseite öffnen &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 
   runtime.ui = {
@@ -388,6 +422,7 @@ async function initializeRuntime(runtime) {
 
   hideSearchResults(runtime);
   renderHazardKpis(runtime, []);
+  renderScoreGuide(runtime, null);
   setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidents.length} schulwegrelevante Unfallpunkte geladen.`);
 }
 
@@ -1391,7 +1426,7 @@ function renderScoreSummary(runtime, payload) {
   if (!payload || !payload.selected) {
     runtime.ui.scoreSummary.innerHTML = `
       <div class="sws-score-copy">
-        <span class="sws-score-label">Score</span>
+        <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
         <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
       </div>
       <strong>-</strong>
@@ -1407,7 +1442,10 @@ function renderScoreSummary(runtime, payload) {
   const scoreLabel = getCompactScoreLabel(payload.modeLabel);
   runtime.ui.scoreSummary.innerHTML = `
     <div class="sws-score-copy">
-      <span class="sws-score-label">${escapeHtml(scoreLabel)}</span>
+      <span class="sws-score-label">
+        ${escapeHtml(scoreLabel)}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a>
+      </span>
       <span class="sws-score-caption">${capitalize(bestRoute.scoreResult.level)} · ${bestRoute.scoreResult.hits.length} Punkte</span>
     </div>
     <strong>${bestRoute.scoreResult.score.toFixed(1)}</strong>
@@ -1473,6 +1511,17 @@ function renderScoreGuide(runtime, scoreResult) {
         <span>Fuss/Rad staerker</span>
         <span>Neuere Unfaelle staerker</span>
       </div>
+      <details class="sws-score-details mt-1 border-top pt-2">
+        <summary class="small text-muted" style="cursor: pointer; user-select: none;">Berechnung einblenden</summary>
+        <div class="sws-score-details-content mt-2 text-muted">
+          <ul class="mb-0 ps-3 small text-start">
+            <li><strong>Basisgewicht:</strong> Jeder Unfall im 50m-Korridor zählt <code>1.0</code></li>
+            <li><strong>Beteiligung:</strong> Kind <code>x 2.0</code> · Fußgänger <code>x 1.5</code> · Radfahrer <code>x 1.3</code></li>
+            <li><strong>Aktualität:</strong> -10% pro Jahr Alter (min. verbleibend: 50%)</li>
+            <li><strong>Maximaler Score:</strong> Begrenzt auf maximal <code>100.0</code></li>
+          </ul>
+        </div>
+      </details>
     </div>
   `;
 }
@@ -2040,4 +2089,310 @@ function pointToSegmentDistanceMeters(point, segmentStart, segmentEnd) {
 
 function degreesToRadians(value) {
   return (value * Math.PI) / 180;
+}
+
+function renderEnhancedDescriptionPage(config) {
+  const beschreibungRaw = config.beschreibung || "";
+  const sections = splitMarkdownSections(beschreibungRaw);
+  
+  let html = `
+    <div class="col-12" id="secondarySites">
+      <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+        <div class="sws-brand-mark me-3" style="width: 48px; height: 48px; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f766e 0%, #2563eb 100%); color: #fff; border-radius: 8px; font-weight: bold;">S</div>
+        <div>
+          <h2 class="mb-0 text-dark h3 fw-bold">Über SchulwegSafe BW</h2>
+          <p class="text-muted small mb-0">Hintergrundinformationen und Berechnungsgrundlagen</p>
+        </div>
+      </div>
+      <div class="row g-4">
+  `;
+  
+  sections.forEach((section) => {
+    const title = section.title;
+    const content = section.content;
+    
+    let contentHtml = parseMarkdownToHtml(content);
+    
+    if (title.toLowerCase().includes("datenquelle") || title.toLowerCase().includes("datenquellen")) {
+      contentHtml += renderEnhancedDataSources(config);
+    } else if (title.toLowerCase().includes("nutzung") || title.toLowerCase().includes("bewertung")) {
+      contentHtml += renderEnhancedScoringExplanation();
+    }
+    
+    html += `
+      <div class="col-12">
+        <div class="card border-0 shadow-sm sws-info-card">
+          <div class="card-body p-4">
+            <h3 class="card-title text-primary mb-3 h5 fw-bold d-flex align-items-center">
+              <span class="sws-section-icon me-2">${getSectionIcon(title)}</span>
+              ${escapeHtml(title)}
+            </h3>
+            <div class="card-text text-muted" style="font-size: 0.95rem; line-height: 1.6;">${contentHtml}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `
+      </div>
+      <div class="mt-4 text-start">
+        <a href="#startseite" class="btn btn-outline-primary" onclick="event.preventDefault(); loadPage('startseite');">
+          &larr; Zurück zur Hauptseite
+        </a>
+      </div>
+    </div>
+  `;
+  return html;
+}
+
+function getSectionIcon(title) {
+  const t = title.toLowerCase();
+  if (t.includes("app") || t.includes("über")) return "ℹ️";
+  if (t.includes("inhalt")) return "📋";
+  if (t.includes("nutzung") || t.includes("bewertung") || t.includes("scoring")) return "🧮";
+  if (t.includes("datenquelle")) return "📊";
+  if (t.includes("store") || t.includes("open data")) return "🌐";
+  return "🔹";
+}
+
+function splitMarkdownSections(markdownString) {
+  const sections = [];
+  const lines = markdownString.split("\n");
+  let currentSection = null;
+  
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("## ")) {
+      if (currentSection) {
+        sections.push({
+          title: currentSection.title,
+          content: currentSection.content.join("\n").trim()
+        });
+      }
+      currentSection = { title: trimmed.substring(3).trim(), content: [] };
+    } else if (trimmed.startsWith("# ")) {
+      if (currentSection) {
+        sections.push({
+          title: currentSection.title,
+          content: currentSection.content.join("\n").trim()
+        });
+      }
+      currentSection = { title: trimmed.substring(2).trim(), content: [] };
+    } else {
+      if (currentSection) {
+        currentSection.content.push(line);
+      } else {
+        currentSection = { title: "Über diese App", content: [line] };
+      }
+    }
+  }
+  
+  if (currentSection) {
+    sections.push({
+      title: currentSection.title,
+      content: currentSection.content.join("\n").trim()
+    });
+  }
+  
+  return sections;
+}
+
+function parseMarkdownToHtml(markdownString) {
+  if (!markdownString) return "";
+  
+  let html = markdownString;
+  
+  // Headers (in case of subheadings)
+  html = html.replace(/^### (.*$)/gim, '<h4 class="h6 mt-3 mb-2 text-dark fw-bold">$1</h4>');
+  
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+  
+  // Italic
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+  
+  // Links
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  
+  // Split paragraphs
+  const paragraphs = html.split(/\n\s*\n/);
+  return paragraphs.map(p => {
+    const trimmed = p.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("<h") || trimmed.startsWith("<div") || trimmed.startsWith("<table") || trimmed.startsWith("<ul")) {
+      return trimmed;
+    }
+    
+    // List support (simple list bullet items)
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      const items = trimmed.split(/\n[-*]\s+/).map(item => {
+        const cleanItem = item.replace(/^[-*]\s+/, "").trim();
+        return `<li class="mb-1">${cleanItem}</li>`;
+      }).join("");
+      return `<ul class="ps-3 mb-3">${items}</ul>`;
+    }
+    
+    return `<p class="mb-3">${trimmed.replace(/\n/g, "<br>")}</p>`;
+  }).join("\n");
+}
+
+function renderEnhancedDataSources(config) {
+  const schoolsUrl = config.schoolsDataUrl || "";
+  const accidentUrl = config.accidentDataUrl || "";
+  
+  return `
+    <div class="sws-sources-grid mt-4">
+      <div class="row g-3">
+        <!-- Schuldaten -->
+        <div class="col-md-6">
+          <div class="p-3 rounded border bg-light h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="text-dark">Schulstandorte BW</strong>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">CC0 Lizenz</span>
+              </div>
+              <p class="small text-muted mb-3" style="font-size: 0.85rem;">
+                Verzeichnis aller Schulen in Baden-Württemberg mit Geokoordinaten und Metadaten. Bereitgestellt von Datenschule / JedeSchule.
+              </p>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="https://github.com/Datenschule/schulscraper-data" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center">
+                <span>Projekt-Website (GitHub)</span> &nbsp;&nearr;
+              </a>
+              <a href="${escapeHtml(schoolsUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center">
+                <span>Rohdaten-JSON laden</span> &nbsp;&nearr;
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Unfalldaten -->
+        <div class="col-md-6">
+          <div class="p-3 rounded border bg-light h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="text-dark">Unfallatlas 2024</strong>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">dl-de/by-2-0</span>
+              </div>
+              <p class="small text-muted mb-3" style="font-size: 0.85rem;">
+                Punktgenaue Straßenverkehrsunfälle der amtlichen Statistik mit Personen- und Mobilitätsbezug (Fuß, Rad, Auto).
+              </p>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center">
+                <span>Geodata-Portal NRW</span> &nbsp;&nearr;
+              </a>
+              <a href="${escapeHtml(accidentUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center">
+                <span>Rohdaten-ZIP laden</span> &nbsp;&nearr;
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Kartengrundlage & Routing -->
+        <div class="col-12">
+          <div class="p-3 rounded border bg-light">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+              <div>
+                <strong class="text-dark">Kartenmaterial & Routing-Dienste</strong>
+                <p class="small text-muted mb-0" style="font-size: 0.85rem;">
+                  Hintergrundkarte von OpenStreetMap (ODbL). Routingberechnung via OSRM (Open Source Routing Machine) für Fußgänger, Radfahrer und Autos.
+                </p>
+              </div>
+              <div>
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                  OSM Urheberrechte &nearr;
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEnhancedScoringExplanation() {
+  return `
+    <div class="sws-scoring-details-block mt-4 pt-3 border-top">
+      <h4 class="h6 text-dark fw-bold mb-3">Bewertungsschlüssel (Score-Berechnung)</h4>
+      <p class="small text-muted mb-4" style="font-size: 0.88rem;">
+        Der Route-Score (0 bis 100) berechnet sich aus der Summe der gewichteten Unfallpunkte in einem <strong>50 Meter breiten Korridor</strong> (25m links und rechts) entlang des berechneten Schulwegs. Ein Score von <code>0</code> bedeutet, dass im Korridor keine registrierten Unfälle liegen. Höhere Werte signalisieren ein erhöhtes Gefahrenpotenzial.
+      </p>
+      
+      <!-- Stufen-Visualisierung -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="p-3 rounded border border-success-subtle bg-success-subtle text-success-emphasis h-100">
+            <div class="d-flex align-items-center mb-1">
+              <span class="fs-5 me-2">🟢</span>
+              <strong class="text-success-emphasis" style="font-size: 0.9rem;">Niedrig (0 bis &lt; 2)</strong>
+            </div>
+            <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Sehr wenige oder keine Unfälle im Korridor. Geringes dokumentiertes Risiko.</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded border border-warning-subtle bg-warning-subtle text-warning-emphasis h-100">
+            <div class="d-flex align-items-center mb-1">
+              <span class="fs-5 me-2">🟡</span>
+              <strong class="text-warning-emphasis" style="font-size: 0.9rem;">Mittel (2 bis &lt; 6)</strong>
+            </div>
+            <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Einzelne oder leichtere Unfälle. Aufmerksamkeit an Kreuzungspunkten ratsam.</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded border border-danger-subtle bg-danger-subtle text-danger-emphasis h-100">
+            <div class="d-flex align-items-center mb-1">
+              <span class="fs-5 me-2">🔴</span>
+              <strong class="text-danger-emphasis" style="font-size: 0.9rem;">Hoch (ab 6)</strong>
+            </div>
+            <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Mehrere oder schwerwiegende Unfallereignisse im Nahbereich der Route. Alternative Route wählen.</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Gewichtungs-Tabelle -->
+      <div class="table-responsive rounded border mb-0">
+        <table class="table table-striped table-hover mb-0 align-middle style-table text-start" style="font-size: 0.85rem;">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" style="width: 40%">Faktor / Unfallmerkmal</th>
+              <th scope="col" style="width: 25%">Gewichtung</th>
+              <th scope="col" style="width: 35%">Erklärung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Basisgewicht</strong></td>
+              <td><code>1.0</code></td>
+              <td>Ausgangswert für jeden Unfallpunkt im Korridor</td>
+            </tr>
+            <tr>
+              <td><strong>Kinderbeteiligung</strong></td>
+              <td><code>x 2.0</code></td>
+              <td>Unfälle unter Beteiligung von Kindern (bis 15 Jahre)</td>
+            </tr>
+            <tr>
+              <td><strong>Fußgängerbeteiligung</strong></td>
+              <td><code>x 1.5</code></td>
+              <td>Verkehrsunfall mit Fußgängerbeteiligung</td>
+            </tr>
+            <tr>
+              <td><strong>Radfahrerbeteiligung</strong></td>
+              <td><code>x 1.3</code></td>
+              <td>Verkehrsunfall mit Radfahrerbeteiligung</td>
+            </tr>
+            <tr>
+              <td><strong>Aktualitäts-Faktor</strong></td>
+              <td><code>-10% pro Jahr Alter</code></td>
+              <td>Das Gewicht sinkt jährlich um 10% (mindestens verbleibendes Gewicht: 50% ab dem 5. Jahr)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
 }

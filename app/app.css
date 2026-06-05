@@ -579,3 +579,101 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom styling for the details/summary elements inside the scoring guide sidebar */
+.sws-score-details {
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.sws-score-details summary {
+  font-weight: 500;
+  color: #0f766e !important;
+  transition: color 0.15s ease-in-out;
+  outline: none;
+}
+
+.sws-score-details summary:hover {
+  color: #115e59 !important;
+}
+
+.sws-score-details-content {
+  background-color: #ffffff;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.sws-score-details-content ul {
+  padding-left: 1rem;
+}
+
+.sws-score-details-content li {
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+  color: #475569;
+}
+
+.sws-score-details-content li:last-child {
+  margin-bottom: 0;
+}
+
+/* Styles for description page cards and layout */
+.sws-info-card {
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sws-info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+}
+
+.sws-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #f0fdfa;
+  border-radius: 6px;
+}
+
+/* Custom Table in Description Page */
+.style-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.style-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.style-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+.style-table tr:last-child td:first-child {
+  border-bottom-left-radius: 6px;
+}
+
+.style-table tr:last-child td:last-child {
+  border-bottom-right-radius: 6px;
+}
+
+.style-table th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.style-table td {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.style-table tr:last-child td {
+  border-bottom: none;
+}
+
