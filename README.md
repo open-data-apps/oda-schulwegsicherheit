@@ -111,7 +111,7 @@ Die App verwendet [Leaflet.js](https://leafletjs.com/) und [Leaflet.heat](https:
 
 Fuer Startadressen wird die Nominatim-Suche von OpenStreetMap genutzt. Fuer Routen wird standardmaessig ein OSRM-kompatibler Routingdienst verwendet; ueber `routeServiceUrl` kann im ODAS-Betrieb ein geschuetzter eigener Routingdienst gesetzt werden.
 
-Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Routenkorridor keine relevanten Unfallpunkte liegen; jeder Treffer erhoeht den Wert, wobei Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle staerker gewichtet werden. Unter `2` gilt als niedrig, `2` bis unter `6` als mittel und ab `6` als hoch.
+Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Routenkorridor keine relevanten Unfallpunkte liegen; jeder Treffer erhoeht den Wert, wobei Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle staerker gewichtet werden. Unter `2` gilt als geringes Risiko, `2` bis unter `6` als erhöhte Aufmerksamkeit und ab `6` als kritisches Risiko.
 
 ---
 

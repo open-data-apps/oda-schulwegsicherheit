@@ -157,11 +157,15 @@ function renderShell(runtime) {
           </div>
 
           <div class="sws-score-strip" id="score-summary">
+            <div class="sws-score-badge is-neutral">⚪</div>
             <div class="sws-score-copy">
               <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
               <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
             </div>
-            <strong>-</strong>
+            <div class="sws-score-value">
+              <strong>-</strong>
+              <small>Score</small>
+            </div>
           </div>
         </div>
 
@@ -1424,14 +1428,45 @@ function clearRouteVisuals(runtime) {
   runtime.layers.alternatives = [];
 }
 
+function getLevelLabel(level) {
+  switch (level) {
+    case "niedrig":
+      return "Geringes Risiko";
+    case "mittel":
+      return "Erhöhte Aufmerksamkeit";
+    case "hoch":
+      return "Kritisches Risiko";
+    default:
+      return level ? capitalize(level) : "-";
+  }
+}
+
+function getLevelEmoji(level) {
+  switch (level) {
+    case "niedrig":
+      return "🟢";
+    case "mittel":
+      return "🟡";
+    case "hoch":
+      return "🔴";
+    default:
+      return "⚪";
+  }
+}
+
 function renderScoreSummary(runtime, payload) {
   if (!payload || !payload.selected) {
+    runtime.ui.scoreSummary.className = "sws-score-strip";
     runtime.ui.scoreSummary.innerHTML = `
+      <div class="sws-score-badge is-neutral">⚪</div>
       <div class="sws-score-copy">
         <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
         <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
       </div>
-      <strong>-</strong>
+      <div class="sws-score-value">
+        <strong>-</strong>
+        <small>Score</small>
+      </div>
     `;
     runtime.ui.routeModeNote.textContent = "Noch keine Bewertung vorhanden.";
     renderScoreGuide(runtime, null);
@@ -1442,15 +1477,29 @@ function renderScoreSummary(runtime, payload) {
 
   const bestRoute = payload.selected;
   const scoreLabel = getCompactScoreLabel(payload.modeLabel);
+  const level = bestRoute.scoreResult.level;
+  const hitsCount = bestRoute.scoreResult.hits.length;
+  const levelLabel = getLevelLabel(level);
+  const levelEmoji = getLevelEmoji(level);
+
+  runtime.ui.scoreSummary.className = `sws-score-strip is-${level}`;
   runtime.ui.scoreSummary.innerHTML = `
+    <div class="sws-score-badge is-${level}">
+      ${levelEmoji}
+    </div>
     <div class="sws-score-copy">
       <span class="sws-score-label">
         ${escapeHtml(scoreLabel)}
         <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a>
       </span>
-      <span class="sws-score-caption">${capitalize(bestRoute.scoreResult.level)} · ${bestRoute.scoreResult.hits.length} Punkte</span>
+      <span class="sws-score-caption">
+        <strong>${escapeHtml(levelLabel)}</strong> · ${hitsCount} ${hitsCount === 1 ? 'Unfallpunkt' : 'Unfallpunkte'}
+      </span>
     </div>
-    <strong>${bestRoute.scoreResult.score.toFixed(1)}</strong>
+    <div class="sws-score-value">
+      <strong>${bestRoute.scoreResult.score.toFixed(1)}</strong>
+      <small>Score</small>
+    </div>
   `;
   runtime.ui.routeModeNote.textContent = `${payload.modeLabel}: ${bestRoute.label}, ${formatDistance(bestRoute.distance)}${bestRoute.duration ? `, ca. ${formatDuration(bestRoute.duration)}` : ""}.`;
   renderScoreGuide(runtime, bestRoute.scoreResult);
@@ -1458,7 +1507,7 @@ function renderScoreSummary(runtime, payload) {
     .map((route, index) => `
       <div class="sws-route-item ${index === 0 ? "is-best" : ""}">
         <strong>${escapeHtml(route.label)}</strong>
-        <span>${formatDistance(route.distance)} · Score ${route.scoreResult.score.toFixed(1)} · ${capitalize(route.scoreResult.level)}</span>
+        <span>${formatDistance(route.distance)} · Score ${route.scoreResult.score.toFixed(1)} · ${escapeHtml(getLevelLabel(route.scoreResult.level))}</span>
       </div>
     `)
     .join("");
@@ -1475,9 +1524,9 @@ function getCompactScoreLabel(modeLabel = "") {
 
 function getScoreExplanation(score) {
   if (Number.isFinite(Number(score))) {
-    return `Score ${Number(score).toFixed(1)} von 100. Skala: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = niedrig, 2 bis unter 6 = mittel, ab 6 = hoch.`;
+    return `Score ${Number(score).toFixed(1)} von 100. Skala: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.`;
   }
-  return "Skala 0-100: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = niedrig, 2 bis unter 6 = mittel, ab 6 = hoch.";
+  return "Skala 0-100: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.";
 }
 
 function renderScoreGuide(runtime, scoreResult) {
@@ -1503,9 +1552,9 @@ function renderScoreGuide(runtime, scoreResult) {
         <span style="width: ${meterWidth}%"></span>
       </div>
       <div class="sws-score-scale" aria-label="Score-Skala">
-        <span><strong>Niedrig</strong><small>0 bis &lt; 2</small></span>
-        <span><strong>Mittel</strong><small>2 bis &lt; 6</small></span>
-        <span><strong>Hoch</strong><small>ab 6</small></span>
+        <span><strong>Geringes Risiko</strong><small>0 bis &lt; 2</small></span>
+        <span><strong>Erhöhte Aufmerksamkeit</strong><small>2 bis &lt; 6</small></span>
+        <span><strong>Kritisches Risiko</strong><small>ab 6</small></span>
       </div>
       <div class="sws-score-factors" aria-label="Bewertungsfaktoren">
         <span>50-m-Routenkorridor</span>
@@ -2346,7 +2395,7 @@ function renderEnhancedScoringExplanation() {
           <div class="p-3 rounded border border-success-subtle bg-success-subtle text-success-emphasis h-100">
             <div class="d-flex align-items-center mb-1">
               <span class="fs-5 me-2">🟢</span>
-              <strong class="text-success-emphasis" style="font-size: 0.9rem;">Niedrig (0 bis &lt; 2)</strong>
+              <strong class="text-success-emphasis" style="font-size: 0.9rem;">Geringes Risiko (0 bis &lt; 2)</strong>
             </div>
             <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Sehr wenige oder keine Unfälle im Korridor. Geringes dokumentiertes Risiko.</div>
           </div>
@@ -2355,7 +2404,7 @@ function renderEnhancedScoringExplanation() {
           <div class="p-3 rounded border border-warning-subtle bg-warning-subtle text-warning-emphasis h-100">
             <div class="d-flex align-items-center mb-1">
               <span class="fs-5 me-2">🟡</span>
-              <strong class="text-warning-emphasis" style="font-size: 0.9rem;">Mittel (2 bis &lt; 6)</strong>
+              <strong class="text-warning-emphasis" style="font-size: 0.9rem;">Erhöhte Aufmerksamkeit (2 bis &lt; 6)</strong>
             </div>
             <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Einzelne oder leichtere Unfälle. Aufmerksamkeit an Kreuzungspunkten ratsam.</div>
           </div>
@@ -2364,7 +2413,7 @@ function renderEnhancedScoringExplanation() {
           <div class="p-3 rounded border border-danger-subtle bg-danger-subtle text-danger-emphasis h-100">
             <div class="d-flex align-items-center mb-1">
               <span class="fs-5 me-2">🔴</span>
-              <strong class="text-danger-emphasis" style="font-size: 0.9rem;">Hoch (ab 6)</strong>
+              <strong class="text-danger-emphasis" style="font-size: 0.9rem;">Kritisches Risiko (ab 6)</strong>
             </div>
             <div class="small" style="font-size: 0.8rem; line-height: 1.4;">Mehrere oder schwerwiegende Unfallereignisse im Nahbereich der Route. Alternative Route wählen.</div>
           </div>
