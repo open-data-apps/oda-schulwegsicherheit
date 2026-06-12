@@ -29,13 +29,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("hashchange", () => {
       const page = getPageFromHash();
       loadPage(page);
+      updateActiveNavLink(page);
     });
 
     // Initialen Page-Load basierend auf dem aktuellen URL-Hash durchfuehren
     const initialPage = getPageFromHash();
-    loadPage(initialPage);
+    if (window.location.hash !== `#${initialPage}`) {
+      window.location.hash = `#${initialPage}`;
+    } else {
+      loadPage(initialPage);
+      updateActiveNavLink(initialPage);
+    }
   } catch (err) {
     console.error("Fehler:", err);
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+      mainContent.innerHTML = `
+        <div class="alert alert-danger my-4" role="alert">
+          <h4 class="alert-heading">Fehler beim Laden der App</h4>
+          <p>Die Konfigurationsdatei der App konnte nicht geladen oder verarbeitet werden.</p>
+          <hr>
+          <p class="mb-0">Details: ${err.message}</p>
+        </div>
+      `;
+    }
   }
   setupBurgerMenu();
 });
@@ -46,10 +63,38 @@ function getPageFromHash() {
   return validPages.includes(hash) ? hash : "startseite";
 }
 
+function updateActiveNavLink(page) {
+  document.querySelectorAll(".navbar-nav .nav-link").forEach((link) => {
+    const href = link.getAttribute("href");
+    const pageName =
+      link.getAttribute("data-page") ||
+      (href ? href.replace("#", "").trim() : "");
+    if (pageName === page) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+}
+
 function getConfigUrl() {
-  const urlString = window.location.href;
-  const url = new URL(urlString);
-  let configUrl = `${urlString}config`;
+  const url = new URL(window.location.href);
+
+  // Clean query and hash
+  url.search = "";
+  url.hash = "";
+
+  // Ensure the pathname refers to the directory and not a filename (e.g. index.html)
+  let pathname = url.pathname;
+  if (!pathname.endsWith("/")) {
+    const lastSlashIndex = pathname.lastIndexOf("/");
+    if (lastSlashIndex !== -1) {
+      pathname = pathname.substring(0, lastSlashIndex + 1);
+    }
+  }
+
+  let configUrl = url.origin + pathname + "config";
+
   /* Zum testen auf dem lokalen System mit den config.json
   if (["127.0.0.1", "localhost"].includes(url.hostname)) {
     configUrl = "../odas-config/config.json";
@@ -118,6 +163,8 @@ function updatePageContent() {
     if (!element) return;
     if (id === "logo-icon") {
       applyImageWithFallback(element, content);
+    } else if (id === "footer-text") {
+      element.innerHTML = content;
     } else {
       element.textContent = content;
     }
