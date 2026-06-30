@@ -96,6 +96,13 @@ function normalizeConfig(configdata = {}) {
     schoolsDataUrl: String(configdata.schoolsDataUrl || "").trim(),
     accidentDataUrl: String(configdata.accidentDataUrl || "").trim(),
     routeServiceUrl: String(configdata.routeServiceUrl || "").trim(),
+    weiterfuehrendeLinks: String(configdata.weiterfuehrendeLinks || "").trim(),
+    datenquelleHinweis: String(configdata.datenquelleHinweis || "").trim(),
+    datenStand: String(configdata.datenStand || "").trim(),
+    kpiKontext1: String(configdata.kpiKontext1 || "").trim(),
+    kpiKontext2: String(configdata.kpiKontext2 || "").trim(),
+    kpiKontext3: String(configdata.kpiKontext3 || "").trim(),
+    kpiKontext4: String(configdata.kpiKontext4 || "").trim(),
   };
 }
 
@@ -167,6 +174,8 @@ function renderShell(runtime) {
               <small>Score</small>
             </div>
           </div>
+
+          <div id="data-freshness" class="text-muted small mt-1"></div>
         </div>
 
         <div id="runtime-status" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
@@ -195,6 +204,9 @@ function renderShell(runtime) {
             <h3>Relevante Unfallpunkte</h3>
             <div id="hazard-list" class="sws-muted">Nach der Bewertung erscheinen hier die wichtigsten Punkte im Routenkorridor.</div>
           </section>
+
+          ${renderMethodikbox(runtime)}
+          ${renderWeitereInfos(runtime)}
         </div>
       </div>
     </section>
@@ -225,6 +237,7 @@ function renderShell(runtime) {
     status: runtime.rootElement.querySelector("#runtime-status"),
     mapContainer: runtime.rootElement.querySelector("#map-container"),
     hazardKpis: runtime.rootElement.querySelector("#hazard-kpis"),
+    dataFreshness: runtime.rootElement.querySelector("#data-freshness"),
     scoreSummary: runtime.rootElement.querySelector("#score-summary"),
     routeModeNote: runtime.rootElement.querySelector("#route-mode-note"),
     routeScoreHelp: runtime.rootElement.querySelector("#route-score-help"),
@@ -428,6 +441,7 @@ async function initializeRuntime(runtime) {
 
   hideSearchResults(runtime);
   renderHazardKpis(runtime, []);
+  renderDataFreshness(runtime);
   renderScoreGuide(runtime, null);
   setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidents.length} schulwegrelevante Unfallpunkte geladen.`);
 }
@@ -1226,17 +1240,86 @@ function clearAccidentLayers(runtime) {
   }
 }
 
+function renderKpiKontext(kontext, id) {
+  const text = String(kontext || "").trim();
+  if (!text) return "";
+  const targetId = `sws-kpi-kontext-${id}`;
+  return (
+    `<button class="sws-kpi-info-toggle collapsed" type="button" ` +
+    `data-bs-toggle="collapse" data-bs-target="#${targetId}" ` +
+    `aria-expanded="false" aria-controls="${targetId}" aria-label="Erklaerung zu diesem Wert">` +
+    `<span class="sws-kpi-info-icon" aria-hidden="true">&#9432;</span>` +
+    `</button>` +
+    `<div id="${targetId}" class="collapse">` +
+    `<div class="sws-kpi-kontext">${escapeHtml(text)}</div>` +
+    `</div>`
+  );
+}
+
+function renderHazardKpi(label, kontext, id) {
+  return (
+    `<div class="sws-kpi">` +
+    `<span class="sws-kpi-label">${label}</span>` +
+    renderKpiKontext(kontext, id) +
+    `</div>`
+  );
+}
+
 function renderHazardKpis(runtime, accidents) {
   const childCount = accidents.filter((accident) => accident.properties.ist_kind).length;
   const walkCount = accidents.filter((accident) => accident.properties.ist_fuss).length;
   const bikeCount = accidents.filter((accident) => accident.properties.ist_rad).length;
+  const config = runtime.config;
 
-  runtime.ui.hazardKpis.innerHTML = `
-    <span>${accidents.length} Punkte im Umfeld</span>
-    <span>${walkCount} Fuss</span>
-    <span>${bikeCount} Rad</span>
-    <span>${childCount} Kinder</span>
-  `;
+  runtime.ui.hazardKpis.innerHTML =
+    renderHazardKpi(`${accidents.length} Punkte im Umfeld`, config.kpiKontext1, "1") +
+    renderHazardKpi(`${walkCount} Fuss`, config.kpiKontext2, "2") +
+    renderHazardKpi(`${bikeCount} Rad`, config.kpiKontext3, "3") +
+    renderHazardKpi(`${childCount} Kinder`, config.kpiKontext4, "4");
+}
+
+function renderDataFreshness(runtime) {
+  if (!runtime.ui.dataFreshness) return;
+  const jahre = runtime.data.accidents
+    .map((accident) => accident.properties.jahr)
+    .filter(Number.isFinite);
+  runtime.ui.dataFreshness.textContent = jahre.length
+    ? `Unfalldaten: Jahrgang ${Math.max(...jahre)}`
+    : "";
+}
+
+function renderWeitereInfos(runtime) {
+  const links = (runtime.config.weiterfuehrendeLinks || "").trim();
+  if (!links) return "";
+  return (
+    '<section class="sws-panel sws-panel-wide">' +
+    "<h3>Weitere Informationen</h3>" +
+    '<div class="sws-weitere-infos">' +
+    links +
+    "</div>" +
+    "</section>"
+  );
+}
+
+function renderMethodikbox(runtime) {
+  const hinweis = (runtime.config.datenquelleHinweis || "").trim();
+  const stand = (runtime.config.datenStand || "").trim();
+  if (!hinweis && !stand) return "";
+  const standHtml = stand
+    ? `<p class="sws-muted small mb-2">${escapeHtml(stand)}</p>`
+    : "";
+  return (
+    '<section class="sws-panel sws-panel-wide">' +
+    '<button class="sws-methodik-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sws-methodik-body" aria-expanded="false" aria-controls="sws-methodik-body">' +
+    "<h3 class=\"mb-0\">Methodik &amp; Datenquelle</h3>" +
+    '<span class="sws-methodik-chevron" aria-hidden="true">&#9662;</span>' +
+    "</button>" +
+    '<div id="sws-methodik-body" class="collapse mt-2">' +
+    standHtml +
+    hinweis +
+    "</div>" +
+    "</section>"
+  );
 }
 
 function updateRouteModeButtons(runtime) {

@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.7.1",
+  "version": "1.10.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -120,6 +120,8 @@
         "## Ueber diese App",
         "SchulwegSafe unterstuetzt Kommunen, Schulen und interessierte Fachstellen dabei, moegliche Schulwege anhand offener Geodaten zu betrachten. Die App kombiniert Schuldaten fuer Baden-Wuerttemberg mit den punktgenauen Unfallatlas-Daten und zeigt daraus eine kompakte Karten- und Bewertungsansicht.",
         "Die Anwendung ist als statische ODAS-Webapp umgesetzt. Sie ersetzt keine amtliche Schulwegplanung und keine Navigation, macht aber auffaellige Bereiche und Bewertungsgrundlagen transparent sichtbar.",
+        "## Fuer wen ist diese App?",
+        "Diese App richtet sich an Eltern, Schuelerinnen und Schueler sowie an Schulen und Kommunen in Baden-Wuerttemberg. Voraussetzung ist kein spezielles Datenwissen – wer den Schulweg eines Kindes kennt, kann die App direkt nutzen.",
         "## Inhalte & Funktionen",
         "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.",
         "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
@@ -128,9 +130,9 @@
         "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
         "## Datenquellen & Lizenzen",
         "Die Anwendung verarbeitet die folgenden offenen Datenquellen:",
-        "- **Schuldaten**: Daten von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data) (CC0).",
-        "- **Unfalldaten**: [Unfallatlas der Statistischen Aemter des Bundes und der Laender](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/), bereitgestellt ueber [OpenGeodata.NRW](https://www.opengeodata.nrw.de/) unter Datenlizenz Deutschland Namensnennung 2.0.",
-        "- **Kartengrundlage**: [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright) (ODbL).",
+        "- **Schuldaten**: Daten von <a href='https://github.com/Datenschule/schulscraper-data' target='_blank' rel='noopener'>JedeSchule/Datenschule</a> (CC0).",
+        "- **Unfalldaten**: <a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank' rel='noopener'>Unfallatlas der Statistischen Aemter des Bundes und der Laender</a>, bereitgestellt ueber <a href='https://www.opengeodata.nrw.de/' target='_blank' rel='noopener'>OpenGeodata.NRW</a> unter Datenlizenz Deutschland Namensnennung 2.0.",
+        "- **Kartengrundlage**: <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap-Mitwirkende</a> (ODbL).",
         "## Open Data App Store",
         "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
       ],
@@ -221,6 +223,73 @@
       "default": "",
       "format": {
         "typ": "url"
+      },
+      "erforderlich": "nein"
+    },
+    "weiterfuehrendeLinks": {
+      "label": "Weiterfuehrende Links",
+      "hilfe": "Verwandte Datensaetze / Hintergrundquellen (HTML/Markdown). Leer = ausgeblendet.",
+      "default": "<ul><li><a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank'>Unfallatlas (OpenGeodata.NRW)</a></li><li><a href='https://github.com/Datenschule/schulscraper-data' target='_blank'>Schuldaten JedeSchule/Datenschule</a></li><li><a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap-Mitwirkende</a></li></ul>",
+      "format": {
+        "typ": "markdown"
+      },
+      "erforderlich": "nein"
+    },
+    "datenquelleHinweis": {
+      "label": "Methodik / Datenquelle-Hinweis",
+      "hilfe": "Herkunft, Erhebungsmethode und Limitierungen (HTML/Markdown). Leer = ausgeblendet.",
+      "default": "<p>Die App kombiniert Schuldaten von <a href=\"https://github.com/Datenschule/schulscraper-data\" target=\"_blank\" rel=\"noopener\">JedeSchule/Datenschule</a> (Baden-Wuerttemberg) mit den punktgenauen Daten des <a href=\"https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/\" target=\"_blank\" rel=\"noopener\">Unfallatlas (OpenGeodata.NRW)</a>.</p><p>Beruecksichtigt werden ausschliesslich schulwegrelevante Unfaelle mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten. Die App ersetzt keine amtliche Schulwegplanung; Vollstaendigkeit und Aktualitaet haengen von den Quellen ab.</p>",
+      "format": {
+        "typ": "markdown"
+      },
+      "erforderlich": "nein"
+    },
+    "datenStand": {
+      "label": "Datenstand",
+      "hilfe": "Freitext-Hinweis zum Stand der Daten. Leer = ausgeblendet.",
+      "default": "Stand: Unfallatlas 2024; Schuldaten laufend von JedeSchule",
+      "format": {
+        "typ": "string"
+      },
+      "erforderlich": "nein"
+    },
+    "kpiKontext1": {
+      "label": "KPI-Kontext 1 (Punkte im Umfeld)",
+      "hilfe": "Optionaler Erklaertext zum ersten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
+      "format": {
+        "typ": "string",
+        "laenge": 160
+      },
+      "erforderlich": "nein"
+    },
+    "kpiKontext2": {
+      "label": "KPI-Kontext 2 (Fuss)",
+      "hilfe": "Optionaler Erklaertext zum zweiten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
+      "format": {
+        "typ": "string",
+        "laenge": 160
+      },
+      "erforderlich": "nein"
+    },
+    "kpiKontext3": {
+      "label": "KPI-Kontext 3 (Rad)",
+      "hilfe": "Optionaler Erklaertext zum dritten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
+      "format": {
+        "typ": "string",
+        "laenge": 160
+      },
+      "erforderlich": "nein"
+    },
+    "kpiKontext4": {
+      "label": "KPI-Kontext 4 (Kinder)",
+      "hilfe": "Optionaler Erklaertext zum vierten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
+      "format": {
+        "typ": "string",
+        "laenge": 160
       },
       "erforderlich": "nein"
     }

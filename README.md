@@ -33,6 +33,12 @@ Die Konfiguration wird vom ODAS geladen. Die App zeigt folgende Inhalte:
 
 ---
 
+## Fuer wen ist diese App?
+
+Diese App richtet sich an Eltern, Schuelerinnen und Schueler sowie an Schulen und Kommunen in Baden-Wuerttemberg. Voraussetzung ist kein spezielles Datenwissen – wer den Schulweg eines Kindes kennt, kann die App direkt nutzen.
+
+---
+
 ## Datenformat
 
 Die App verarbeitet zwei externe Datenquellen:

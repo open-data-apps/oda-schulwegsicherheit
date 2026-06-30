@@ -1,5 +1,21 @@
 # Changelog
 
+## 30.06.2026 (Version 1.10.0)
+
+- ENH: KPI-Kontext (Schale 4 / TODO 1) fuer die Gefahren-Kennzahlen im Karten-Overlay ergaenzt – optionale Erklaertexte je Wert ueber ein ausklappbares ⓘ-Element (`kpiKontext1`–`kpiKontext4`, leer = kein Kontext).
+- FIX: `datenquelleHinweis` und `datenStand` wurden in `normalizeConfig` nicht durchgereicht, wodurch die Methodikbox (Version 1.9.0) nie angezeigt wurde; Keys werden jetzt korrekt uebernommen.
+
+## 16.06.2026 (Version 1.9.0)
+
+- ENH: Methodikbox (ausklappbar) mit Datenquelle-Hinweis und Datenstand ergaenzt (`datenquelleHinweis`, `datenStand`).
+- FIX: Datenquellen-Links auf der Beschreibungsseite als anklickbare Links dargestellt.
+
+## 16.06.2026 (Version 1.8.0)
+
+- ENH: Schale-4-Verstaendlichkeit ergaenzt – „Fuer wen ist diese App?"-Block in Beschreibung und README.
+- ENH: Konfigurierbarer Abschnitt „Weitere Informationen" mit weiterfuehrenden Links (neues Feld `weiterfuehrendeLinks`, leer = ausgeblendet).
+- ENH: Automatisches Datenfrische-Label, das den juengsten Unfalljahrgang (`UJAHR`) der geladenen Unfalldaten anzeigt.
+
 ## 05.06.2026 (Version 1.7.1)
 
 - FIX: Filterung fuer ODAS-Proxy-Nutzung hinzugefuegt. Nur relative/interne Abrufe laufen ueber den Proxy, da dieser externe Domains (GitHub/OpenGeodata.NRW) nicht proxieren kann (behebt App-Fehler bei aktivem Proxy).

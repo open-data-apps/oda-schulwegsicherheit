@@ -8,6 +8,8 @@
     "## Ueber diese App\n",
     "SchulwegSafe unterstuetzt Kommunen, Schulen und interessierte Fachstellen dabei, moegliche Schulwege anhand offener Geodaten zu betrachten. Die App kombiniert Schuldaten fuer Baden-Wuerttemberg mit den punktgenauen Unfallatlas-Daten und zeigt daraus eine kompakte Karten- und Bewertungsansicht.\n",
     "Die Anwendung ist als statische ODAS-Webapp umgesetzt. Sie ersetzt keine amtliche Schulwegplanung und keine Navigation, macht aber auffaellige Bereiche und Bewertungsgrundlagen transparent sichtbar.\n",
+    "## Fuer wen ist diese App?\n",
+    "Diese App richtet sich an Eltern, Schuelerinnen und Schueler sowie an Schulen und Kommunen in Baden-Wuerttemberg. Voraussetzung ist kein spezielles Datenwissen – wer den Schulweg eines Kindes kennt, kann die App direkt nutzen.\n",
     "## Inhalte & Funktionen\n",
     "Die Startseite zeigt eine grosse Kartenflaeche mit fehlertoleranter Schulsuche, Startadress-Suche, Wegtyp-Auswahl, Unfallpunkten, Heatmap und einer Schulweg-Bewertung. Die Schulsuche bereinigt doppelte Datensaetze und sortiert Treffer nach Name, Ort, Adresse und Schulform. Beruecksichtigt werden schulwegrelevante Unfallatlas-Eintraege mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten.\n",
     "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.\n",
@@ -16,9 +18,9 @@
     "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.\n",
     "## Datenquellen & Lizenzen\n",
     "Die Anwendung verarbeitet die folgenden offenen Datenquellen:\n",
-    "- **Schuldaten**: Daten von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data) (CC0).\n",
-    "- **Unfalldaten**: [Unfallatlas der Statistischen Aemter des Bundes und der Laender](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/), bereitgestellt ueber [OpenGeodata.NRW](https://www.opengeodata.nrw.de/) unter Datenlizenz Deutschland Namensnennung 2.0.\n",
-    "- **Kartengrundlage**: [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright) (ODbL).\n",
+    "- **Schuldaten**: Daten von <a href='https://github.com/Datenschule/schulscraper-data' target='_blank' rel='noopener'>JedeSchule/Datenschule</a> (CC0).\n",
+    "- **Unfalldaten**: <a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank' rel='noopener'>Unfallatlas der Statistischen Aemter des Bundes und der Laender</a>, bereitgestellt ueber <a href='https://www.opengeodata.nrw.de/' target='_blank' rel='noopener'>OpenGeodata.NRW</a> unter Datenlizenz Deutschland Namensnennung 2.0.\n",
+    "- **Kartengrundlage**: <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap-Mitwirkende</a> (ODbL).\n",
     "## Open Data App Store\n",
     "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
   ],
@@ -41,5 +43,12 @@
   "proxyAktiv": "nein",
   "schoolsDataUrl": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
   "accidentDataUrl": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
-  "routeServiceUrl": ""
+  "routeServiceUrl": "",
+  "weiterfuehrendeLinks": "<ul><li><a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank'>Unfallatlas (OpenGeodata.NRW)</a></li><li><a href='https://github.com/Datenschule/schulscraper-data' target='_blank'>Schuldaten JedeSchule/Datenschule</a></li><li><a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap-Mitwirkende</a></li></ul>",
+  "datenquelleHinweis": "<p>Die App kombiniert Schuldaten von <a href=\"https://github.com/Datenschule/schulscraper-data\" target=\"_blank\" rel=\"noopener\">JedeSchule/Datenschule</a> (Baden-Wuerttemberg) mit den punktgenauen Daten des <a href=\"https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/\" target=\"_blank\" rel=\"noopener\">Unfallatlas (OpenGeodata.NRW)</a>.</p><p>Beruecksichtigt werden ausschliesslich schulwegrelevante Unfaelle mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten. Die App ersetzt keine amtliche Schulwegplanung; Vollstaendigkeit und Aktualitaet haengen von den Quellen ab.</p>",
+  "datenStand": "Stand: Unfallatlas 2024; Schuldaten laufend von JedeSchule",
+  "kpiKontext1": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
+  "kpiKontext2": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
+  "kpiKontext3": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
+  "kpiKontext4": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal."
 }

@@ -426,7 +426,8 @@
   max-width: min(540px, calc(100% - 1.5rem));
 }
 
-.sws-map-overlay span {
+.sws-map-overlay > span,
+.sws-kpi {
   padding: 0.38rem 0.58rem;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
@@ -434,6 +435,54 @@
   border: 1px solid rgba(148, 163, 184, 0.35);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
   font-size: 0.82rem;
+}
+
+/* Schicht 4: KPI-Kontext (TODO 1) im Karten-Overlay */
+.sws-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 16rem;
+}
+
+.sws-kpi-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sws-kpi-info-toggle {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0;
+  margin-left: 0.25rem;
+  cursor: pointer;
+}
+
+.sws-kpi-info-toggle:hover,
+.sws-kpi-info-toggle:focus-visible,
+.sws-kpi-info-toggle:not(.collapsed) {
+  color: var(--bs-primary, #0d6efd);
+  background: rgba(13, 110, 253, 0.1);
+  outline: none;
+}
+
+.sws-kpi-info-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.sws-kpi-kontext {
+  margin-top: 0.35rem;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .sws-detail-grid {
@@ -783,3 +832,24 @@
   border-bottom: none;
 }
 
+
+/* Schicht 4: Methodikbox (ausklappbar) */
+.sws-methodik-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+.sws-methodik-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.sws-methodik-toggle:not(.collapsed) .sws-methodik-chevron {
+  transform: rotate(180deg);
+}
