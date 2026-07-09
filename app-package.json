@@ -146,13 +146,9 @@
       },
       "default": [
         "_multiline_",
-        "### Anbieter",
-        "Ondics GmbH",
-        "Blumenstrasse 19",
-        "70182 Stuttgart",
-        "",
-        "Website: <a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>",
-        "E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a>"
+        "<h4>Anbieter</h4>",
+        "<p>Ondics GmbH<br>Blumenstrasse 19<br>70182 Stuttgart</p>",
+        "<p>Website: <a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a><br>E-Mail: <a href='mailto:info@ondics.de'>info@ondics.de</a></p>"
       ],
       "erforderlich": "ja"
     },
