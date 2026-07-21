@@ -9,6 +9,11 @@ const SCHULWEGSAFE_DEFAULTS = {
   currentYear: 2026,
   geocodingServiceUrl: "https://nominatim.openstreetmap.org/search",
   routingServiceBaseUrl: "https://router.project-osrm.org/route/v1",
+  cacheTtlStunden: 24,
+  // Praktischer Referenzwert fuer die Meter-Balken-Anzeige, nicht die technische
+  // Score-Obergrenze (100 in calculateRouteHazardScore). Gekoppelt an die
+  // .sws-score-meter-Gradientstops in app.css (2/12 und 6/12) - bei Aenderung dort mitziehen.
+  scoreMeterReferenceMax: 12,
 };
 
 const SCHULWEGSAFE_RUNTIME = {
@@ -74,11 +79,16 @@ function createRuntime(configdata, rootElement) {
       addressResults: [],
       nearbyAccidents: [],
       routeCandidates: [],
+      schoolsFetchedAt: null,
+      schoolsFromCache: false,
+      accidentsFetchedAt: null,
+      accidentsFromCache: false,
     },
     layers: {
       school: null,
       start: null,
       route: null,
+      routeSegments: [],
       alternatives: [],
       accidents: [],
       heat: null,
@@ -103,6 +113,7 @@ function normalizeConfig(configdata = {}) {
     kpiKontext2: String(configdata.kpiKontext2 || "").trim(),
     kpiKontext3: String(configdata.kpiKontext3 || "").trim(),
     kpiKontext4: String(configdata.kpiKontext4 || "").trim(),
+    cacheTtlStunden: Number(configdata.cacheTtlStunden) || SCHULWEGSAFE_DEFAULTS.cacheTtlStunden,
   };
 }
 
@@ -117,8 +128,13 @@ function teardownRuntime() {
   }
   if (runtime && runtime.map && typeof runtime.map.remove === "function") {
     runtime.map.remove();
+    runtime.map = null;
   }
   SCHULWEGSAFE_RUNTIME.activeRuntime = null;
+}
+
+function isRuntimeActive(runtime) {
+  return SCHULWEGSAFE_RUNTIME.activeRuntime === runtime;
 }
 
 function renderShell(runtime) {
@@ -173,6 +189,12 @@ function renderShell(runtime) {
               <strong>-</strong>
               <small>Score</small>
             </div>
+          </div>
+
+          <div id="route-recommendations" class="sws-recommendations-inline is-empty"></div>
+
+          <div class="sws-share-row">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-share-link-button">Route teilen</button>
           </div>
 
           <div id="data-freshness" class="text-muted small mt-1"></div>
@@ -243,11 +265,13 @@ function renderShell(runtime) {
     routeScoreHelp: runtime.rootElement.querySelector("#route-score-help"),
     routeAlternatives: runtime.rootElement.querySelector("#route-alternatives"),
     hazardList: runtime.rootElement.querySelector("#hazard-list"),
+    routeRecommendations: runtime.rootElement.querySelector("#route-recommendations"),
     startAddressInput: runtime.rootElement.querySelector("#start-address-input"),
     startAddressResults: runtime.rootElement.querySelector("#start-address-results"),
     applyStartButton: runtime.rootElement.querySelector("#apply-start-button"),
     geoLocateButton: runtime.rootElement.querySelector("#geo-locate-button"),
     routeModeButtons: runtime.rootElement.querySelectorAll("[data-route-mode]"),
+    copyShareLinkButton: runtime.rootElement.querySelector("#copy-share-link-button"),
   };
 }
 
@@ -354,6 +378,26 @@ function bindUi(runtime) {
       setStatus(runtime, "warning", getGeolocationErrorMessage(error));
     });
   });
+
+  if (runtime.ui.copyShareLinkButton) {
+    runtime.ui.copyShareLinkButton.addEventListener("click", () => {
+      copyShareLink(runtime);
+    });
+  }
+}
+
+function copyShareLink(runtime) {
+  if (!runtime.selectedSchool || !runtime.startPoint) {
+    setStatus(runtime, "warning", "Bitte zuerst eine Schule und eine Startadresse waehlen, um einen Link zu erstellen.");
+    return;
+  }
+  if (!navigator.clipboard?.writeText) {
+    setStatus(runtime, "warning", "Der Link konnte nicht automatisch kopiert werden. Bitte die Adresse manuell aus der Adresszeile kopieren.");
+    return;
+  }
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => setStatus(runtime, "success", "Link wurde in die Zwischenablage kopiert."))
+    .catch(() => setStatus(runtime, "warning", "Der Link konnte nicht kopiert werden. Bitte die Adresse manuell aus der Adresszeile kopieren."));
 }
 
 async function handleGeolocationClick(runtime) {
@@ -400,6 +444,10 @@ async function handleGeolocationClick(runtime) {
       });
     }
 
+    if (!isRuntimeActive(runtime)) {
+      return;
+    }
+
     const latitude = Number(position?.coords?.latitude);
     const longitude = Number(position?.coords?.longitude);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -436,6 +484,10 @@ async function initializeRuntime(runtime) {
     loadAccidentAtlas(runtime),
   ]);
 
+  if (!isRuntimeActive(runtime)) {
+    return;
+  }
+
   runtime.data.schools = schools;
   runtime.data.accidents = accidents;
 
@@ -443,7 +495,66 @@ async function initializeRuntime(runtime) {
   renderHazardKpis(runtime, []);
   renderDataFreshness(runtime);
   renderScoreGuide(runtime, null);
-  setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidents.length} schulwegrelevante Unfallpunkte geladen.`);
+
+  let appliedSharedState = false;
+  try {
+    appliedSharedState = await applySharedStateFromUrl(runtime);
+  } catch (error) {
+    console.error("Geteilter Link konnte nicht angewendet werden.", error);
+  }
+
+  if (!appliedSharedState) {
+    setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidents.length} schulwegrelevante Unfallpunkte geladen.`);
+  }
+}
+
+const SWS_SHARE_ROUTE_MODES = ["foot", "bike", "car"];
+
+async function applySharedStateFromUrl(runtime) {
+  const params = new URLSearchParams(window.location.search);
+  const schoolId = params.get("schule");
+  if (!schoolId) {
+    return false;
+  }
+
+  const school = runtime.data.schools.find((candidate) => candidate.id === schoolId);
+  if (!school) {
+    return false;
+  }
+
+  const modus = params.get("modus");
+  if (SWS_SHARE_ROUTE_MODES.includes(modus)) {
+    runtime.routeMode = modus;
+    updateRouteModeButtons(runtime);
+  }
+
+  const lat = Number(params.get("lat"));
+  const lon = Number(params.get("lon"));
+  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+    const adresse = params.get("adresse") || "Startadresse aus Link uebernommen";
+    updateStartPoint(runtime, { lat, lon, label: adresse }, "Startadresse aus geteiltem Link uebernommen.");
+  }
+
+  await selectSchool(runtime, school);
+  return true;
+}
+
+function updateShareUrl(runtime) {
+  if (!runtime.selectedSchool || !runtime.startPoint) {
+    return;
+  }
+
+  const params = new URLSearchParams();
+  params.set("schule", runtime.selectedSchool.id);
+  params.set("lat", runtime.startPoint.lat.toFixed(6));
+  params.set("lon", runtime.startPoint.lon.toFixed(6));
+  if (runtime.startAddressLabel) {
+    params.set("adresse", runtime.startAddressLabel);
+  }
+  params.set("modus", runtime.routeMode);
+
+  const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+  window.history.replaceState(null, "", newUrl);
 }
 
 function validateConfig(config) {
@@ -479,6 +590,14 @@ function createMap(runtime) {
 }
 
 async function loadSchools(runtime) {
+  const cacheKey = `schools:${runtime.config.schoolsDataUrl}`;
+  const cached = await readCacheEntry(cacheKey);
+  if (isCacheEntryFresh(cached, runtime.config.cacheTtlStunden)) {
+    runtime.data.schoolsFetchedAt = cached.fetchedAt;
+    runtime.data.schoolsFromCache = true;
+    return cached.data;
+  }
+
   const payload = await fetchJsonResource(runtime.config.schoolsDataUrl, runtime.config);
   const rawSchools = Array.isArray(payload) ? payload : payload.schools || payload.data || payload.results;
 
@@ -491,9 +610,14 @@ async function loadSchools(runtime) {
     .filter((school) => school && school.id && school.name && Number.isFinite(school.lat) && Number.isFinite(school.lon))
     .map((school) => ({ ...school, id: String(school.id) }));
 
-  return deduplicateSchools(schools)
+  const normalizedSchools = deduplicateSchools(schools)
     .map(enrichSchoolForSearch)
     .sort((left, right) => left.name.localeCompare(right.name, "de"));
+
+  runtime.data.schoolsFetchedAt = Date.now();
+  runtime.data.schoolsFromCache = false;
+  await writeCacheEntry(cacheKey, normalizedSchools);
+  return normalizedSchools;
 }
 
 function normalizeSchool(rawSchool = {}) {
@@ -526,6 +650,14 @@ function normalizeSchool(rawSchool = {}) {
 }
 
 async function loadAccidentAtlas(runtime) {
+  const cacheKey = `accidents:${runtime.config.accidentDataUrl}`;
+  const cached = await readCacheEntry(cacheKey);
+  if (isCacheEntryFresh(cached, runtime.config.cacheTtlStunden)) {
+    runtime.data.accidentsFetchedAt = cached.fetchedAt;
+    runtime.data.accidentsFromCache = true;
+    return cached.data;
+  }
+
   await ensureJsZip();
   const buffer = await fetchBinaryResource(runtime.config.accidentDataUrl, runtime.config);
   const zip = await JSZip.loadAsync(buffer);
@@ -536,9 +668,14 @@ async function loadAccidentAtlas(runtime) {
   }
 
   const csvText = await csvFile.async("string");
-  return parseCsv(csvText)
+  const accidents = parseCsv(csvText)
     .map(normalizeAccident)
     .filter(isSchoolRouteRelevantAccident);
+
+  runtime.data.accidentsFetchedAt = Date.now();
+  runtime.data.accidentsFromCache = false;
+  await writeCacheEntry(cacheKey, accidents);
+  return accidents;
 }
 
 function normalizeAccident(row) {
@@ -1283,9 +1420,28 @@ function renderDataFreshness(runtime) {
   const jahre = runtime.data.accidents
     .map((accident) => accident.properties.jahr)
     .filter(Number.isFinite);
-  runtime.ui.dataFreshness.textContent = jahre.length
-    ? `Unfalldaten: Jahrgang ${Math.max(...jahre)}`
-    : "";
+  const parts = [];
+  if (jahre.length) {
+    parts.push(`Unfalldaten: Jahrgang ${Math.max(...jahre)}`);
+  }
+  const cacheNote = describeCacheFreshness(runtime);
+  if (cacheNote) {
+    parts.push(cacheNote);
+  }
+  runtime.ui.dataFreshness.textContent = parts.join(" · ");
+}
+
+function describeCacheFreshness(runtime) {
+  const fetchedAtValues = [runtime.data.schoolsFetchedAt, runtime.data.accidentsFetchedAt].filter(Number.isFinite);
+  if (!fetchedAtValues.length) {
+    return "";
+  }
+  const oldestFetchedAt = Math.min(...fetchedAtValues);
+  const fromCache = Boolean(runtime.data.schoolsFromCache || runtime.data.accidentsFromCache);
+  const formattedDate = new Date(oldestFetchedAt).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" });
+  return fromCache
+    ? `Daten aus Zwischenspeicher, zuletzt aktualisiert am ${formattedDate}`
+    : `Daten geladen am ${formattedDate}`;
 }
 
 function renderWeitereInfos(runtime) {
@@ -1392,8 +1548,14 @@ async function evaluateRoute(runtime) {
   let routes = [];
   try {
     const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode);
+    if (!isRuntimeActive(runtime)) {
+      return;
+    }
     routes = normalizeRouteCandidates(routePayload);
   } catch (error) {
+    if (!isRuntimeActive(runtime)) {
+      return;
+    }
     renderScoreSummary(runtime, null);
     setStatus(runtime, "warning", `Der Routingdienst konnte keine ${getRouteModeLabel(runtime.routeMode)} berechnen: ${error.message}`);
     return;
@@ -1416,6 +1578,7 @@ async function evaluateRoute(runtime) {
   runtime.data.routeCandidates = scoredRoutes;
   renderRouteVisuals(runtime, scoredRoutes);
   renderScoreSummary(runtime, { selected: scoredRoutes[0], alternatives: scoredRoutes, modeLabel: `${getRouteModeLabel(runtime.routeMode)} mit Routing` });
+  updateShareUrl(runtime);
   setStatus(runtime, "success", `${getRouteModeLabel(runtime.routeMode)} bewertet.`);
 }
 
@@ -1484,11 +1647,19 @@ function renderRouteVisuals(runtime, scoredRoutes) {
   });
 
   const bestRoute = scoredRoutes[0];
-  runtime.layers.route = L.polyline(bestRoute.coordinates.map((coordinate) => [coordinate[1], coordinate[0]]), {
-    color: "#2563eb",
-    weight: 6,
-    opacity: 0.9,
-  }).addTo(runtime.map);
+  const riskSegments = buildRouteRiskSegments(bestRoute.coordinates, bestRoute.scoreResult.hits);
+  if (riskSegments.length) {
+    runtime.layers.routeSegments = riskSegments.map((segment) => L.polyline(
+      segment.coordinates.map((coordinate) => [coordinate[1], coordinate[0]]),
+      { color: getRouteSegmentColor(segment.level), weight: 6, opacity: 0.9 },
+    ).addTo(runtime.map));
+  } else {
+    runtime.layers.route = L.polyline(bestRoute.coordinates.map((coordinate) => [coordinate[1], coordinate[0]]), {
+      color: "#2563eb",
+      weight: 6,
+      opacity: 0.9,
+    }).addTo(runtime.map);
+  }
 
   const bounds = bestRoute.coordinates.map((coordinate) => [coordinate[1], coordinate[0]]);
   if (runtime.startPoint) {
@@ -1507,6 +1678,8 @@ function clearRouteVisuals(runtime) {
     runtime.layers.route.remove();
     runtime.layers.route = null;
   }
+  runtime.layers.routeSegments.forEach((layer) => layer.remove());
+  runtime.layers.routeSegments = [];
   runtime.layers.alternatives.forEach((layer) => layer.remove());
   runtime.layers.alternatives = [];
 }
@@ -1555,6 +1728,7 @@ function renderScoreSummary(runtime, payload) {
     renderScoreGuide(runtime, null);
     runtime.ui.routeAlternatives.innerHTML = "";
     runtime.ui.hazardList.textContent = "Nach der Bewertung erscheinen hier die wichtigsten Punkte im Routenkorridor.";
+    renderRecommendations(runtime, null);
     return;
   }
 
@@ -1595,6 +1769,7 @@ function renderScoreSummary(runtime, payload) {
     `)
     .join("");
   renderHazardList(runtime, bestRoute.scoreResult.hits);
+  renderRecommendations(runtime, bestRoute.scoreResult, payload.alternatives);
 }
 
 function getCompactScoreLabel(modeLabel = "") {
@@ -1607,9 +1782,9 @@ function getCompactScoreLabel(modeLabel = "") {
 
 function getScoreExplanation(score) {
   if (Number.isFinite(Number(score))) {
-    return `Score ${Number(score).toFixed(1)} von 100. Skala: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.`;
+    return `Score ${Number(score).toFixed(1)}. 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.`;
   }
-  return "Skala 0-100: 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.";
+  return "0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.";
 }
 
 function renderScoreGuide(runtime, scoreResult) {
@@ -1619,10 +1794,10 @@ function renderScoreGuide(runtime, scoreResult) {
   const hasScore = Number.isFinite(Number(scoreResult?.score));
   const score = hasScore ? Number(scoreResult.score) : 0;
   const level = hasScore ? scoreResult.level : "";
-  const meterWidth = Math.max(0, Math.min(100, score));
+  const meterWidth = Math.max(0, Math.min(100, (score / SCHULWEGSAFE_DEFAULTS.scoreMeterReferenceMax) * 100));
   const levelClass = level ? ` is-${escapeHtml(level)}` : "";
   const label = hasScore
-    ? `Aktueller Wert ${score.toFixed(1)} von 100`
+    ? `Aktueller Wert ${score.toFixed(1)}`
     : "Noch kein aktueller Wert";
 
   runtime.ui.routeScoreHelp.innerHTML = `
@@ -1652,7 +1827,7 @@ function renderScoreGuide(runtime, scoreResult) {
             <li><strong>Basisgewicht:</strong> Jeder Unfall im 50m-Korridor zählt <code>1.0</code></li>
             <li><strong>Beteiligung:</strong> Kind <code>x 2.0</code> · Fußgänger <code>x 1.5</code> · Radfahrer <code>x 1.3</code></li>
             <li><strong>Aktualität:</strong> -10% pro Jahr Alter (min. verbleibend: 50%)</li>
-            <li><strong>Maximaler Score:</strong> Begrenzt auf maximal <code>100.0</code></li>
+            <li><strong>Sicherheitsobergrenze:</strong> Rechnerisch maximal <code>100,0</code> (in der Praxis liegen Routen deutlich darunter)</li>
           </ul>
         </div>
       </details>
@@ -1717,6 +1892,140 @@ function renderHazardList(runtime, hits) {
   `;
 }
 
+function renderRecommendations(runtime, scoreResult, allScoredRoutes) {
+  const container = runtime.ui.routeRecommendations;
+  if (!container) {
+    return;
+  }
+
+  const recommendations = scoreResult ? buildRouteRecommendations(scoreResult, allScoredRoutes) : [];
+  if (!recommendations.length) {
+    container.innerHTML = "";
+    container.classList.add("is-empty");
+    return;
+  }
+
+  container.classList.remove("is-empty");
+  container.innerHTML = `
+    <div class="sws-recommendations-inline-title">${recommendations.length > 1 ? "Empfehlungen" : "Empfehlung"}</div>
+    <ul class="sws-recommendation-list">
+      ${recommendations.map((text) => `<li class="sws-recommendation-item">${escapeHtml(text)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function describeHitLocation(hit) {
+  const titel = hit.properties.titel || "Unfallpunkt";
+  const distance = Math.round(hit.distanceMeters);
+  const merkmale = describeAccident(hit.properties);
+  return `"${titel}" (${distance} m, ${merkmale})`;
+}
+
+function buildRouteRecommendations(scoreResult, allScoredRoutes) {
+  const hits = scoreResult?.hits || [];
+  if (!hits.length) {
+    return [];
+  }
+
+  if (scoreResult.level === "mittel") {
+    const topHit = hits[0];
+    const countLabel = hits.length === 1 ? "liegt ein Unfallpunkt" : `liegen ${hits.length} Unfallpunkte`;
+    return [
+      `Auf dieser Route ${countLabel} im 50-m-Korridor; am auffaelligsten ist ${describeHitLocation(topHit)}.`,
+    ];
+  }
+
+  if (scoreResult.level !== "hoch") {
+    return [];
+  }
+
+  const recommendations = [];
+
+  const childHits = hits.filter((hit) => hit.properties.ist_kind);
+  if (childHits.length && childHits.length / hits.length > 0.5) {
+    recommendations.push(
+      `${childHits.length} von ${hits.length} Unfallpunkten im Korridor betreffen Kinderbeteiligung - Elternlotsen oder Schulweghelfer an dieser Stelle einsetzen, oder das Kind hier zunaechst persoenlich begleiten.`,
+    );
+  }
+
+  const bikeHits = hits.filter((hit) => hit.properties.ist_rad);
+  const footHits = hits.filter((hit) => hit.properties.ist_fuss);
+  if (bikeHits.length && bikeHits.length > footHits.length) {
+    const worstBikeHit = bikeHits[0];
+    recommendations.push(
+      `Die Unfallpunkte im Korridor sind ueberwiegend radbezogen, besonders nahe ${describeHitLocation(worstBikeHit)} - dort absteigen und schieben, oder ueber den Wegtyp-Umschalter auf "Fussweg" wechseln.`,
+    );
+  }
+
+  const cluster = findDenseHitCluster(hits);
+  if (cluster) {
+    recommendations.push(
+      `Mehrere Unfallpunkte haeufen sich nahe ${describeHitLocation(cluster)} - diesen Abschnitt nach Moeglichkeit meiden oder besonders aufmerksam und begleitet durchqueren.`,
+    );
+  }
+
+  const currentYear = SCHULWEGSAFE_DEFAULTS.currentYear;
+  const totalWeight = hits.reduce((sum, hit) => sum + hit.weight, 0);
+  const recentHits = hits.filter((hit) => Number(hit.properties.jahr) >= currentYear - 1);
+  const recentWeightShare = totalWeight ? recentHits.reduce((sum, hit) => sum + hit.weight, 0) / totalWeight : 0;
+  if (recentHits.length && recentWeightShare > 0.5) {
+    recommendations.push(
+      `Ein Grossteil des Risikos stammt aus juengeren Unfaellen (${currentYear - 1}-${currentYear}) - die Route bis auf Weiteres eng begleiten und die Lage vor Ort neu einschaetzen.`,
+    );
+  }
+
+  if (!recommendations.length) {
+    const topHit = hits[0];
+    recommendations.push(
+      `Der staerkste Einzelfaktor auf dieser Route ist ein Unfallpunkt bei ${describeHitLocation(topHit)} - hier ist erhoehte Aufmerksamkeit sinnvoll.`,
+    );
+  }
+
+  const limitedRecommendations = recommendations.slice(0, 4);
+  const alternativesNote = buildRouteAlternativesNote(scoreResult, allScoredRoutes);
+  if (alternativesNote) {
+    limitedRecommendations.push(alternativesNote);
+  }
+
+  return limitedRecommendations;
+}
+
+function buildRouteAlternativesNote(scoreResult, allScoredRoutes) {
+  const candidates = Array.isArray(allScoredRoutes) ? allScoredRoutes : [];
+  const contactHint = "Ziehen Sie zusaetzlich einen anderen Wegtyp (Fussweg/Rad/Auto) in Betracht oder wenden Sie sich an Elternlotsen, Schulweghelfer oder die Verkehrswacht vor Ort.";
+
+  if (candidates.length <= 1) {
+    return `Es wurde nur eine Routenvariante berechnet. ${contactHint}`;
+  }
+
+  const nextBest = candidates[1];
+  const scoreGap = nextBest.scoreResult.score - scoreResult.score;
+  const selectedIsMeaningfullyBetter = nextBest.scoreResult.level !== scoreResult.level || scoreGap >= 1;
+
+  if (!selectedIsMeaningfullyBetter) {
+    return `Von ${candidates.length} berechneten Routenvarianten ist keine deutlich sicherer - alle liegen in einem aehnlich kritischen Bereich. ${contactHint}`;
+  }
+
+  return `Von ${candidates.length} berechneten Routenvarianten wurde bereits automatisch die risikoaermste gewaehlt (Score ${scoreResult.score.toFixed(1)}); die naechstbessere Alternative laege bei Score ${nextBest.scoreResult.score.toFixed(1)} (${getLevelLabel(nextBest.scoreResult.level)}). ${contactHint}`;
+}
+
+function findDenseHitCluster(hits, clusterRadiusMeters = 150) {
+  for (const hit of hits) {
+    const [hitLon, hitLat] = hit.geometry.coordinates;
+    const hasNeighbor = hits.some((other) => {
+      if (other === hit) {
+        return false;
+      }
+      const [otherLon, otherLat] = other.geometry.coordinates;
+      return distanceBetweenPoints(hitLat, hitLon, otherLat, otherLon) <= clusterRadiusMeters;
+    });
+    if (hasNeighbor) {
+      return hit;
+    }
+  }
+  return null;
+}
+
 function calculateRouteHazardScore(routeCoordinates, accidents, options = {}) {
   const bufferMeters = Number(options.hazardBufferMeters || SCHULWEGSAFE_DEFAULTS.routeBufferMeters);
   const currentYear = Number(options.currentYear || SCHULWEGSAFE_DEFAULTS.currentYear);
@@ -1765,6 +2074,63 @@ function classifyHazardScore(score) {
     return "mittel";
   }
   return "hoch";
+}
+
+const SWS_CACHE_DB_NAME = "sws-data-cache";
+const SWS_CACHE_STORE_NAME = "datasets";
+const SWS_CACHE_DB_VERSION = 1;
+
+function openSwsCacheDb() {
+  if (!globalThis.indexedDB) {
+    return Promise.reject(new Error("IndexedDB nicht verfuegbar."));
+  }
+  return new Promise((resolve, reject) => {
+    const request = globalThis.indexedDB.open(SWS_CACHE_DB_NAME, SWS_CACHE_DB_VERSION);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(SWS_CACHE_STORE_NAME)) {
+        request.result.createObjectStore(SWS_CACHE_STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("IndexedDB konnte nicht geoeffnet werden."));
+  });
+}
+
+async function readCacheEntry(key) {
+  try {
+    const db = await openSwsCacheDb();
+    return await new Promise((resolve, reject) => {
+      const transaction = db.transaction(SWS_CACHE_STORE_NAME, "readonly");
+      const request = transaction.objectStore(SWS_CACHE_STORE_NAME).get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("Cache-Eintrag konnte nicht gelesen werden."));
+    });
+  } catch (error) {
+    // Caching ist optional; ohne IndexedDB oder bei Lesefehlern wird einfach neu geladen.
+    return null;
+  }
+}
+
+async function writeCacheEntry(key, data) {
+  try {
+    const db = await openSwsCacheDb();
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(SWS_CACHE_STORE_NAME, "readwrite");
+      transaction.objectStore(SWS_CACHE_STORE_NAME).put({ data, fetchedAt: Date.now() }, key);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error || new Error("Cache-Eintrag konnte nicht geschrieben werden."));
+    });
+  } catch (error) {
+    // Quota-Fehler oder fehlende IndexedDB-Unterstuetzung duerfen den Ladevorgang nicht blockieren.
+  }
+}
+
+function isCacheEntryFresh(entry, ttlHours) {
+  if (!entry || !Number.isFinite(entry.fetchedAt)) {
+    return false;
+  }
+  const ttlMs = Math.max(0, Number(ttlHours) || 0) * 60 * 60 * 1000;
+  return Date.now() - entry.fetchedAt < ttlMs;
 }
 
 async function fetchJsonResource(url, config) {
@@ -2214,6 +2580,74 @@ function distanceToRouteMeters(point, routeCoordinates) {
   return minimumDistance;
 }
 
+function findNearestRouteSegmentIndex(point, routeCoordinates) {
+  if (!Array.isArray(routeCoordinates) || routeCoordinates.length < 2) {
+    return -1;
+  }
+  let minimumDistance = Number.POSITIVE_INFINITY;
+  let nearestIndex = 0;
+  for (let index = 0; index < routeCoordinates.length - 1; index += 1) {
+    const distance = pointToSegmentDistanceMeters(point, routeCoordinates[index], routeCoordinates[index + 1]);
+    if (distance < minimumDistance) {
+      minimumDistance = distance;
+      nearestIndex = index;
+    }
+  }
+  return nearestIndex;
+}
+
+function buildRouteRiskSegments(routeCoordinates, hits, segmentCount = 12) {
+  const vertexCount = Array.isArray(routeCoordinates) ? routeCoordinates.length : 0;
+  if (vertexCount < 2) {
+    return [];
+  }
+
+  const effectiveSegmentCount = Math.max(1, Math.min(segmentCount, vertexCount - 1));
+  const bucketWeights = new Array(effectiveSegmentCount).fill(0);
+
+  (hits || []).forEach((hit) => {
+    const vertexIndex = findNearestRouteSegmentIndex(hit.geometry.coordinates, routeCoordinates);
+    if (vertexIndex < 0) {
+      return;
+    }
+    const bucketIndex = Math.min(
+      effectiveSegmentCount - 1,
+      Math.floor((vertexIndex / (vertexCount - 1)) * effectiveSegmentCount),
+    );
+    bucketWeights[bucketIndex] += hit.weight;
+  });
+
+  const verticesPerBucket = (vertexCount - 1) / effectiveSegmentCount;
+  const segments = [];
+  for (let bucketIndex = 0; bucketIndex < effectiveSegmentCount; bucketIndex += 1) {
+    const startVertex = Math.round(bucketIndex * verticesPerBucket);
+    const endVertex = bucketIndex === effectiveSegmentCount - 1
+      ? vertexCount - 1
+      : Math.round((bucketIndex + 1) * verticesPerBucket);
+    if (endVertex <= startVertex) {
+      continue;
+    }
+    const weight = roundToSingleDecimal(bucketWeights[bucketIndex]);
+    segments.push({
+      coordinates: routeCoordinates.slice(startVertex, endVertex + 1),
+      weight,
+      level: classifyHazardScore(weight),
+    });
+  }
+  return segments;
+}
+
+function getRouteSegmentColor(level) {
+  switch (level) {
+    case "hoch":
+      return "#dc2626";
+    case "mittel":
+      return "#ca8a04";
+    default:
+      return "#16a34a";
+  }
+}
+
 function pointToSegmentDistanceMeters(point, segmentStart, segmentEnd) {
   const originLatitude = degreesToRadians(point[1]);
   const metersPerDegreeLat = 111320;
@@ -2469,7 +2903,7 @@ function renderEnhancedScoringExplanation() {
     <div class="sws-scoring-details-block mt-4 pt-3 border-top">
       <h4 class="h6 text-dark fw-bold mb-3">Bewertungsschlüssel (Score-Berechnung)</h4>
       <p class="small text-muted mb-4" style="font-size: 0.88rem;">
-        Der Route-Score (0 bis 100) berechnet sich aus der Summe der gewichteten Unfallpunkte in einem <strong>50 Meter breiten Korridor</strong> (25m links und rechts) entlang des berechneten Schulwegs. Ein Score von <code>0</code> bedeutet, dass im Korridor keine registrierten Unfälle liegen. Höhere Werte signalisieren ein erhöhtes Gefahrenpotenzial.
+        Der Route-Score berechnet sich aus der Summe der gewichteten Unfallpunkte in einem <strong>50 Meter breiten Korridor</strong> (25m links und rechts) entlang des berechneten Schulwegs. Ein Score von <code>0</code> bedeutet, dass im Korridor keine registrierten Unfälle liegen. Höhere Werte signalisieren ein erhöhtes Gefahrenpotenzial; rechnerisch ist der Wert auf maximal 100 begrenzt, in der Praxis liegen Routen deutlich darunter.
       </p>
       
       <!-- Stufen-Visualisierung -->

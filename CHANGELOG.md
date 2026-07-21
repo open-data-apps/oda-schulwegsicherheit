@@ -1,5 +1,20 @@
 # Changelog
 
+## 21.07.2026 (Version 1.11.0)
+
+- ENH: Standalone-Betrieb hinter Traefik ergaenzt (`STANDALONE=true make up`, `docker-compose.standalone.yml`, neuer `/config`-Endpunkt in `nginx.conf`), analog zur Schwester-App Unfallatlas.
+- FIX: `Dockerfile` kopierte die App-Dateien auf die Wurzel des Nginx-Webroots statt nach `html/app`, wie es `nginx.conf` erwartet; funktionierte bisher nur zufaellig durch den Compose-Volume-Mount. Docker-Service in `docker-compose.yml` von `web` zu `oda-app` umbenannt.
+- ENH: Regelbasierte Empfehlungen bei erhoehtem oder kritischem Risiko ("Empfehlungen"-Panel) auf Basis der bewerteten Unfallpunkte im Routenkorridor ergaenzt.
+- ENH: Schul- und Unfalldaten werden im Browser (IndexedDB) zwischengespeichert; konfigurierbare Gueltigkeit ueber `cacheTtlStunden` (Standard 24 Stunden), Hinweis auf Zwischenspeicher-Nutzung im Datenfrische-Label.
+- ENH: Vollstaendiger Share-Link (Schule, Startadresse, Wegtyp als URL-Parameter) inklusive "Link kopieren"-Button; ein geteilter Link laedt die identische Bewertung automatisch.
+- ENH: Routenlinie wird abschnittsweise nach lokaler Unfallgewichtung eingefaerbt (Segment-Risiko), zusaetzlich zum bestehenden Gesamt-Score.
+- FIX: Laufende Initialisierung, Routenberechnung und Standortsuche pruefen nach jedem Netzwerk-Abruf, ob die Seite zwischenzeitlich verlassen wurde, und brechen sonst sauber ab (verhindert Leaflet-Fehler auf einer bereits entfernten Karte, analog zu einem Fix in der Schwester-App Unfallatlas).
+- ENH: Empfehlungen erscheinen jetzt direkt unter der Score-Anzeige in der Bedienleiste statt am Ende der Detailkacheln; generische Formulierungen ("Blick auf die Liste lohnt sich") wurden durch konkrete Orts-/Merkmalsangaben ersetzt.
+- FIX: "Link kopieren"-Button in "Route teilen" umbenannt, damit die Share-Funktion erkennbar ist.
+- FIX: Breite Kacheln (Relevante Unfallpunkte, Methodikbox, Weitere Infos) spannten auf Desktop-Breiten faelschlich nicht die volle Breite; "Routenbewertung" wirkte dadurch zusammengequetscht. Grid-Layout korrigiert und Spaltenverhaeltnis zugunsten von "Routenbewertung" angepasst.
+- FIX: Der Score-Meter-Balken hatte seine Farbzonen fest auf eine 100er-Skala programmiert, obwohl "kritisches Risiko" schon ab 6 beginnt - dadurch wirkte der Balken fast durchgehend rot. Anzeige auf einen realistischen Referenzwert umgestellt; der Score-Rohwert und die technische Obergrenze (100) sind unveraendert.
+- ENH: Empfehlungen bei kritischem Risiko enthalten jetzt konkrete Handlungsvorschlaege statt reiner Beschreibung (z.B. "Elternlotsen einsetzen", "auf Fussweg wechseln", "Abschnitt meiden") sowie einen Transparenz-Hinweis zu den automatisch verglichenen Routenvarianten (inkl. Hinweis auf andere Wegtypen und lokale Ansprechpartner, wenn keine Variante deutlich sicherer ist).
+
 ## 30.06.2026 (Version 1.10.0)
 
 - ENH: KPI-Kontext (Schale 4 / TODO 1) fuer die Gefahren-Kennzahlen im Karten-Overlay ergaenzt – optionale Erklaertexte je Wert ueber ein ausklappbares ⓘ-Element (`kpiKontext1`–`kpiKontext4`, leer = kein Kontext).

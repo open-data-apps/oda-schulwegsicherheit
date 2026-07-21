@@ -50,5 +50,6 @@
   "kpiKontext1": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
   "kpiKontext2": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
   "kpiKontext3": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
-  "kpiKontext4": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal."
+  "kpiKontext4": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
+  "cacheTtlStunden": "24"
 }

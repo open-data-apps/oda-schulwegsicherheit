@@ -92,7 +92,47 @@ Empfohlene ODAS-Einstellungen:
 }
 ```
 
-`liveServer.settings.root` sollte fuer ODAS-Apps normalerweise `/` bleiben, damit `app/` und `odas-config/` gleichzeitig erreichbar sind. Falls `app/app-base.js` fuer lokale Tests den auskommentierten `getConfigUrl()`-Localhost-Block nutzt, muss dieser vor ZIP-Erstellung und ODAS-Live-Auslieferung wieder auskommentiert werden.
+`liveServer.settings.root` sollte fuer ODAS-Apps normalerweise `/` bleiben, damit `app/` und `odas-config/` gleichzeitig erreichbar sind. `getConfigUrl()` in `app/app-base.js` erkennt `localhost`/`127.0.0.1` automatisch und laedt dann `odas-config/config.json` direkt; dafuer ist keine manuelle Anpassung mehr noetig, auch nicht vor ZIP-Erstellung und ODAS-Live-Auslieferung.
+
+---
+
+## Einsatzumgebungen
+
+| Umgebung    | Start oder Auslieferung             | Konfiguration                        | Datenabruf                   |
+| ----------- | ----------------------------------- | ------------------------------------ | ----------------------------- |
+| Entwicklung | `make up` / `http://localhost:8090` | `odas-config/config.json`            | direkt                       |
+| Standalone  | `STANDALONE=true make up`           | `odas-config/config.json`            | direkt                       |
+| ODAS        | `make zip` / Veroeffentlichung      | vom ODAS erzeugter Endpunkt `config` | direkt oder mit `proxyAktiv` |
+
+Entwicklung und Standalone verwenden dieselbe lokale Datei `odas-config/config.json`. Der Config-Loader in `app/app-base.js` laedt sie auf `localhost` direkt unter `odas-config/config.json`. Bei einem Standalone-FQDN fragt er stattdessen `/config` ab; Nginx liefert dort ueber `nginx.conf` dieselbe gemountete Datei aus.
+
+## Standalone-Betrieb hinter Traefik
+
+Fuer den Standalone-Betrieb wird ein bereits vorhandener Traefik-Reverse-Proxy vorausgesetzt. Die App selbst liefert HTTP intern auf Port `80`; Traefik uebernimmt FQDN, HTTPS-Zertifikat und Weiterleitung. Der App-Container veroeffentlicht dabei keinen Host-Port.
+
+Vor dem Start:
+
+1. In `docker-compose.standalone.yml` den Platzhalter-FQDN `app1.example.com` durch den echten Hostnamen ohne Protokoll oder Pfad ersetzen.
+2. `odas-config/config.json` an Betreiber, Datenquellen und rechtliche Texte anpassen.
+3. Sicherstellen, dass `proxyAktiv` auf `nein` steht (kein ODAS-Proxy im Standalone-Betrieb verfuegbar).
+4. Pruefen, dass Traefik das externe Docker-Netzwerk `proxynet`, den EntryPoint `websecure` und den Zertifikatsresolver `letsencrypt` verwendet.
+
+Starten:
+
+```bash
+STANDALONE=true make up
+```
+
+Weitere Befehle:
+
+```bash
+STANDALONE=true make logs
+STANDALONE=true make config
+STANDALONE=true make ps
+STANDALONE=true make down
+```
+
+Ohne `STANDALONE=true` verwenden dieselben Make-Ziele ausschliesslich `docker-compose.yml` fuer die Entwicklung.
 
 ### Aufbau der App
 

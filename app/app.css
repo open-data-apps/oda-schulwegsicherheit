@@ -244,6 +244,12 @@
   transition: all 0.3s ease;
 }
 
+.sws-share-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
+}
+
 .sws-score-badge {
   display: flex;
   align-items: center;
@@ -487,7 +493,7 @@
 
 .sws-detail-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.75fr) minmax(0, 0.75fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
   gap: 0.85rem;
 }
 
@@ -496,6 +502,10 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.sws-panel-wide {
+  grid-column: 1 / -1;
 }
 
 .sws-panel h3 {
@@ -568,7 +578,9 @@
   height: 0.55rem;
   overflow: hidden;
   border-radius: 999px;
-  background: linear-gradient(90deg, #dcfce7 0 2%, #fef9c3 2% 6%, #fee2e2 6% 100%);
+  /* Farbzonen sind an SCHULWEGSAFE_DEFAULTS.scoreMeterReferenceMax (12) in app.js gekoppelt:
+     2/12 = 16.7%, 6/12 = 50%. Bei Aenderung dort mitziehen. */
+  background: linear-gradient(90deg, #dcfce7 0 16.7%, #fef9c3 16.7% 50%, #fee2e2 50% 100%);
   border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
@@ -645,6 +657,40 @@
   background: #ecfdf5;
 }
 
+.sws-recommendations-inline {
+  margin-top: 0.6rem;
+}
+
+.sws-recommendations-inline.is-empty {
+  display: none;
+}
+
+.sws-recommendations-inline-title {
+  margin-bottom: 0.35rem;
+  color: #78350f;
+  font-weight: 650;
+  font-size: 0.85rem;
+}
+
+.sws-recommendation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sws-recommendation-item {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
 .sws-popup {
   min-width: 10rem;
 }
@@ -660,10 +706,6 @@
 
   .sws-detail-grid {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .sws-panel-wide {
-    grid-column: 1 / -1;
   }
 }
 

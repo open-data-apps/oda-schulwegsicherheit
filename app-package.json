@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -286,6 +286,15 @@
       "format": {
         "typ": "string",
         "laenge": 160
+      },
+      "erforderlich": "nein"
+    },
+    "cacheTtlStunden": {
+      "label": "Cache-Gueltigkeit (Stunden)",
+      "hilfe": "Wie lange Schul- und Unfalldaten im Browser zwischengespeichert werden, bevor sie erneut geladen werden. Leer = Standardwert 24.",
+      "default": "24",
+      "format": {
+        "typ": "string"
       },
       "erforderlich": "nein"
     }
