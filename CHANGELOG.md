@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.0 - 2026-07-24
+
+- **FIX:** Laufzeit-Fehlermeldung wird vor der Anzeige HTML-maskiert (`escapeHtmlForBase`); ein Fehlertext kann kein Markup mehr in die Seite einschleusen (XSS)
+- **FIX:** Startseiten-Renderer wird nun `await`et; bei asynchronen Apps erscheint kein kurzzeitiges `[object Promise]` in `#main-content`
+
 ## 21.07.2026 (Version 1.11.0)
 
 - ENH: Standalone-Betrieb hinter Traefik ergaenzt (`STANDALONE=true make up`, `docker-compose.standalone.yml`, neuer `/config`-Endpunkt in `nginx.conf`), analog zur Schwester-App Unfallatlas.

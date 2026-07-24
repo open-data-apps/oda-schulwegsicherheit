@@ -35,10 +35,10 @@ help:
 .DEFAULT_GOAL := help
 
 # allgemeine Befehle
-up: ## Alle kontainer starten
-	${DC} up -d --remove-orphans
+up: ## App starten (Standalone mit STANDALONE=true)
+	${DC} up -d --build --remove-orphans
 
-down: ##Alle Container stoppen
+down: ## App stoppen (Standalone mit STANDALONE=true)
 	${DC} down
 
 down-volumes: ## Container stopen, Volumes löschen
