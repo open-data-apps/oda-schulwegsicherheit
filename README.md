@@ -57,6 +57,7 @@ Die ZIP-Datei wird im Browser mit JSZip gelesen. Bei CORS-Problemen kann der ODA
 | `schoolsDataUrl` | JSON-Datensatz mit Schulen in Baden-Wuerttemberg | `https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json` |
 | `accidentDataUrl` | Unfallatlas CSV-ZIP | `https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip` |
 | `routeServiceUrl` | Optionaler OSRM-kompatibler oder geschuetzter Routing-Service | leer fuer den voreingestellten OSRM-Routingdienst |
+| `geocodingServiceUrl` | Nominatim-kompatible Such-URL fuer die Adressaufloesung | leer fuer den voreingestellten oeffentlichen Dienst |
 
 ---
 
@@ -155,7 +156,31 @@ Der Inhaltsbereich wird in `app/app.js` erstellt. App-spezifisches Styling liegt
 
 Die App verwendet [Leaflet.js](https://leafletjs.com/) und [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat). Die Karte nutzt OpenStreetMap-Kacheln und benoetigt keinen Karten-API-Key.
 
-Fuer Startadressen wird die Nominatim-Suche von OpenStreetMap genutzt. Fuer Routen wird standardmaessig ein OSRM-kompatibler Routingdienst verwendet; ueber `routeServiceUrl` kann im ODAS-Betrieb ein geschuetzter eigener Routingdienst gesetzt werden.
+Fuer Startadressen wird die Nominatim-Suche von OpenStreetMap genutzt. Fuer Routen wird standardmaessig ein OSRM-kompatibler Routingdienst verwendet.
+
+### Uebertragung personenbezogener Angaben an Dritte
+
+Beide Funktionen uebertragen Angaben, die Rueckschluesse auf Wohnort und Schulweg zulassen:
+
+| Funktion | Empfaenger (Voreinstellung) | Uebertragene Daten |
+| --- | --- | --- |
+| Adresssuche | `nominatim.openstreetmap.org` | Eingegebene Adresse und Ort der gewaehlten Schule |
+| Routenberechnung | `router.project-osrm.org` | Koordinaten von Startpunkt und Schule, **im Pfad der aufgerufenen Adresse** — sie erscheinen dadurch in den Zugriffsprotokollen des Dienstes |
+
+Wird der Standort-Knopf genutzt, ist der Startpunkt die tatsaechliche Position des Geraets.
+`router.project-osrm.org` ist eine oeffentliche Demonstrationsinstanz des OSRM-Projekts und
+nicht fuer den Produktivbetrieb vorgesehen.
+
+**Die App fragt vor der ersten Uebertragung.** Ohne Zustimmung findet keine dieser
+Uebertragungen statt; Adresssuche und Routenberechnung bleiben deaktiviert. Kartenansicht,
+Schulsuche und Unfallpunkte funktionieren auch ohne. Die Entscheidung wird lokal im Browser
+gespeichert (IndexedDB) und ist jederzeit widerrufbar.
+
+**Fuer Betreiber:** Ueber `geocodingServiceUrl` und `routeServiceUrl` lassen sich eigene
+Instanzen hinterlegen; die App nennt dann diese im Hinweis und in der Datenschutzangabe.
+Wer die mitgelieferte `datenschutz`-Angabe uebernimmt, ohne eigene Dienste zu setzen,
+uebernimmt damit auch die Nennung der beiden oeffentlichen Dienste — das ist beabsichtigt
+und muss zur tatsaechlichen Konfiguration passen.
 
 Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Routenkorridor keine relevanten Unfallpunkte liegen; jeder Treffer erhoeht den Wert, wobei Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle staerker gewichtet werden. Unter `2` gilt als geringes Risiko, `2` bis unter `6` als erhöhte Aufmerksamkeit und ab `6` als kritisches Risiko.
 

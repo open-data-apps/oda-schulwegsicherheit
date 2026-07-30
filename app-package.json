@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.12.0",
+  "version": "1.14.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -128,6 +128,10 @@
         "## Nutzung & Route-Score",
         "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Standortbestimmung zeigt einen Ladezustand und nutzt einen zweiten Versuch, wenn der erste Browser-Standort nicht geliefert wird. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
         "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
+        "## Uebertragung an externe Dienste",
+        "Adresssuche und Routenberechnung koennen ohne externe Dienste nicht arbeiten. Die eingegebene Adresse geht an den Geocoding-Dienst (voreingestellt <em>nominatim.openstreetmap.org</em>), die Koordinaten von Startpunkt und Schule an den Routing-Dienst (voreingestellt <em>router.project-osrm.org</em>). Damit verlassen Angaben die App, die Rueckschluesse auf Wohnort und Schulweg zulassen.",
+        "Vor der ersten Uebertragung wird um Zustimmung gebeten; ohne sie bleiben beide Funktionen deaktiviert. Kartenansicht, Schulsuche und Unfallpunkte funktionieren auch ohne. Betreiber koennen ueber <code>geocodingServiceUrl</code> und <code>routeServiceUrl</code> eigene Instanzen hinterlegen. Einzelheiten stehen auf der Seite Datenschutz.",
+        "",
         "## Datenquellen & Lizenzen",
         "Die Anwendung verarbeitet die folgenden offenen Datenquellen:",
         "- **Schuldaten**: Daten von <a href='https://github.com/Datenschule/schulscraper-data' target='_blank' rel='noopener'>JedeSchule/Datenschule</a> (CC0).",
@@ -160,8 +164,25 @@
       },
       "default": [
         "_multiline_",
-        "Diese App speichert keine Nutzerprofile im Browser-Code.",
-        "Bei Nutzung der Standortfunktion wird die Position nur fuer die laufende Bewertung im Frontend verarbeitet."
+        "<h3>Verarbeitung im Browser</h3>",
+        "Diese App speichert keine Nutzerprofile. Ihre Eingaben und ein per Standort-Knopf ermittelter Standort werden nicht an den Betreiber dieser App uebertragen und nicht dauerhaft gespeichert. Zwischengespeichert werden ausschliesslich die oeffentlichen Schul- und Unfalldatensaetze sowie Ihre Entscheidung zu den unten genannten Diensten.",
+        "",
+        "<h3>Uebertragung an externe Dienste</h3>",
+        "Zwei Funktionen dieser App koennen ohne externe Dienste nicht arbeiten. Beide uebertragen dabei Angaben, die einen Rueckschluss auf Wohnort und Schulweg zulassen:",
+        "<ul>",
+        "<li><strong>Adresssuche (Geocoding):</strong> Die von Ihnen eingegebene Adresse wird zusammen mit dem Ort der gewaehlten Schule an den Geocoding-Dienst uebertragen, um daraus Koordinaten zu ermitteln. Voreingestellt ist der oeffentliche Dienst <em>nominatim.openstreetmap.org</em>.</li>",
+        "<li><strong>Routenberechnung:</strong> Die Koordinaten Ihres Startpunkts und der ausgewaehlten Schule werden an den Routing-Dienst uebertragen, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Zugriffsprotokollen des Dienstes. Voreingestellt ist <em>router.project-osrm.org</em>, eine oeffentliche Demonstrationsinstanz des OSRM-Projekts.</li>",
+        "</ul>",
+        "Wird der Standort-Knopf genutzt, ist der uebertragene Startpunkt Ihre tatsaechliche Position. Beide Dienste werden von Dritten betrieben; auf deren Protokollierung und Aufbewahrung hat der Betreiber dieser App keinen Einfluss.",
+        "",
+        "<h3>Ihre Entscheidung</h3>",
+        "Vor der ersten Uebertragung werden Sie gefragt. Ohne Ihre Zustimmung findet keine Uebertragung an diese beiden Dienste statt; Adresssuche und Routenberechnung bleiben dann deaktiviert. Kartenansicht, Schulsuche und die Anzeige der Unfallpunkte funktionieren auch ohne Zustimmung. Ihre Entscheidung wird lokal in Ihrem Browser gespeichert und laesst sich jederzeit ueber den Hinweis oberhalb der Eingabefelder widerrufen.",
+        "",
+        "<h3>Weitere Datenquellen</h3>",
+        "Die Schul- und Unfalldatensaetze sowie die Kartenkacheln werden von externen Servern geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung uebermittelt, jedoch keine Angaben zu Ihrer Person, Ihrer Adresse oder Ihrem Schulweg.",
+        "",
+        "<h3>Hinweis fuer Betreiber</h3>",
+        "Ueber die Konfigurationsschluessel <code>geocodingServiceUrl</code> und <code>routeServiceUrl</code> lassen sich eigene Instanzen hinterlegen. Wird davon Gebrauch gemacht, sind die oben genannten Dienstnamen in dieser Erklaerung entsprechend anzupassen."
       ],
       "erforderlich": "ja"
     },
@@ -190,8 +211,11 @@
       "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen ('ja' oder 'nein')",
       "default": "nein",
       "format": {
-        "typ": "string",
-        "laenge": 4
+        "typ": "dropdown",
+        "optionen": [
+          "nein",
+          "ja"
+        ]
       },
       "erforderlich": "ja"
     },
@@ -216,6 +240,15 @@
     "routeServiceUrl": {
       "label": "Optionaler Routing-Service",
       "hilfe": "Optionale OSRM-kompatible Basis-URL oder geschuetzte Service-URL fuer Routen. Leer lassen fuer den voreingestellten OSRM-Routingdienst.",
+      "default": "",
+      "format": {
+        "typ": "url"
+      },
+      "erforderlich": "nein"
+    },
+    "geocodingServiceUrl": {
+      "label": "Optionaler Geocoding-Dienst",
+      "hilfe": "Nominatim-kompatible Such-URL fuer die Adressaufloesung. Leer lassen fuer den voreingestellten oeffentlichen Dienst nominatim.openstreetmap.org.",
       "default": "",
       "format": {
         "typ": "url"

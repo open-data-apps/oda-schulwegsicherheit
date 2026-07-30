@@ -21,6 +21,173 @@ const SCHULWEGSAFE_RUNTIME = {
   assetPromises: {},
 };
 
+/*
+ * Einwilligung fuer Drittdienste (Review.md, F-26)
+ * ------------------------------------------------
+ * Adresssuche und Routenberechnung uebertragen personenbezogene Angaben an externe
+ * Dienste: die eingegebene Adresse an den Geocoding-Dienst, das Koordinatenpaar aus
+ * Startpunkt und Schule an den Routing-Dienst. Beides geschah bisher ohne Hinweis und
+ * begann bereits beim Tippen. Vor dem ersten Aufruf wird deshalb eine Entscheidung
+ * eingeholt und dauerhaft gemerkt.
+ *
+ * Nicht betroffen sind Schul- und Unfalldaten: Das sind Massendownloads von
+ * Referenzdaten ohne Bezug zur Nutzerin oder zum Nutzer.
+ */
+const SWS_CONSENT_KEY = "consent:drittdienste";
+// Wird der Umfang der Uebertragung erweitert, hebt eine neue Version die alte
+// Entscheidung auf und es wird erneut gefragt.
+const SWS_CONSENT_VERSION = 1;
+
+let swsConsentGeladen = false;
+let swsConsentWert = null; // null = noch nicht entschieden, true/false = Entscheidung
+
+async function ladeDrittdienstEinwilligung() {
+  if (swsConsentGeladen) {
+    return swsConsentWert;
+  }
+  // Bewusst ohne isCacheEntryFresh(): Die Entscheidung darf nicht mit der
+  // Aktualisierungsfrist der Datensaetze verfallen.
+  const entry = await readCacheEntry(SWS_CONSENT_KEY);
+  const gespeichert = entry && entry.data;
+  swsConsentWert = gespeichert && gespeichert.version === SWS_CONSENT_VERSION
+    ? gespeichert.erteilt === true
+    : null;
+  swsConsentGeladen = true;
+  return swsConsentWert;
+}
+
+async function setzeDrittdienstEinwilligung(erteilt) {
+  swsConsentWert = erteilt === true;
+  swsConsentGeladen = true;
+  await writeCacheEntry(SWS_CONSENT_KEY, {
+    version: SWS_CONSENT_VERSION,
+    erteilt: swsConsentWert,
+    entschiedenAm: new Date().toISOString(),
+  });
+}
+
+/* Synchrone Pruefung fuer die Netzaufrufe selbst. Der Wert liegt ab dem Start vor. */
+function drittdienstFreigegeben() {
+  return swsConsentWert === true;
+}
+
+function drittdienstAbgelehntFehler() {
+  return new Error(
+    "Ohne Einwilligung werden keine Daten an externe Dienste uebertragen.",
+  );
+}
+
+/* Zeigt den Hostnamen des tatsaechlich verwendeten Dienstes, damit der Hinweis auch
+ * stimmt, wenn ein Betreiber eigene Instanzen hinterlegt hat. */
+function dienstAnzeigename(konfiguriert, voreinstellung) {
+  const wert = String(konfiguriert || "").trim() || String(voreinstellung || "");
+  try {
+    return new URL(wert).host;
+  } catch (error) {
+    return wert;
+  }
+}
+
+function renderConsentPanel(runtime) {
+  const panel = runtime.ui.consentPanel;
+  if (!panel) {
+    return;
+  }
+
+  const geoDienst = escapeHtml(dienstAnzeigename(
+    runtime.config.geocodingServiceUrl, SCHULWEGSAFE_DEFAULTS.geocodingServiceUrl,
+  ));
+  const routeDienst = escapeHtml(dienstAnzeigename(
+    runtime.config.routeServiceUrl, SCHULWEGSAFE_DEFAULTS.routingServiceBaseUrl,
+  ));
+
+  panel.hidden = false;
+
+  if (swsConsentWert === true) {
+    panel.className = "alert alert-light sws-consent";
+    panel.innerHTML = `
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="small mb-0">
+          Adresssuche und Routenberechnung uebertragen Daten an
+          <strong>${geoDienst}</strong> und <strong>${routeDienst}</strong>. Sie haben dem zugestimmt.
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-consent-action="widerrufen">
+          Zustimmung widerrufen
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const abgelehnt = swsConsentWert === false;
+  panel.className = `alert ${abgelehnt ? "alert-secondary" : "alert-warning"} sws-consent`;
+  panel.innerHTML = `
+    <h3 class="h6 mb-2">Adresssuche und Routenberechnung nutzen externe Dienste</h3>
+    <p class="small mb-2">
+      Fuer diese beiden Funktionen werden Angaben an Dienste ausserhalb dieser App uebertragen:
+    </p>
+    <ul class="small mb-2">
+      <li><strong>${geoDienst}</strong> erhaelt die von Ihnen eingegebene Adresse zusammen mit dem Ort der gewaehlten Schule, um daraus Koordinaten zu ermitteln.</li>
+      <li><strong>${routeDienst}</strong> erhaelt die Koordinaten Ihres Startpunkts und der Schule, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Protokollen des Dienstes.</li>
+    </ul>
+    <p class="small mb-2">
+      Wird der Standort-Knopf verwendet, ist der Startpunkt Ihre tatsaechliche Position.
+      Ohne Ihre Zustimmung findet keine dieser Uebertragungen statt. Kartenansicht,
+      Schulsuche und Unfallpunkte funktionieren auch ohne.
+    </p>
+    ${abgelehnt ? `
+      <p class="small mb-2"><strong>Sie haben abgelehnt.</strong> Adresssuche und Routenberechnung sind deaktiviert.</p>
+    ` : ""}
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-sm btn-primary" data-consent-action="zustimmen">
+        ${abgelehnt ? "Doch zustimmen" : "Einverstanden"}
+      </button>
+      ${abgelehnt ? "" : `
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-consent-action="ablehnen">
+          Nicht einverstanden
+        </button>
+      `}
+    </div>
+  `;
+}
+
+function bindConsentPanel(runtime) {
+  const panel = runtime.ui.consentPanel;
+  if (!panel) {
+    return;
+  }
+  panel.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-consent-action]");
+    if (!button) {
+      return;
+    }
+    const aktion = button.getAttribute("data-consent-action");
+    const erteilt = aktion === "zustimmen";
+    setzeDrittdienstEinwilligung(erteilt)
+      .catch(() => {
+        // Persistenz ist optional; die Entscheidung gilt in jedem Fall fuer diese Sitzung.
+      })
+      .finally(() => {
+        renderConsentPanel(runtime);
+        if (erteilt) {
+          setStatus(runtime, "info", "Danke. Adresssuche und Routenberechnung stehen jetzt zur Verfuegung.");
+        } else {
+          setStatus(runtime, "info", "Adresssuche und Routenberechnung bleiben deaktiviert.");
+        }
+      });
+  });
+}
+
+/*
+ * Template-Hook (oda-generic 1.4.0). Die Base ruft ihn vor dem Rendern der neuen Seite
+ * auf. Diese App haelt eine Leaflet-Karte, einen Geocoding-Timer und registrierte
+ * Cleanup-Callbacks; `teardownRuntime()` gibt all das frei. Frueher rief app/app-base.js
+ * die Funktion selbst auf und wich dadurch vom Template ab.
+ */
+function onPageLeave(page) {
+  teardownRuntime();
+}
+
 // Override loadPage to support the beautiful enhanced description page
 document.addEventListener("DOMContentLoaded", () => {
   if (window.loadPage && !window.loadPage.__swsOverridden) {
@@ -29,6 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (page === "beschreibung") {
         const container = document.getElementById("main-content");
         if (container) {
+          // Dieser Zweig umgeht loadPage() der Base und damit auch deren Aufruf von
+          // onPageLeave(). Ohne den folgenden Aufruf bliebe die Karte der Startseite
+          // beim Wechsel auf die Beschreibungsseite aktiv.
+          onPageLeave(page);
           container.innerHTML = renderEnhancedDescriptionPage(configData);
           return;
         }
@@ -47,7 +218,18 @@ function app(configdata = {}, enclosingHtmlDivElement) {
 
   renderShell(runtime);
   bindUi(runtime);
+  bindConsentPanel(runtime);
   setStatus(runtime, "info", "Datenquellen werden geladen.");
+
+  // Die gespeicherte Entscheidung zu den Drittdiensten laden und den Hinweis anzeigen,
+  // bevor irgendeine Eingabe eine Uebertragung ausloesen kann (F-26).
+  ladeDrittdienstEinwilligung()
+    .catch(() => null)
+    .then(() => {
+      if (isRuntimeActive(runtime)) {
+        renderConsentPanel(runtime);
+      }
+    });
 
   initializeRuntime(runtime).catch((error) => {
     handleRuntimeError(runtime, error, "Die App konnte nicht initialisiert werden.");
@@ -106,6 +288,7 @@ function normalizeConfig(configdata = {}) {
     schoolsDataUrl: String(configdata.schoolsDataUrl || "").trim(),
     accidentDataUrl: String(configdata.accidentDataUrl || "").trim(),
     routeServiceUrl: String(configdata.routeServiceUrl || "").trim(),
+    geocodingServiceUrl: String(configdata.geocodingServiceUrl || "").trim(),
     weiterfuehrendeLinks: String(configdata.weiterfuehrendeLinks || "").trim(),
     datenquelleHinweis: String(configdata.datenquelleHinweis || "").trim(),
     datenStand: String(configdata.datenStand || "").trim(),
@@ -200,6 +383,7 @@ function renderShell(runtime) {
           <div id="data-freshness" class="text-muted small mt-1"></div>
         </div>
 
+        <div id="consent-panel" class="alert alert-warning sws-consent" role="region" aria-label="Hinweis zu externen Diensten" hidden></div>
         <div id="runtime-status" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
 
         <div class="sws-map-shell">
@@ -257,6 +441,7 @@ function renderShell(runtime) {
     schoolSearchResults: runtime.rootElement.querySelector("#school-search-results"),
     schoolDetails: runtime.rootElement.querySelector("#school-details"),
     status: runtime.rootElement.querySelector("#runtime-status"),
+    consentPanel: runtime.rootElement.querySelector("#consent-panel"),
     mapContainer: runtime.rootElement.querySelector("#map-container"),
     hazardKpis: runtime.rootElement.querySelector("#hazard-kpis"),
     dataFreshness: runtime.rootElement.querySelector("#data-freshness"),
@@ -806,6 +991,14 @@ function queueAddressSearch(runtime, query) {
     clearTimeout(runtime.geocodeTimer);
   }
 
+  // Vor der Einwilligung wird gar nicht erst ein Aufruf eingeplant (F-26).
+  if (!drittdienstFreigegeben()) {
+    runtime.data.addressResults = [];
+    hideStartAddressResults(runtime);
+    setStatus(runtime, "warning", "Fuer die Adresssuche ist Ihre Zustimmung zur Nutzung des externen Dienstes noetig.");
+    return;
+  }
+
   const normalizedQuery = String(query || "").trim();
   if (normalizedQuery.length < 4) {
     runtime.data.addressResults = [];
@@ -821,13 +1014,18 @@ function queueAddressSearch(runtime, query) {
 }
 
 async function searchStartAddress(runtime, query) {
-  const results = await fetchAddressCandidates(query, runtime.selectedSchool);
+  const results = await fetchAddressCandidates(query, runtime.selectedSchool, runtime.config);
   runtime.data.addressResults = results;
   renderStartAddressResults(runtime, results);
   return results;
 }
 
 async function resolveStartAddressAndRoute(runtime) {
+  if (!drittdienstFreigegeben()) {
+    setStatus(runtime, "warning", "Fuer die Routenberechnung ist Ihre Zustimmung zur Nutzung der externen Dienste noetig.");
+    return;
+  }
+
   if (!runtime.selectedSchool) {
     setStatus(runtime, "warning", "Bitte zuerst eine Schule auswaehlen.");
     return;
@@ -850,11 +1048,18 @@ async function resolveStartAddressAndRoute(runtime) {
   await evaluateRoute(runtime);
 }
 
-async function fetchAddressCandidates(query, selectedSchool) {
+async function fetchAddressCandidates(query, selectedSchool, config = {}) {
+  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26).
+  if (!drittdienstFreigegeben()) {
+    throw drittdienstAbgelehntFehler();
+  }
+
   const searchQuery = selectedSchool?.ort && !query.toLowerCase().includes(selectedSchool.ort.toLowerCase())
     ? `${query}, ${selectedSchool.ort}, Baden-Wuerttemberg`
     : `${query}, Baden-Wuerttemberg`;
-  const url = new URL(SCHULWEGSAFE_DEFAULTS.geocodingServiceUrl);
+  const url = new URL(
+    String(config.geocodingServiceUrl || "").trim() || SCHULWEGSAFE_DEFAULTS.geocodingServiceUrl,
+  );
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("limit", String(SCHULWEGSAFE_DEFAULTS.maxAddressResults));
   url.searchParams.set("countrycodes", "de");
@@ -2207,6 +2412,11 @@ async function fetchViaOdasProxy(targetUrl) {
 }
 
 async function fetchRouteService(routeServiceUrl, startPoint, school, routeMode) {
+  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26).
+  if (!drittdienstFreigegeben()) {
+    throw drittdienstAbgelehntFehler();
+  }
+
   const serviceUrl = String(routeServiceUrl || "").trim();
   if (!serviceUrl || isOsrmRouteService(serviceUrl)) {
     return fetchOsrmRoutes(serviceUrl || SCHULWEGSAFE_DEFAULTS.routingServiceBaseUrl, startPoint, school, routeMode);

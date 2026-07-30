@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.14.0 - 2026-07-30
+
+- **FIX:** Die Datenschutzangabe war unzutreffend. Sie sagte, die Position werde „nur fuer die laufende Bewertung im Frontend verarbeitet" — tatsaechlich gehen die eingegebene Adresse an den Geocoding-Dienst und die Koordinaten von Startpunkt und Schule an den Routing-Dienst. Der Text benennt jetzt beide Dienste, die uebertragenen Daten und den Zweck
+- **ENH:** Vor der ersten Uebertragung an einen der beiden Dienste wird um Zustimmung gebeten. Ohne sie findet keine Uebertragung statt; Adresssuche und Routenberechnung bleiben deaktiviert, Kartenansicht, Schulsuche und Unfallpunkte funktionieren weiter. Die Entscheidung wird lokal gespeichert und ist jederzeit widerrufbar
+- **FIX:** Die Adresssuche uebertrug bereits waehrend des Tippens an den Geocoding-Dienst, ohne dass ein Knopf gedrueckt werden musste. Sie wird jetzt erst nach erteilter Zustimmung ausgeloest
+- **ENH:** Neuer Konfigurationsschluessel `geocodingServiceUrl`. Der Geocoding-Endpunkt war bisher fest im Code verdrahtet; Betreiber koennen jetzt wie beim Routing eine eigene Instanz hinterlegen. Der Hinweis und die Datenschutzangabe nennen den tatsaechlich konfigurierten Dienst
+- **FIX:** `proxyAktiv` ist als `dropdown` mit den Werten `nein` und `ja` deklariert statt als freier `string`. Bisher schaltete ein Tippfehler still auf den Direktmodus
+- **DOC:** README und App-Beschreibung benennen die Uebertragung an Dritte, die betroffenen Funktionen und die Konfigurationsschluessel fuer eigene Instanzen
+
+## 1.13.0 - 2026-07-30
+
+- **FIX:** Laufzeitfehler nach dem Laden der Konfiguration werden jetzt sichtbar gemeldet; die Base besitzt einen Fehlerpfad und maskiert die Meldung
+- **FIX:** `getConfigUrl()` schneidet bei einer URL ohne abschliessenden Schraegstrich nicht mehr das letzte Verzeichnis ab
+- **FIX:** Klick auf einen Hash-Link, der bereits die aktive Seite bezeichnet, rendert die Seite neu. Das uebernimmt jetzt `setupSamePageLinks()` der Base; der app-eigene Burger-Menue-Handler entfaellt
+- **FIX:** Beim Wechsel auf die Beschreibungsseite wird die Karte der Startseite jetzt abgeraeumt. Der app-eigene `loadPage`-Override umging bisher den Aufraeumpfad der Base
+- **ENH:** `app/app-base.js` ist wieder byte-identisch zum Template `oda-generic` 1.4.0. Das Freigeben von Karte, Geocoding-Timer und Cleanup-Callbacks laeuft ueber den neuen Hook `onPageLeave(page)` in `app/app.js`
+- **ENH:** Die Asset-Pfad-Fallbacks in der Base entfallen. Die Pfade werden jetzt je Konfigurationsdatei passend angegeben: `app-package.json` fuehrt die Produktionsform `assets/...` (so liefert der ODAS-Live-Betrieb die App aus), `odas-config/config.json` die Testform `../assets/...` (Live-Server und Standalone). Der Fallback probierte bisher beide Formen durch
+
 ## 1.12.0 - 2026-07-24
 
 - **FIX:** Laufzeit-Fehlermeldung wird vor der Anzeige HTML-maskiert (`escapeHtmlForBase`); ein Fehlertext kann kein Markup mehr in die Seite einschleusen (XSS)
