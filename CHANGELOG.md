@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.16.0 - 2026-07-31
+- FIX: Markdown-Reste in `beschreibung` durch HTML ersetzt (F-23), einschliesslich der
+  lokalen Konfiguration; die F-26-Aussagen zur Uebertragung an externe Dienste bleiben
+  inhaltlich unveraendert
+
 ## 1.15.0 - 2026-07-31
 - CHG: assets/schema.json auf ein flaches Frictionless Table Schema gebracht (F-20)
 
