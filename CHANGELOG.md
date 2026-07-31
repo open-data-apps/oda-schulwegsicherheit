@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.15.0 - 2026-07-31
+- CHG: assets/schema.json auf ein flaches Frictionless Table Schema gebracht (F-20)
+
 ## 1.14.0 - 2026-07-30
 
 - **FIX:** Die Datenschutzangabe war unzutreffend. Sie sagte, die Position werde „nur fuer die laufende Bewertung im Frontend verarbeitet" — tatsaechlich gehen die eingegebene Adresse an den Geocoding-Dienst und die Koordinaten von Startpunkt und Schule an den Routing-Dienst. Der Text benennt jetzt beide Dienste, die uebertragenen Daten und den Zweck

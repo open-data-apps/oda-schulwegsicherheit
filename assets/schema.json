@@ -1,49 +1,78 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
+  "name": "oda-schulwegsicherheit",
   "title": "SchulwegSafe Unfallatlas-Datensatz",
-  "description": "Von SchulwegSafe ausgewertete Kernfelder des Unfallatlas CSV-Downloads.",
-  "type": "object",
-  "properties": {
-    "UJAHR": {
+  "description": "Von SchulwegSafe ausgewertete Kernfelder des Unfallatlas CSV-Downloads. Eine Zeile entspricht einem erfassten Verkehrsunfall.",
+  "fields": [
+    {
+      "name": "UJAHR",
+      "title": "Unfalljahr",
       "type": "integer",
-      "description": "Unfalljahr"
+      "description": "Jahr, in dem sich der Unfall ereignet hat.",
+      "constraints": {
+        "required": true
+      }
     },
-    "UWOCHENTAG": {
+    {
+      "name": "UWOCHENTAG",
+      "title": "Wochentag",
       "type": "integer",
-      "description": "Wochentag nach Unfallatlas-Codierung"
+      "description": "Wochentag nach Unfallatlas-Codierung.",
+      "constraints": {
+        "required": true
+      }
     },
-    "USTUNDE": {
+    {
+      "name": "USTUNDE",
+      "title": "Unfallstunde",
       "type": "integer",
-      "description": "Unfallstunde"
+      "description": "Stunde des Unfallzeitpunkts (0 bis 23).",
+      "constraints": {
+        "required": true
+      }
     },
-    "IstRad": {
+    {
+      "name": "IstRad",
+      "title": "Radverkehr beteiligt",
       "type": "integer",
-      "description": "1, wenn Radverkehr beteiligt war"
+      "description": "1, wenn Radverkehr beteiligt war, sonst 0.",
+      "constraints": {
+        "required": true
+      }
     },
-    "IstFuss": {
+    {
+      "name": "IstFuss",
+      "title": "Fussverkehr beteiligt",
       "type": "integer",
-      "description": "1, wenn Fussverkehr beteiligt war"
+      "description": "1, wenn Fussverkehr beteiligt war, sonst 0.",
+      "constraints": {
+        "required": true
+      }
     },
-    "IstKind": {
+    {
+      "name": "IstKind",
+      "title": "Kinder beteiligt",
       "type": "integer",
-      "description": "1, wenn Kinder beteiligt waren"
+      "description": "1, wenn Kinder beteiligt waren, sonst 0."
     },
-    "XGCSWGS84": {
+    {
+      "name": "XGCSWGS84",
+      "title": "Laengengrad",
       "type": "number",
-      "description": "Laengengrad in WGS84"
+      "description": "Laengengrad des Unfallorts in WGS84.",
+      "constraints": {
+        "required": true
+      }
     },
-    "YGCSWGS84": {
+    {
+      "name": "YGCSWGS84",
+      "title": "Breitengrad",
       "type": "number",
-      "description": "Breitengrad in WGS84"
+      "description": "Breitengrad des Unfallorts in WGS84.",
+      "constraints": {
+        "required": true
+      }
     }
-  },
-  "required": [
-    "UJAHR",
-    "UWOCHENTAG",
-    "USTUNDE",
-    "IstRad",
-    "IstFuss",
-    "XGCSWGS84",
-    "YGCSWGS84"
-  ]
+  ],
+  "missingValues": [""]
 }
