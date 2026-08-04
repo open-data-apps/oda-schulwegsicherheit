@@ -2469,8 +2469,8 @@ function getRouteModeLabel(routeMode) {
 }
 
 async function ensureMapAssets() {
-  await loadStylesheetOnce("leaflet-css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
-  await loadScriptOnce("leaflet-js", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
+  await loadStylesheetOnce("leaflet-css", "vendor/leaflet/leaflet.css");
+  await loadScriptOnce("leaflet-js", "vendor/leaflet/leaflet.js");
   await Promise.all([
     loadScriptOnce("leaflet-heat-js", "https://unpkg.com/leaflet.heat/dist/leaflet-heat.js").catch(() => null),
     ensureJsZip(),

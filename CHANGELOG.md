@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.19.0 - 2026-08-04
+- FIX: Bootstrap, Leaflet vendored in `app/vendor/` statt von CDN geladen (F-07 Teil 2) — Standalone-Betrieb laedt diese Bibliotheken nicht mehr extern
+
 ## 1.18.0 - 2026-08-04
 - FIX: `brandingCSS`/`brandingCSSFile` faelschlich als `"erforderlich": "ja"` deklariert (Kopierfehler seit Erstcommit); jetzt konsistent zum restlichen Portfolio auf `"nein"` gesetzt
 - CHG: `loadPage`-Monkey-Patch fuer die Seite "beschreibung" durch den offiziellen Template-Hook `renderPageOverride(page)` (oda-generic 1.6.0) ersetzt (F-27b) — funktional unveraendert, aber ohne Abweichung von `app/app-base.js`
