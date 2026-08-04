@@ -195,6 +195,17 @@ Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Route
 
 ---
 
+## Beim Aufruf kontaktierte Drittanbieter
+
+Beim Aufruf dieser App werden folgende externe Server kontaktiert:
+
+- `cdn.jsdelivr.net` — Bootstrap (Layout- und UI-Framework), JSZip (ZIP-Erstellung im Browser)
+- `unpkg.com` — Leaflet (Kartendarstellung), Leaflet.heat (Heatmap-Darstellung)
+- `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
+- `nominatim.openstreetmap.org` — Adresssuche / Geokodierung
+
+Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich (siehe F-07 in `Review.md`).
+
 ## Autor
 
 (C) 2026, Ondics GmbH
