@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.18.0 - 2026-08-04
+- FIX: `brandingCSS`/`brandingCSSFile` faelschlich als `"erforderlich": "ja"` deklariert (Kopierfehler seit Erstcommit); jetzt konsistent zum restlichen Portfolio auf `"nein"` gesetzt
+- CHG: `loadPage`-Monkey-Patch fuer die Seite "beschreibung" durch den offiziellen Template-Hook `renderPageOverride(page)` (oda-generic 1.6.0) ersetzt (F-27b) — funktional unveraendert, aber ohne Abweichung von `app/app-base.js`
+
 ## 1.17.0 - 2026-08-04
 - FIX: Drittanbieter (CDN, Kartendienste) in `datenschutz`-Default und README dokumentiert (F-07 Teil 1)
 - FIX: Bootstrap CSS/JS auf einheitlich 5.3.8 gezogen (vorher gemischt 5.3.0/5.3.1 bzw. 5.3.0/5.3.0) (F-31)

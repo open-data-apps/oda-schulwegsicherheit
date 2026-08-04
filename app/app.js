@@ -188,27 +188,18 @@ function onPageLeave(page) {
   teardownRuntime();
 }
 
-// Override loadPage to support the beautiful enhanced description page
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.loadPage && !window.loadPage.__swsOverridden) {
-    const originalLoadPage = window.loadPage;
-    window.loadPage = async function(page) {
-      if (page === "beschreibung") {
-        const container = document.getElementById("main-content");
-        if (container) {
-          // Dieser Zweig umgeht loadPage() der Base und damit auch deren Aufruf von
-          // onPageLeave(). Ohne den folgenden Aufruf bliebe die Karte der Startseite
-          // beim Wechsel auf die Beschreibungsseite aktiv.
-          onPageLeave(page);
-          container.innerHTML = renderEnhancedDescriptionPage(configData);
-          return;
-        }
-      }
-      return originalLoadPage(page);
-    };
-    window.loadPage.__swsOverridden = true;
+/*
+ * Template-Hook (oda-generic 1.6.0). Ersetzt den Standard-Content der Seite
+ * "beschreibung" durch die erweiterte Beschreibungsseite. Die Base ruft onPageLeave()
+ * bereits vor renderPageOverride() auf, die Karte der Startseite wird also unabhaengig
+ * davon abgeraeumt (siehe onPageLeave() oben).
+ */
+function renderPageOverride(page) {
+  if (page === "beschreibung") {
+    return renderEnhancedDescriptionPage(configData);
   }
-});
+  return null;
+}
 
 function app(configdata = {}, enclosingHtmlDivElement) {
   teardownRuntime();
