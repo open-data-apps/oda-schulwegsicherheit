@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.25.0 - 2026-08-06
+- FIX: Datenschutzangabe beschreibt den tatsaechlichen Stand nach dem Vendoring (Welle G)
+
 ## 1.24.0 - 2026-08-06
 - FIX: Drittanbietersektion nennt keine Beim-Aufruf-Behauptung mehr (Welle G)
 
