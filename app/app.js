@@ -2472,7 +2472,7 @@ async function ensureMapAssets() {
   await loadStylesheetOnce("leaflet-css", "vendor/leaflet/leaflet.css");
   await loadScriptOnce("leaflet-js", "vendor/leaflet/leaflet.js");
   await Promise.all([
-    loadScriptOnce("leaflet-heat-js", "https://unpkg.com/leaflet.heat/dist/leaflet-heat.js").catch(() => null),
+    loadScriptOnce("leaflet-heat-js", "https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js").catch(() => null),
     ensureJsZip(),
   ]);
 }

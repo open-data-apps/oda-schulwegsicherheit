@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.21.0 - 2026-08-06
+- FIX: Leaflet.heat auf 0.2.0 exakt gepinnt (vorher ohne Versionsangabe — bei jedem Aufruf eine andere Version, Voraussetzung fuer Vendoring)
+
 ## 1.20.0 - 2026-08-04
 - FIX: Datenschutzhinweis "Beim Aufruf kontaktierte Drittanbieter" an das Vendoring angepasst — jetzt lokal ausgelieferte Bibliotheken (Bootstrap/Leaflet/Chart.js) sind aus der Liste entfernt, weiterhin extern geladene Dienste (Kartenkacheln, Zusatzbibliotheken) bleiben genannt
 
