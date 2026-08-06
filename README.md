@@ -199,12 +199,11 @@ Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Route
 
 Beim Aufruf dieser App werden folgende externe Server kontaktiert:
 
-- `cdn.jsdelivr.net` — Bootstrap (Layout- und UI-Framework), JSZip (ZIP-Erstellung im Browser)
-- `unpkg.com` — Leaflet (Kartendarstellung), Leaflet.heat (Heatmap-Darstellung)
+- `cdn.jsdelivr.net` — JSZip (ZIP-Erstellung im Browser)
+- `unpkg.com` — Leaflet.heat (Heatmap-Darstellung)
 - `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
-- `nominatim.openstreetmap.org` — Adresssuche / Geokodierung
 
-Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich (siehe F-07 in `Review.md`).
+Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Bootstrap, Leaflet und Chart.js werden seit Version 1.20.0 lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 
 ## Autor
 
