@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.24.0 - 2026-08-06
+- FIX: Drittanbietersektion nennt keine Beim-Aufruf-Behauptung mehr (Welle G)
+
 ## 1.23.0 - 2026-08-06
 - FIX: Drittanbieterliste "Beim Aufruf kontaktierte Drittanbieter" an das Vendoring angepasst — jetzt lokal ausgelieferte Bibliotheken (Leaflet.heat sowie JSZip) sind aus der Liste entfernt, weiterhin extern geladene Dienste (Kartenkacheln) bleiben genannt
 
