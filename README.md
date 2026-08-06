@@ -203,7 +203,7 @@ Beim Aufruf dieser App werden folgende externe Server kontaktiert:
 - `unpkg.com` — Leaflet.heat (Heatmap-Darstellung)
 - `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
 
-Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Bootstrap, Leaflet und Chart.js werden seit Version 1.20.0 lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
+Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Bootstrap, Leaflet und Chart.js werden seit Version 1.19.0 lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 
 ## Autor
 
