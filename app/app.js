@@ -2472,7 +2472,7 @@ async function ensureMapAssets() {
   await loadStylesheetOnce("leaflet-css", "vendor/leaflet/leaflet.css");
   await loadScriptOnce("leaflet-js", "vendor/leaflet/leaflet.js");
   await Promise.all([
-    loadScriptOnce("leaflet-heat-js", "https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js").catch(() => null),
+    loadScriptOnce("leaflet-heat-js", "vendor/leafletheat/leaflet-heat.js").catch(() => null),
     ensureJsZip(),
   ]);
 }
@@ -2481,7 +2481,7 @@ async function ensureJsZip() {
   if (globalThis.JSZip) {
     return;
   }
-  await loadScriptOnce("jszip-js", "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js");
+  await loadScriptOnce("jszip-js", "vendor/jszip/jszip.min.js");
 }
 
 async function loadStylesheetOnce(id, href) {

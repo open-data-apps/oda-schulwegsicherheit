@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.22.0 - 2026-08-06
+- FIX: Leaflet.heat und JSZip vendored in `app/vendor/` statt von CDN geladen (Vendoring Teil 3) — Standalone-Betrieb laedt die Zusatzbibliotheken nicht mehr extern
+
 ## 1.21.0 - 2026-08-06
 - FIX: Leaflet.heat auf 0.2.0 exakt gepinnt (vorher ohne Versionsangabe — bei jedem Aufruf eine andere Version, Voraussetzung fuer Vendoring)
 
