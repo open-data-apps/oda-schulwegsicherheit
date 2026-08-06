@@ -50,3 +50,5 @@ Thumbs.db
 
 # Antigravity CLI
 .antigravitycli/
+# Liefer-ZIP (Bauartefakt, wird bei Bedarf mit make zip erzeugt)
+*.zip

@@ -105,6 +105,8 @@ Empfohlene ODAS-Einstellungen:
 | Standalone  | `STANDALONE=true make up`           | `odas-config/config.json`            | direkt                       |
 | ODAS        | `make zip` / Veroeffentlichung      | vom ODAS erzeugter Endpunkt `config` | direkt oder mit `proxyAktiv` |
 
+`make zip` erzeugt das Liefer-ZIP mit `app/`, `assets/`, `app-package.json` und `CHANGELOG.md`. Das ZIP ist ein Bauartefakt und wird nicht mitversioniert, sondern bei Bedarf mit `make zip` erzeugt.
+
 Entwicklung und Standalone verwenden dieselbe lokale Datei `odas-config/config.json`. Der Config-Loader in `app/app-base.js` laedt sie auf `localhost` direkt unter `odas-config/config.json`. Bei einem Standalone-FQDN fragt er stattdessen `/config` ab; Nginx liefert dort ueber `nginx.conf` dieselbe gemountete Datei aus.
 
 ## Standalone-Betrieb hinter Traefik
