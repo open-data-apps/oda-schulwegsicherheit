@@ -16,6 +16,8 @@ const SCHULWEGSAFE_DEFAULTS = {
   scoreMeterReferenceMax: 12,
 };
 
+let swsInstanzZaehler = 0;
+
 const SCHULWEGSAFE_RUNTIME = {
   activeRuntime: null,
   assetPromises: {},
@@ -233,6 +235,7 @@ function addToHead() {}
 
 function createRuntime(configdata, rootElement) {
   return {
+    uid: "i" + ++swsInstanzZaehler,
     rootElement,
     config: normalizeConfig(configdata),
     map: null,
@@ -356,7 +359,7 @@ function renderShell(runtime) {
           <div class="sws-score-strip" id="score-summary">
             <div class="sws-score-badge is-neutral">⚪</div>
             <div class="sws-score-copy">
-              <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
+              <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
               <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
             </div>
             <div class="sws-score-value">
@@ -409,7 +412,7 @@ function renderShell(runtime) {
     </section>
 
     <!-- Modal für die Score-Erklärung -->
-    <div class="modal fade" id="score-info-modal" tabindex="-1" aria-labelledby="scoreInfoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="score-info-modal-${runtime.uid}" tabindex="-1" aria-labelledby="scoreInfoModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
           <div class="modal-header bg-light border-bottom-0 pb-2">
@@ -1573,10 +1576,10 @@ function clearAccidentLayers(runtime) {
   }
 }
 
-function renderKpiKontext(kontext, id) {
+function renderKpiKontext(kontext, id, uid) {
   const text = String(kontext || "").trim();
   if (!text) return "";
-  const targetId = `sws-kpi-kontext-${id}`;
+  const targetId = `sws-kpi-kontext-${id}-${uid}`;
   return (
     `<button class="sws-kpi-info-toggle collapsed" type="button" ` +
     `data-bs-toggle="collapse" data-bs-target="#${targetId}" ` +
@@ -1589,11 +1592,11 @@ function renderKpiKontext(kontext, id) {
   );
 }
 
-function renderHazardKpi(label, kontext, id) {
+function renderHazardKpi(label, kontext, id, uid) {
   return (
     `<div class="sws-kpi">` +
     `<span class="sws-kpi-label">${label}</span>` +
-    renderKpiKontext(kontext, id) +
+    renderKpiKontext(kontext, id, uid) +
     `</div>`
   );
 }
@@ -1605,10 +1608,10 @@ function renderHazardKpis(runtime, accidents) {
   const config = runtime.config;
 
   runtime.ui.hazardKpis.innerHTML =
-    renderHazardKpi(`${accidents.length} Punkte im Umfeld`, config.kpiKontext1, "1") +
-    renderHazardKpi(`${walkCount} Fuss`, config.kpiKontext2, "2") +
-    renderHazardKpi(`${bikeCount} Rad`, config.kpiKontext3, "3") +
-    renderHazardKpi(`${childCount} Kinder`, config.kpiKontext4, "4");
+    renderHazardKpi(`${accidents.length} Punkte im Umfeld`, config.kpiKontext1, "1", runtime.uid) +
+    renderHazardKpi(`${walkCount} Fuss`, config.kpiKontext2, "2", runtime.uid) +
+    renderHazardKpi(`${bikeCount} Rad`, config.kpiKontext3, "3", runtime.uid) +
+    renderHazardKpi(`${childCount} Kinder`, config.kpiKontext4, "4", runtime.uid);
 }
 
 function renderDataFreshness(runtime) {
@@ -1662,11 +1665,11 @@ function renderMethodikbox(runtime) {
     : "";
   return (
     '<section class="sws-panel sws-panel-wide">' +
-    '<button class="sws-methodik-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sws-methodik-body" aria-expanded="false" aria-controls="sws-methodik-body">' +
+    '<button class="sws-methodik-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sws-methodik-body-' + runtime.uid + '" aria-expanded="false" aria-controls="sws-methodik-body-' + runtime.uid + '">' +
     "<h3 class=\"mb-0\">Methodik &amp; Datenquelle</h3>" +
     '<span class="sws-methodik-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="sws-methodik-body" class="collapse mt-2">' +
+    '<div id="sws-methodik-body-' + runtime.uid + '" class="collapse mt-2">' +
     standHtml +
     hinweis +
     "</div>" +
@@ -1912,7 +1915,7 @@ function renderScoreSummary(runtime, payload) {
     runtime.ui.scoreSummary.innerHTML = `
       <div class="sws-score-badge is-neutral">⚪</div>
       <div class="sws-score-copy">
-        <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
+        <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
         <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
       </div>
       <div class="sws-score-value">
@@ -1943,7 +1946,7 @@ function renderScoreSummary(runtime, payload) {
     <div class="sws-score-copy">
       <span class="sws-score-label">
         ${escapeHtml(scoreLabel)}
-        <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a>
       </span>
       <span class="sws-score-caption">
         <strong>${escapeHtml(levelLabel)}</strong> · ${hitsCount} ${hitsCount === 1 ? 'Unfallpunkt' : 'Unfallpunkte'}

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.26.0 - 2026-08-08
+- CHG: Bootstrap-Ziele instanzeindeutig (F-32): Score-Modal (`#score-info-modal`), KPI-Kontext- (`#sws-kpi-kontext-<n>`) und Methodik-Ziele (`#sws-methodik-body`) um eine Instanzkennung ergänzt; die Kennung wird je Laufzeit in `createRuntime` geführt (`runtime.uid`)
+
 ## 1.25.0 - 2026-08-06
 - FIX: Datenschutzangabe beschreibt den tatsaechlichen Stand nach dem Vendoring (Welle G)
 
