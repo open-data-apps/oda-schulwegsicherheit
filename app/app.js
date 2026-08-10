@@ -19,7 +19,7 @@ const SCHULWEGSAFE_DEFAULTS = {
 let swsInstanzZaehler = 0;
 
 const SCHULWEGSAFE_RUNTIME = {
-  activeRuntime: null,
+  activeRuntimes: new Map(),
   assetPromises: {},
 };
 
@@ -204,10 +204,12 @@ function renderPageOverride(page) {
 }
 
 function app(configdata = {}, enclosingHtmlDivElement) {
-  teardownRuntime();
+  if (SCHULWEGSAFE_RUNTIME.activeRuntimes.has(enclosingHtmlDivElement)) {
+    teardownRuntime(enclosingHtmlDivElement);
+  }
 
   const runtime = createRuntime(configdata, enclosingHtmlDivElement);
-  SCHULWEGSAFE_RUNTIME.activeRuntime = runtime;
+  SCHULWEGSAFE_RUNTIME.activeRuntimes.set(enclosingHtmlDivElement, runtime);
 
   renderShell(runtime);
   bindUi(runtime);
@@ -294,24 +296,41 @@ function normalizeConfig(configdata = {}) {
   };
 }
 
-function teardownRuntime() {
-  const runtime = SCHULWEGSAFE_RUNTIME.activeRuntime;
-  if (runtime && Array.isArray(runtime.cleanupCallbacks)) {
+function teardownRuntime(rootElement) {
+  if (rootElement !== undefined) {
+    const runtime = SCHULWEGSAFE_RUNTIME.activeRuntimes.get(rootElement);
+    if (!runtime) return;
+    disposeRuntime(runtime);
+    if (SCHULWEGSAFE_RUNTIME.activeRuntimes.get(rootElement) === runtime) {
+      SCHULWEGSAFE_RUNTIME.activeRuntimes.delete(rootElement);
+    }
+    return;
+  }
+  Array.from(SCHULWEGSAFE_RUNTIME.activeRuntimes.entries()).forEach(
+    ([root, runtime]) => {
+      disposeRuntime(runtime);
+      SCHULWEGSAFE_RUNTIME.activeRuntimes.delete(root);
+    },
+  );
+}
+
+function disposeRuntime(runtime) {
+  if (!runtime) return;
+  if (Array.isArray(runtime.cleanupCallbacks)) {
     runtime.cleanupCallbacks.forEach((cleanup) => cleanup());
     runtime.cleanupCallbacks = [];
   }
-  if (runtime?.geocodeTimer) {
+  if (runtime.geocodeTimer) {
     clearTimeout(runtime.geocodeTimer);
   }
-  if (runtime && runtime.map && typeof runtime.map.remove === "function") {
+  if (runtime.map && typeof runtime.map.remove === "function") {
     runtime.map.remove();
     runtime.map = null;
   }
-  SCHULWEGSAFE_RUNTIME.activeRuntime = null;
 }
 
 function isRuntimeActive(runtime) {
-  return SCHULWEGSAFE_RUNTIME.activeRuntime === runtime;
+  return Boolean(runtime) && SCHULWEGSAFE_RUNTIME.activeRuntimes.get(runtime.rootElement) === runtime;
 }
 
 function renderShell(runtime) {

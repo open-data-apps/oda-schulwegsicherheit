@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.27.0 - 2026-08-10
+- FIX: Laufzeitzustand pro App-Instanz isolieren (F-34)
+
 ## 1.26.0 - 2026-08-08
 - CHG: Bootstrap-Ziele instanzeindeutig (F-32): Score-Modal (`#score-info-modal`), KPI-Kontext- (`#sws-kpi-kontext-<n>`) und Methodik-Ziele (`#sws-methodik-body`) um eine Instanzkennung ergänzt; die Kennung wird je Laufzeit in `createRuntime` geführt (`runtime.uid`)
 
