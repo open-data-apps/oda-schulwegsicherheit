@@ -3028,7 +3028,7 @@ function renderEnhancedDataSources(config) {
     ? `<a href="${escapeHtml(schoolsUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-JSON laden</span> &nbsp;&nearr;</a>`
     : `<span class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-JSON laden</span> &nbsp;&nearr;</span>`;
   const accidentDownload = accidentUrl
-    ? `<a href="${escapeHtml(accidentUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-ZIP laden</span> &nbsp;&nearr;</span>`
+    ? `<a href="${escapeHtml(accidentUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-ZIP laden</span> &nbsp;&nearr;</a>`
     : `<span class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-ZIP laden</span> &nbsp;&nearr;</span>`;
   
   return `
