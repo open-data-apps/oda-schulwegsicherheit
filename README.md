@@ -202,6 +202,8 @@ Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Route
 Beim Aufruf dieser App werden folgende externe Server kontaktiert:
 
 - `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
+- `nominatim.openstreetmap.org` — Adress-Suche (Geocoding); übertragen: Suchbegriffe der Schul-/Unfalladressen, IP-Adresse, User-Agent; Abruf nur nach Einwilligung
+- `router.project-osrm.org` — Routenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung
 
 Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Alle Programmbibliotheken werden lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 
