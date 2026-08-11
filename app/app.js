@@ -24,7 +24,7 @@ const SCHULWEGSAFE_RUNTIME = {
 };
 
 /*
- * Einwilligung fuer Drittdienste (Review.md, F-26)
+ * Einwilligung fuer Drittdienste (Review.md, F-26, F-37)
  * ------------------------------------------------
  * Adresssuche und Routenberechnung uebertragen personenbezogene Angaben an externe
  * Dienste: die eingegebene Adresse an den Geocoding-Dienst, das Koordinatenpaar aus
@@ -32,45 +32,24 @@ const SCHULWEGSAFE_RUNTIME = {
  * begann bereits beim Tippen. Vor dem ersten Aufruf wird deshalb eine Entscheidung
  * eingeholt und dauerhaft gemerkt.
  *
+ * Seit F-37 gilt die Einwilligung nur fuer das konfigurierte Endpunktpaar: Der
+ * localStorage-Key traegt die Identitaet (Origin + Pfad) des Geocoding- und des
+ * Routing-Endpunkts, eine Freigabe fuer ein anderes Paar gilt nicht. Es gibt keinen
+ * Modul-Zustand mehr; alte Keys werden bewusst nicht migriert (Consent-Version v2).
+ *
  * Nicht betroffen sind Schul- und Unfalldaten: Das sind Massendownloads von
  * Referenzdaten ohne Bezug zur Nutzerin oder zum Nutzer.
  */
-const SWS_CONSENT_KEY = "consent:drittdienste";
-// Wird der Umfang der Uebertragung erweitert, hebt eine neue Version die alte
-// Entscheidung auf und es wird erneut gefragt.
-const SWS_CONSENT_VERSION = 1;
-
-let swsConsentGeladen = false;
-let swsConsentWert = null; // null = noch nicht entschieden, true/false = Entscheidung
-
-async function ladeDrittdienstEinwilligung() {
-  if (swsConsentGeladen) {
-    return swsConsentWert;
-  }
-  // Bewusst ohne isCacheEntryFresh(): Die Entscheidung darf nicht mit der
-  // Aktualisierungsfrist der Datensaetze verfallen.
-  const entry = await readCacheEntry(SWS_CONSENT_KEY);
-  const gespeichert = entry && entry.data;
-  swsConsentWert = gespeichert && gespeichert.version === SWS_CONSENT_VERSION
-    ? gespeichert.erteilt === true
-    : null;
-  swsConsentGeladen = true;
-  return swsConsentWert;
+function endpointIdentity(url) {
+  try { const u = new URL(String(url || "").trim()); return u.origin + u.pathname; }
+  catch (e) { return ""; }
 }
-
-async function setzeDrittdienstEinwilligung(erteilt) {
-  swsConsentWert = erteilt === true;
-  swsConsentGeladen = true;
-  await writeCacheEntry(SWS_CONSENT_KEY, {
-    version: SWS_CONSENT_VERSION,
-    erteilt: swsConsentWert,
-    entschiedenAm: new Date().toISOString(),
-  });
+function consentKey(geocodingUrl, routingUrl) {
+  return "oda-schulwegsicherheit:consent:v2:"
+    + endpointIdentity(geocodingUrl) + "|" + endpointIdentity(routingUrl);
 }
-
-/* Synchrone Pruefung fuer die Netzaufrufe selbst. Der Wert liegt ab dem Start vor. */
-function drittdienstFreigegeben() {
-  return swsConsentWert === true;
+function hasConsent(geocodingUrl, routingUrl) {
+  return localStorage.getItem(consentKey(geocodingUrl, routingUrl)) === "granted";
 }
 
 function drittdienstAbgelehntFehler() {
@@ -105,7 +84,7 @@ function renderConsentPanel(runtime) {
 
   panel.hidden = false;
 
-  if (swsConsentWert === true) {
+  if (hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
     panel.className = "alert alert-light sws-consent";
     panel.innerHTML = `
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -121,8 +100,7 @@ function renderConsentPanel(runtime) {
     return;
   }
 
-  const abgelehnt = swsConsentWert === false;
-  panel.className = `alert ${abgelehnt ? "alert-secondary" : "alert-warning"} sws-consent`;
+  panel.className = "alert alert-warning sws-consent";
   panel.innerHTML = `
     <h3 class="h6 mb-2">Adresssuche und Routenberechnung nutzen externe Dienste</h3>
     <p class="small mb-2">
@@ -137,18 +115,13 @@ function renderConsentPanel(runtime) {
       Ohne Ihre Zustimmung findet keine dieser Uebertragungen statt. Kartenansicht,
       Schulsuche und Unfallpunkte funktionieren auch ohne.
     </p>
-    ${abgelehnt ? `
-      <p class="small mb-2"><strong>Sie haben abgelehnt.</strong> Adresssuche und Routenberechnung sind deaktiviert.</p>
-    ` : ""}
     <div class="d-flex flex-wrap gap-2">
       <button type="button" class="btn btn-sm btn-primary" data-consent-action="zustimmen">
-        ${abgelehnt ? "Doch zustimmen" : "Einverstanden"}
+        Einverstanden
       </button>
-      ${abgelehnt ? "" : `
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-consent-action="ablehnen">
-          Nicht einverstanden
-        </button>
-      `}
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-consent-action="ablehnen">
+        Nicht einverstanden
+      </button>
     </div>
   `;
 }
@@ -165,18 +138,22 @@ function bindConsentPanel(runtime) {
     }
     const aktion = button.getAttribute("data-consent-action");
     const erteilt = aktion === "zustimmen";
-    setzeDrittdienstEinwilligung(erteilt)
-      .catch(() => {
-        // Persistenz ist optional; die Entscheidung gilt in jedem Fall fuer diese Sitzung.
-      })
-      .finally(() => {
-        renderConsentPanel(runtime);
-        if (erteilt) {
-          setStatus(runtime, "info", "Danke. Adresssuche und Routenberechnung stehen jetzt zur Verfuegung.");
-        } else {
-          setStatus(runtime, "info", "Adresssuche und Routenberechnung bleiben deaktiviert.");
-        }
-      });
+    const key = consentKey(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl);
+    try {
+      if (erteilt) {
+        localStorage.setItem(key, "granted");
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch (error) {
+      // Persistenz ist optional; die Entscheidung gilt in jedem Fall fuer diese Sitzung.
+    }
+    renderConsentPanel(runtime);
+    if (erteilt) {
+      setStatus(runtime, "info", "Danke. Adresssuche und Routenberechnung stehen jetzt zur Verfuegung.");
+    } else {
+      setStatus(runtime, "info", "Adresssuche und Routenberechnung bleiben deaktiviert.");
+    }
   });
 }
 
@@ -216,15 +193,9 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   bindConsentPanel(runtime);
   setStatus(runtime, "info", "Datenquellen werden geladen.");
 
-  // Die gespeicherte Entscheidung zu den Drittdiensten laden und den Hinweis anzeigen,
-  // bevor irgendeine Eingabe eine Uebertragung ausloesen kann (F-26).
-  ladeDrittdienstEinwilligung()
-    .catch(() => null)
-    .then(() => {
-      if (isRuntimeActive(runtime)) {
-        renderConsentPanel(runtime);
-      }
-    });
+  // Die gespeicherte Entscheidung zu den Drittdiensten anzeigen, bevor irgendeine
+  // Eingabe eine Uebertragung ausloesen kann (F-26, F-37: endpoint-gebunden).
+  renderConsentPanel(runtime);
 
   initializeRuntime(runtime).catch((error) => {
     handleRuntimeError(runtime, error, "Die App konnte nicht initialisiert werden.");
@@ -1004,8 +975,8 @@ function queueAddressSearch(runtime, query) {
     clearTimeout(runtime.geocodeTimer);
   }
 
-  // Vor der Einwilligung wird gar nicht erst ein Aufruf eingeplant (F-26).
-  if (!drittdienstFreigegeben()) {
+  // Vor der Einwilligung wird gar nicht erst ein Aufruf eingeplant (F-26, F-37).
+  if (!hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
     runtime.data.addressResults = [];
     hideStartAddressResults(runtime);
     setStatus(runtime, "warning", "Fuer die Adresssuche ist Ihre Zustimmung zur Nutzung des externen Dienstes noetig.");
@@ -1034,7 +1005,7 @@ async function searchStartAddress(runtime, query) {
 }
 
 async function resolveStartAddressAndRoute(runtime) {
-  if (!drittdienstFreigegeben()) {
+  if (!hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
     setStatus(runtime, "warning", "Fuer die Routenberechnung ist Ihre Zustimmung zur Nutzung der externen Dienste noetig.");
     return;
   }
@@ -1062,8 +1033,8 @@ async function resolveStartAddressAndRoute(runtime) {
 }
 
 async function fetchAddressCandidates(query, selectedSchool, config = {}) {
-  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26).
-  if (!drittdienstFreigegeben()) {
+  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26, F-37).
+  if (!hasConsent(config.geocodingServiceUrl, config.routeServiceUrl)) {
     throw drittdienstAbgelehntFehler();
   }
 
@@ -1765,7 +1736,7 @@ async function evaluateRoute(runtime) {
 
   let routes = [];
   try {
-    const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode);
+    const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode, runtime.config);
     if (!isRuntimeActive(runtime)) {
       return;
     }
@@ -2424,9 +2395,9 @@ async function fetchViaOdasProxy(targetUrl) {
   return proxyPayload.content;
 }
 
-async function fetchRouteService(routeServiceUrl, startPoint, school, routeMode) {
-  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26).
-  if (!drittdienstFreigegeben()) {
+async function fetchRouteService(routeServiceUrl, startPoint, school, routeMode, config) {
+  // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26, F-37).
+  if (!hasConsent(config.geocodingServiceUrl, config.routeServiceUrl)) {
     throw drittdienstAbgelehntFehler();
   }
 
@@ -2771,6 +2742,11 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function safeHttpUrl(value) {
+  const s = String(value || "").trim();
+  return /^https?:\/\//i.test(s) ? s : "";
+}
+
 function capitalize(value) {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
 }
@@ -3046,8 +3022,14 @@ function parseMarkdownToHtml(markdownString) {
 }
 
 function renderEnhancedDataSources(config) {
-  const schoolsUrl = config.schoolsDataUrl || "";
-  const accidentUrl = config.accidentDataUrl || "";
+  const schoolsUrl = safeHttpUrl(config.schoolsDataUrl || "");
+  const accidentUrl = safeHttpUrl(config.accidentDataUrl || "");
+  const schoolsDownload = schoolsUrl
+    ? `<a href="${escapeHtml(schoolsUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-JSON laden</span> &nbsp;&nearr;</a>`
+    : `<span class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-JSON laden</span> &nbsp;&nearr;</span>`;
+  const accidentDownload = accidentUrl
+    ? `<a href="${escapeHtml(accidentUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-ZIP laden</span> &nbsp;&nearr;</span>`
+    : `<span class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"><span>Rohdaten-ZIP laden</span> &nbsp;&nearr;</span>`;
   
   return `
     <div class="sws-sources-grid mt-4">
@@ -3068,9 +3050,7 @@ function renderEnhancedDataSources(config) {
               <a href="https://github.com/Datenschule/schulscraper-data" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center">
                 <span>Projekt-Website (GitHub)</span> &nbsp;&nearr;
               </a>
-              <a href="${escapeHtml(schoolsUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center">
-                <span>Rohdaten-JSON laden</span> &nbsp;&nearr;
-              </a>
+              ${schoolsDownload}
             </div>
           </div>
         </div>
@@ -3091,9 +3071,7 @@ function renderEnhancedDataSources(config) {
               <a href="https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center">
                 <span>Geodata-Portal NRW</span> &nbsp;&nearr;
               </a>
-              <a href="${escapeHtml(accidentUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center">
-                <span>Rohdaten-ZIP laden</span> &nbsp;&nearr;
-              </a>
+              ${accidentDownload}
             </div>
           </div>
         </div>

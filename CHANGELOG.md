@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.28.0 - 2026-08-11
+- FIX: XSS- und URL-Vertrag geschlossen (F-35): `safeHttpUrl` für die konfigurierten Schulen-/Unfall-Daten-URLs auf der Beschreibungsseite; ungültige Schemata rendern nur noch einen Button ohne Link
+- FIX: Einwilligung endpoint-gebunden (F-37): Zustimmung gilt nur für das konfigurierte Geocoding-/Routing-Endpunktpaar (localStorage-Key mit Endpunkt-Identität, Consent-Version v2); Modul-Zustand und Übernahme-Mechanik entfernt, Abrufpfade prüfen `hasConsent()` mit den konfigurierten URLs
+
 ## 1.27.0 - 2026-08-10
 - FIX: Laufzeitzustand pro App-Instanz isolieren (F-34)
 
