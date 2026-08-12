@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.30.0 - 2026-08-12
+- FIX: `app/index.html` auf den Template-Stand (F-47): Datei byte-gleich aus `oda-generic` übernommen — gültiges HTML, deutsche ARIA-Labels, Footer im Body; Titel und Fußzeile bleiben Platzhalter und werden zur Laufzeit aus der Instanz-Config überschrieben
+
 ## 1.29.0 - 2026-08-12
 - FIX: Einwilligungs-Lesezugriff (`hasConsent`) in try/catch gekapselt, fail-closed — bei blockiertem Browserspeicher bricht die App-Initialisierung nicht mehr ab und es gehen keine Daten an Drittdienste (F-50)
 
