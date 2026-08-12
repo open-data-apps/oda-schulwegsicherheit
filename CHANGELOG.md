@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.29.0 - 2026-08-12
+- FIX: Einwilligungs-Lesezugriff (`hasConsent`) in try/catch gekapselt, fail-closed — bei blockiertem Browserspeicher bricht die App-Initialisierung nicht mehr ab und es gehen keine Daten an Drittdienste (F-50)
+
 ## 1.28.0 - 2026-08-11
 - FIX: XSS- und URL-Vertrag geschlossen (F-35): `safeHttpUrl` für die konfigurierten Schulen-/Unfall-Daten-URLs auf der Beschreibungsseite; ungültige Schemata rendern nur noch einen Button ohne Link
 - FIX: Einwilligung endpoint-gebunden (F-37): Zustimmung gilt nur für das konfigurierte Geocoding-/Routing-Endpunktpaar (localStorage-Key mit Endpunkt-Identität, Consent-Version v2); Modul-Zustand und Übernahme-Mechanik entfernt, Abrufpfade prüfen `hasConsent()` mit den konfigurierten URLs

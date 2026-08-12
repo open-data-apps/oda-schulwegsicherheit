@@ -49,7 +49,14 @@ function consentKey(geocodingUrl, routingUrl) {
     + endpointIdentity(geocodingUrl) + "|" + endpointIdentity(routingUrl);
 }
 function hasConsent(geocodingUrl, routingUrl) {
-  return localStorage.getItem(consentKey(geocodingUrl, routingUrl)) === "granted";
+  /* Symmetrisch zum bereits gekapselten Schreibpfad. Fail-closed: Ist der
+   * Speicher blockiert, gilt keine Zustimmung, und es gehen keine Daten an
+   * Drittdienste (F-50). */
+  try {
+    return localStorage.getItem(consentKey(geocodingUrl, routingUrl)) === "granted";
+  } catch (error) {
+    return false;
+  }
 }
 
 function drittdienstAbgelehntFehler() {
