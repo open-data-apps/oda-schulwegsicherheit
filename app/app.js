@@ -198,6 +198,19 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   renderShell(runtime);
   bindUi(runtime);
   bindConsentPanel(runtime);
+
+  const istUnkonfiguriert = (wert) => {
+    const quelle = String(wert || "").trim();
+    return !quelle || /^\{\{.*\}\}$/.test(quelle) || /^<.*>$/.test(quelle);
+  };
+  if (
+    istUnkonfiguriert(runtime.config.schoolsDataUrl) ||
+    istUnkonfiguriert(runtime.config.accidentDataUrl)
+  ) {
+    setStatus(runtime, "info", "Es ist keine Datenquelle konfiguriert.");
+    return null;
+  }
+
   setStatus(runtime, "info", "Datenquellen werden geladen.");
 
   // Die gespeicherte Entscheidung zu den Drittdiensten anzeigen, bevor irgendeine
@@ -734,10 +747,13 @@ function updateShareUrl(runtime) {
 }
 
 function validateConfig(config) {
-  if (!config.schoolsDataUrl) {
+  const istPlatzhalter = (wert) =>
+    /^\{\{.*\}\}$/.test(String(wert || "").trim()) ||
+    /^<.*>$/.test(String(wert || "").trim());
+  if (!config.schoolsDataUrl || istPlatzhalter(config.schoolsDataUrl)) {
     throw new Error("Konfiguration schoolsDataUrl fehlt.");
   }
-  if (!config.accidentDataUrl) {
+  if (!config.accidentDataUrl || istPlatzhalter(config.accidentDataUrl)) {
     throw new Error("Konfiguration accidentDataUrl fehlt.");
   }
 }
