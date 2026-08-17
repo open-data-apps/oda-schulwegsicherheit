@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -56,7 +56,7 @@
   "instanz-config": {
     "seitentitel": {
       "label": "Seitentitel",
-      "category": "general",
+      "category": "allgemein",
       "hilfe": "Titel der Browser-Registerkarte",
       "default": "Schulwegsicherheit BW",
       "format": {
@@ -67,7 +67,7 @@
     },
     "titel": {
       "label": "App-Titel",
-      "category": "general",
+      "category": "allgemein",
       "hilfe": "Titel in der Kopfzeile der App",
       "default": "Schulwegsicherheit BW",
       "format": {
@@ -78,7 +78,7 @@
     },
     "icon": {
       "label": "Kopfzeilen-Icon",
-      "category": "general",
+      "category": "allgemein",
       "hilfe": "Relativer Pfad oder Bild-URL fuer das Logo in der Kopfzeile",
       "default": "assets/odas-app-icon.svg",
       "format": {
@@ -90,7 +90,7 @@
     },
     "fusszeile": {
       "label": "Fusszeile",
-      "category": "contact-legal",
+      "category": "kontakt-rechtliches",
       "hilfe": "Text in der Footer-Zeile",
       "default": "(C) Copyright {{jahr}} | App: Schulwegsicherheit BW | Daten: JedeSchule und Unfallatlas | ODAS: {{odas.betreiber.name}}",
       "format": {
@@ -101,7 +101,7 @@
     },
     "kontakt": {
       "label": "Kontakt",
-      "category": "contact-legal",
+      "category": "kontakt-rechtliches",
       "hilfe": "Inhalt der Kontakt-Seite",
       "format": {
         "typ": "markdown"
@@ -116,7 +116,7 @@
     },
     "beschreibung": {
       "label": "Beschreibung",
-      "category": "content",
+      "category": "beschreibung",
       "hilfe": "Inhalt der Seite Ueber diese App",
       "format": {
         "typ": "markdown"
@@ -147,7 +147,7 @@
     },
     "impressum": {
       "label": "Impressum",
-      "category": "contact-legal",
+      "category": "kontakt-rechtliches",
       "hilfe": "Inhalt der Impressums-Seite",
       "format": {
         "typ": "markdown"
@@ -162,7 +162,7 @@
     },
     "datenschutz": {
       "label": "Datenschutz",
-      "category": "contact-legal",
+      "category": "kontakt-rechtliches",
       "hilfe": "Inhalt der Datenschutz-Seite",
       "format": {
         "typ": "markdown"
@@ -195,7 +195,7 @@
     },
     "brandingCSS": {
       "label": "Branding CSS",
-      "category": "advanced",
+      "category": "sonstiges",
       "hilfe": "Optionaler direkter CSS-Code fuer Instanz-Anpassungen",
       "default": "",
       "format": {
@@ -206,7 +206,7 @@
     },
     "brandingCSSFile": {
       "label": "Branding CSS Datei",
-      "category": "advanced",
+      "category": "sonstiges",
       "hilfe": "Relativer Pfad zu einer optionalen Branding-CSS-Datei",
       "default": "assets/branding.css",
       "format": {
@@ -217,7 +217,7 @@
     },
     "proxyAktiv": {
       "label": "ODAS Proxy aktiv (ja/nein)",
-      "category": "datasource",
+      "category": "datenherkunft",
       "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen ('ja' oder 'nein')",
       "default": "nein",
       "format": {
@@ -231,7 +231,7 @@
     },
     "schoolsDataUrl": {
       "label": "URL Schuldaten",
-      "category": "datasource",
+      "category": "datenherkunft",
       "hilfe": "URL zu den Baden-Wuerttemberg-Schuldaten als JSON",
       "default": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
       "format": {
@@ -241,7 +241,7 @@
     },
     "accidentDataUrl": {
       "label": "URL Unfallatlas CSV-ZIP",
-      "category": "datasource",
+      "category": "datenherkunft",
       "hilfe": "URL zum Unfallatlas-CSV-ZIP-Download",
       "default": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
       "format": {
@@ -251,7 +251,7 @@
     },
     "routeServiceUrl": {
       "label": "Optionaler Routing-Service",
-      "category": "datasource",
+      "category": "datenherkunft",
       "hilfe": "Optionale OSRM-kompatible Basis-URL oder geschuetzte Service-URL fuer Routen. Leer lassen fuer den voreingestellten OSRM-Routingdienst.",
       "default": "",
       "format": {
@@ -261,7 +261,7 @@
     },
     "geocodingServiceUrl": {
       "label": "Optionaler Geocoding-Dienst",
-      "category": "datasource",
+      "category": "datenherkunft",
       "hilfe": "Nominatim-kompatible Such-URL fuer die Adressaufloesung. Leer lassen fuer den voreingestellten oeffentlichen Dienst nominatim.openstreetmap.org.",
       "default": "",
       "format": {
@@ -271,7 +271,7 @@
     },
     "weiterfuehrendeLinks": {
       "label": "Weiterfuehrende Links",
-      "category": "content",
+      "category": "beschreibung",
       "hilfe": "Verwandte Datensaetze / Hintergrundquellen (HTML/Markdown). Leer = ausgeblendet.",
       "default": "<ul><li><a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank'>Unfallatlas (OpenGeodata.NRW)</a></li><li><a href='https://github.com/Datenschule/schulscraper-data' target='_blank'>Schuldaten JedeSchule/Datenschule</a></li><li><a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap-Mitwirkende</a></li></ul>",
       "format": {
@@ -281,7 +281,7 @@
     },
     "datenquelleHinweis": {
       "label": "Methodik / Datenquelle-Hinweis",
-      "category": "content",
+      "category": "beschreibung",
       "hilfe": "Herkunft, Erhebungsmethode und Limitierungen (HTML/Markdown). Leer = ausgeblendet.",
       "default": "<p>Die App kombiniert Schuldaten von <a href=\"https://github.com/Datenschule/schulscraper-data\" target=\"_blank\" rel=\"noopener\">JedeSchule/Datenschule</a> (Baden-Wuerttemberg) mit den punktgenauen Daten des <a href=\"https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/\" target=\"_blank\" rel=\"noopener\">Unfallatlas (OpenGeodata.NRW)</a>.</p><p>Beruecksichtigt werden ausschliesslich schulwegrelevante Unfaelle mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten. Die App ersetzt keine amtliche Schulwegplanung; Vollstaendigkeit und Aktualitaet haengen von den Quellen ab.</p>",
       "format": {
@@ -291,7 +291,7 @@
     },
     "datenStand": {
       "label": "Datenstand",
-      "category": "content",
+      "category": "beschreibung",
       "hilfe": "Freitext-Hinweis zum Stand der Daten. Leer = ausgeblendet.",
       "default": "Stand: Unfallatlas 2024; Schuldaten laufend von JedeSchule",
       "format": {
@@ -301,7 +301,7 @@
     },
     "kpiKontext1": {
       "label": "KPI-Kontext 1 (Punkte im Umfeld)",
-      "category": "metrics",
+      "category": "beschreibung",
       "hilfe": "Optionaler Erklaertext zum ersten Kennzahlwert. Leer = kein Kontext.",
       "default": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
       "format": {
@@ -312,7 +312,7 @@
     },
     "kpiKontext2": {
       "label": "KPI-Kontext 2 (Fuss)",
-      "category": "metrics",
+      "category": "beschreibung",
       "hilfe": "Optionaler Erklaertext zum zweiten Kennzahlwert. Leer = kein Kontext.",
       "default": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
       "format": {
@@ -323,7 +323,7 @@
     },
     "kpiKontext3": {
       "label": "KPI-Kontext 3 (Rad)",
-      "category": "metrics",
+      "category": "beschreibung",
       "hilfe": "Optionaler Erklaertext zum dritten Kennzahlwert. Leer = kein Kontext.",
       "default": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
       "format": {
@@ -334,7 +334,7 @@
     },
     "kpiKontext4": {
       "label": "KPI-Kontext 4 (Kinder)",
-      "category": "metrics",
+      "category": "beschreibung",
       "hilfe": "Optionaler Erklaertext zum vierten Kennzahlwert. Leer = kein Kontext.",
       "default": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
       "format": {
@@ -345,7 +345,7 @@
     },
     "cacheTtlStunden": {
       "label": "Cache-Gueltigkeit (Stunden)",
-      "category": "advanced",
+      "category": "sonstiges",
       "hilfe": "Wie lange Schul- und Unfalldaten im Browser zwischengespeichert werden, bevor sie erneut geladen werden. Leer = Standardwert 24.",
       "default": "24",
       "format": {
