@@ -340,14 +340,14 @@ function renderShell(runtime) {
 
           <div class="sws-controls">
             <div class="sws-control sws-control-search">
-              <label for="school-search-input">Schule suchen</label>
-              <input id="school-search-input" class="form-control" type="search" placeholder="z.B. Oesterfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results" />
+              <label for="school-search-input-${runtime.uid}">Schule suchen</label>
+              <input id="school-search-input-${runtime.uid}" class="form-control" type="search" placeholder="z.B. Oesterfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results" />
               <div id="school-search-results" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
             <div class="sws-control sws-control-address">
-              <label for="start-address-input">Startadresse</label>
-              <input id="start-address-input" class="form-control" type="search" placeholder="Strasse, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results" />
+              <label for="start-address-input-${runtime.uid}">Startadresse</label>
+              <input id="start-address-input-${runtime.uid}" class="form-control" type="search" placeholder="Strasse, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results" />
               <div id="start-address-results" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
@@ -441,7 +441,7 @@ function renderShell(runtime) {
   `;
 
   runtime.ui = {
-    schoolSearchInput: runtime.rootElement.querySelector("#school-search-input"),
+    schoolSearchInput: runtime.rootElement.querySelector(`#school-search-input-${runtime.uid}`),
     schoolSearchResults: runtime.rootElement.querySelector("#school-search-results"),
     schoolDetails: runtime.rootElement.querySelector("#school-details"),
     status: runtime.rootElement.querySelector("#runtime-status"),
@@ -455,7 +455,7 @@ function renderShell(runtime) {
     routeAlternatives: runtime.rootElement.querySelector("#route-alternatives"),
     hazardList: runtime.rootElement.querySelector("#hazard-list"),
     routeRecommendations: runtime.rootElement.querySelector("#route-recommendations"),
-    startAddressInput: runtime.rootElement.querySelector("#start-address-input"),
+    startAddressInput: runtime.rootElement.querySelector(`#start-address-input-${runtime.uid}`),
     startAddressResults: runtime.rootElement.querySelector("#start-address-results"),
     applyStartButton: runtime.rootElement.querySelector("#apply-start-button"),
     geoLocateButton: runtime.rootElement.querySelector("#geo-locate-button"),
