@@ -2347,7 +2347,24 @@ function isCacheEntryFresh(entry, ttlHours) {
 
 async function fetchJsonResource(url, config) {
   const rawText = await fetchOdasCompatibleText(url, config);
-  return JSON.parse(rawText);
+  try {
+    return JSON.parse(rawText);
+  } catch (_error) {
+    throw new Error(
+      `Die konfigurierte Daten-URL liefert kein JSON, sondern ${describeNonJsonPayload(rawText)}. ` +
+        "Bitte in der Instanzkonfiguration den API-Endpunkt der Datenquelle eintragen, " +
+        "nicht den Datensatz- oder Download-Link.",
+    );
+  }
+}
+
+function describeNonJsonPayload(rawContent) {
+  const text = String(rawContent == null ? "" : rawContent).trim();
+  if (!text) return "eine leere Antwort";
+  if (text.startsWith("<")) return "eine HTML-Seite";
+  const firstLine = text.split(/\r?\n/, 1)[0];
+  if (/[,;]/.test(firstLine)) return "eine CSV- oder Textdatei";
+  return "unlesbaren Inhalt";
 }
 
 async function fetchBinaryResource(url, config) {
