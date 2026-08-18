@@ -15,12 +15,12 @@
     "<p>Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.</p>",
     "<h2>Nutzung & Route-Score</h2>",
     "<p>Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Standortbestimmung zeigt einen Ladezustand und nutzt einen zweiten Versuch, wenn der erste Browser-Standort nicht geliefert wird. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.</p>",
-    "<p>Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.</p>",
+    "<p>Die externen Datenquellen (GitHub, OpenGeodata.NRW) werden direkt im Browser geladen. Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit diesen Fremdhosts; ein Proxy-Schalter wird deshalb in der Instanz-Konfiguration bewusst nicht angeboten.</p>",
     "<h2>Datenquellen & Lizenzen</h2>",
     "<p>Die Anwendung verarbeitet die folgenden offenen Datenquellen:</p>",
     "<ul><li><strong>Schuldaten</strong>: Daten von <a href='https://github.com/Datenschule/schulscraper-data' target='_blank' rel='noopener'>JedeSchule/Datenschule</a> (CC0).</li><li><strong>Unfalldaten</strong>: <a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank' rel='noopener'>Unfallatlas der Statistischen Aemter des Bundes und der Laender</a>, bereitgestellt ueber <a href='https://www.opengeodata.nrw.de/' target='_blank' rel='noopener'>OpenGeodata.NRW</a> unter Datenlizenz Deutschland Namensnennung 2.0.</li><li><strong>Kartengrundlage</strong>: <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap-Mitwirkende</a> (ODbL).</li></ul>",
     "<h2>Open Data App Store</h2>",
-    "<p>SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen.</p>"
+    "<p>SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen und optionale Routing-Erweiterungen.</p>"
   ],
   "kontakt": [
     "Bei Fragen zur App oder zur technischen Bereitstellung wenden Sie sich bitte an das bereitstellende Team.<br>",
@@ -57,7 +57,6 @@
     "<h3>Beim Aufruf kontaktierte Drittanbieter</h3><p>Folgende externe Server werden kontaktiert. Dabei werden IP-Adresse und User-Agent der Besucher:innen an diese Anbieter übertragen:</p><ul><li><strong>tile.openstreetmap.org</strong> — Kartenkacheln (OpenStreetMap)</li><li><strong>nominatim.openstreetmap.org</strong> — Adress-Suche (Geocoding); übertragen: Suchbegriffe der Schul-/Unfalladressen, IP-Adresse, User-Agent; Abruf nur nach Einwilligung</li><li><strong>router.project-osrm.org</strong> — Routenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung</li></ul>"
   ],
   "fusszeile": "(C) Copyright 2026 | App: Schulwegsicherheit BW | Daten: JedeSchule und Unfallatlas | ODAS: Open Data App Store",
-  "proxyAktiv": "nein",
   "schoolsDataUrl": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
   "accidentDataUrl": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
   "routeServiceUrl": "",

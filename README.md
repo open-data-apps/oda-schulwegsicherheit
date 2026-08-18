@@ -46,7 +46,7 @@ Die App verarbeitet zwei externe Datenquellen:
 - **Schuldaten JSON**: Array oder Objekt mit `schools`, `data` oder `results`; unterstuetzt werden u.a. Felder fuer Name, Adresse, Ort, Schulform und Koordinaten.
 - **Unfallatlas CSV-ZIP**: ZIP-Datei mit einer CSV-Datei. Ausgewertet werden die Kernfelder `UJAHR`, `UWOCHENTAG`, `USTUNDE`, `IstRad`, `IstFuss`, `IstKind`, `XGCSWGS84` und `YGCSWGS84`.
 
-Die ZIP-Datei wird im Browser mit JSZip gelesen. Bei CORS-Problemen kann der ODAS-Proxy ueber `proxyAktiv` eingeschaltet werden.
+Die ZIP-Datei wird im Browser mit JSZip gelesen. Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit GitHub/OpenGeodata.NRW; ein `proxyAktiv`-Schalter wird deshalb bewusst nicht angeboten — die App laedt beide Quellen ausschliesslich direkt.
 
 ---
 
@@ -103,7 +103,7 @@ Empfohlene ODAS-Einstellungen:
 | ----------- | ----------------------------------- | ------------------------------------ | ----------------------------- |
 | Entwicklung | `make up` / `http://localhost:8090` | `odas-config/config.json`            | direkt                       |
 | Standalone  | `STANDALONE=true make up`           | `odas-config/config.json`            | direkt                       |
-| ODAS        | `make zip` / Veroeffentlichung      | vom ODAS erzeugter Endpunkt `config` | direkt oder mit `proxyAktiv` |
+| ODAS        | `make zip` / Veroeffentlichung      | vom ODAS erzeugter Endpunkt `config` | direkt                       |
 
 `make zip` erzeugt das Liefer-ZIP mit `app/`, `assets/`, `app-package.json` und `CHANGELOG.md`. Das ZIP ist ein Bauartefakt und wird nicht mitversioniert, sondern bei Bedarf mit `make zip` erzeugt.
 
@@ -117,8 +117,7 @@ Vor dem Start:
 
 1. In `docker-compose.standalone.yml` den Platzhalter-FQDN `app1.example.com` durch den echten Hostnamen ohne Protokoll oder Pfad ersetzen.
 2. `odas-config/config.json` an Betreiber, Datenquellen und rechtliche Texte anpassen.
-3. Sicherstellen, dass `proxyAktiv` auf `nein` steht (kein ODAS-Proxy im Standalone-Betrieb verfuegbar).
-4. Pruefen, dass Traefik das externe Docker-Netzwerk `proxynet`, den EntryPoint `websecure` und den Zertifikatsresolver `letsencrypt` verwendet.
+3. Pruefen, dass Traefik das externe Docker-Netzwerk `proxynet`, den EntryPoint `websecure` und den Zertifikatsresolver `letsencrypt` verwendet.
 
 Starten:
 

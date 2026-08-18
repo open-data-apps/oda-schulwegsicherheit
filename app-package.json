@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.32.0",
+  "version": "1.33.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -17,14 +17,14 @@
     "Die Route wird ueber einen OSRM-kompatiblen Routingdienst fuer Fussweg, Rad oder Auto berechnet. Ein optionaler geschuetzter Routing-Service kann ueber die Instanz-Konfiguration gesetzt werden.",
     "## Nutzung & Route-Score",
     "Nutzerinnen und Nutzer waehlen eine Schule, geben eine Startadresse ein oder nutzen Standort/Kartenklick und erhalten anschliessend eine datenbasierte Einschaetzung der berechneten Route. Die Standortbestimmung zeigt einen Ladezustand und nutzt einen zweiten Versuch, wenn der erste Browser-Standort nicht geliefert wird. Die Ergebnisbereiche nennen Score, Umfeldkennzahlen, Distanz, Dauer und die relevantesten Unfallpunkte.",
-    "Externe Datenabrufe koennen im ODAS-Livebetrieb bei Bedarf ueber den ODAS-Proxy gefuehrt werden. Der Proxy-Schalter ist in der Instanz-Konfiguration enthalten.",
+    "Die externen Datenquellen (GitHub, OpenGeodata.NRW) werden direkt im Browser geladen. Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit diesen Fremdhosts; ein Proxy-Schalter wird deshalb in der Instanz-Konfiguration bewusst nicht angeboten.",
     "## Datenquellen & Lizenzen",
     "Die Anwendung verarbeitet die folgenden offenen Datenquellen:",
     "- **Schuldaten**: Daten von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data) (CC0).",
     "- **Unfalldaten**: [Unfallatlas der Statistischen Aemter des Bundes und der Laender](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/), bereitgestellt ueber [OpenGeodata.NRW](https://www.opengeodata.nrw.de/) unter Datenlizenz Deutschland Namensnennung 2.0.",
     "- **Kartengrundlage**: [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright) (ODbL).",
     "## Open Data App Store",
-    "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen, Proxy-Nutzung und optionale Routing-Erweiterungen."
+    "SchulwegSafe ist fuer den Open Data App Store aufgebaut und nutzt das ODAS-Konfigurationsmodell fuer externe Datenquellen und optionale Routing-Erweiterungen."
   ],
   "tags-funktion": [
     "Karte",
@@ -214,20 +214,6 @@
         "laenge": 255
       },
       "erforderlich": "nein"
-    },
-    "proxyAktiv": {
-      "label": "ODAS Proxy aktiv (ja/nein)",
-      "category": "datenherkunft",
-      "hilfe": "Steuert, ob Datenabrufe ueber den ODAS-Proxy laufen ('ja' oder 'nein')",
-      "default": "nein",
-      "format": {
-        "typ": "dropdown",
-        "optionen": [
-          "nein",
-          "ja"
-        ]
-      },
-      "erforderlich": "ja"
     },
     "schoolsDataUrl": {
       "label": "URL Schuldaten",

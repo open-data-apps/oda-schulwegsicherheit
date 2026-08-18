@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.33.0 - 2026-08-18
+- `proxyAktiv`-Schalter entfernt (`app-package.json`, `odas-config/config.json`): `shouldUseProxy()` schickt Fremdhosts wie GitHub/OpenGeodata.NRW ohnehin nie ueber den Proxy (Same-Origin-Pruefung), der Schalter hatte fuer die konfigurierten Quellen keine Wirkung. Begleitend die irrefuehrenden Proxy-Hinweise in Beschreibung und README auf den tatsaechlichen Direktabruf korrigiert. Verhalten unveraendert (`proxyAktiv` stand bereits auf `nein`).
+
 ## 1.32.0 - 2026-08-17
 - `fetchJsonResource()` wirft jetzt bei nicht-JSON-Antworten (CSV, HTML, leerer Body) eine sprechende Konfigurationsfehlermeldung statt der rohen `JSON.parse`-Parserfehlermeldung (F-66)
 
