@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.36.0 - 2026-08-20
+- Markdown-Metadaten: Paketbeschreibungen auf echtes Markdown umgestellt, exakte Identität Top-Level/Instanz hergestellt, lokale HTML-Fixture semantisch gespiegelt.
 
 ## 1.35.0 - 2026-08-20
 - FIX: Generierte IDs tragen jetzt durchgängig die Instanzkennung (F-71)
