@@ -1505,10 +1505,9 @@ async function selectSchool(runtime, school) {
     return distanceBetweenPoints(school.lat, school.lon, lat, lon) <= SCHULWEGSAFE_DEFAULTS.schoolRadiusMeters;
   });
 
-  if (currentRequest !== runtime.requestVersion) {
-    return;
-  }
-
+  // This block is entirely synchronous (no await yet), so it always applies for
+  // whichever school is currently selected -- it cannot be torn by a later
+  // selection and must not be skipped by the requestVersion guard below.
   runtime.data.nearbyAccidents = nearbyAccidents;
   renderAccidentsOnMap(runtime, nearbyAccidents);
   renderHazardKpis(runtime, nearbyAccidents);
@@ -1519,9 +1518,22 @@ async function selectSchool(runtime, school) {
 
   setStatus(runtime, "success", `${nearbyAccidents.length} schulwegrelevante Unfallpunkte im 1-km-Umkreis.`);
 
-  if (runtime.startPoint) {
-    await evaluateRoute(runtime);
+  if (!runtime.startPoint) {
+    return;
   }
+
+  // Genuine async gap (F-70): yield to the event loop before triggering the route
+  // evaluation. If a newer action (another school pick, a route-mode change, ...)
+  // already bumped requestVersion in the meantime, this call is stale -- skip
+  // starting a route request that evaluateRoute() would just discard on arrival
+  // anyway. Without this await, currentRequest could never differ from
+  // runtime.requestVersion here, making the check dead code.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  if (!isRuntimeActive(runtime) || currentRequest !== runtime.requestVersion) {
+    return;
+  }
+
+  await evaluateRoute(runtime);
 }
 
 function renderSchoolDetails(runtime, school) {
@@ -1754,18 +1766,26 @@ async function evaluateRoute(runtime) {
     return;
   }
 
+  // Single point of truth for the request-token guard (F-70): every call to
+  // evaluateRoute() -- from any of its call sites -- gets a fresh, monotonically
+  // increasing token here. After the async gap below, only the call that still
+  // owns the latest token is allowed to touch DOM/state; an overtaken call bails
+  // out silently instead of overwriting a newer, still-in-flight result.
+  runtime.requestVersion += 1;
+  const requestToken = runtime.requestVersion;
+
   clearRouteVisuals(runtime);
   setStatus(runtime, "info", `${getRouteModeLabel(runtime.routeMode)} wird berechnet.`);
 
   let routes = [];
   try {
     const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode, runtime.config);
-    if (!isRuntimeActive(runtime)) {
+    if (!isRuntimeActive(runtime) || requestToken !== runtime.requestVersion) {
       return;
     }
     routes = normalizeRouteCandidates(routePayload);
   } catch (error) {
-    if (!isRuntimeActive(runtime)) {
+    if (!isRuntimeActive(runtime) || requestToken !== runtime.requestVersion) {
       return;
     }
     renderScoreSummary(runtime, null);

@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.34.0 - 2026-08-20
+- FIX: `evaluateRoute()` prüft `runtime.requestVersion` jetzt an allen 5 Aufrufstellen mit echtem Async-Gap zwischen Inkrement und Prüfung — der bestehende Mechanismus war zuvor toter Code (F-70)
+
 ## 1.33.0 - 2026-08-18
 - `proxyAktiv`-Schalter entfernt (`app-package.json`, `odas-config/config.json`): `shouldUseProxy()` schickt Fremdhosts wie GitHub/OpenGeodata.NRW ohnehin nie ueber den Proxy (Same-Origin-Pruefung), der Schalter hatte fuer die konfigurierten Quellen keine Wirkung. Begleitend die irrefuehrenden Proxy-Hinweise in Beschreibung und README auf den tatsaechlichen Direktabruf korrigiert. Verhalten unveraendert (`proxyAktiv` stand bereits auf `nein`).
 
