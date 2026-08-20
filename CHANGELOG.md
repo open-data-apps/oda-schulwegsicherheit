@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 1.35.0 - 2026-08-20
+- FIX: Generierte IDs tragen jetzt durchgängig die Instanzkennung (F-71)
+- FIX: Eigenimplementierter CSV-Parser durch vendorte PapaParse ersetzt (F-72)
+- FIX: Für die Schulweg-Analyse nicht relevante Unfalldatensätze werden jetzt gezählt und als Hinweis angezeigt (F-73)
+
 ## 1.34.0 - 2026-08-20
 - FIX: `evaluateRoute()` prüft `runtime.requestVersion` jetzt an allen 5 Aufrufstellen mit echtem Async-Gap zwischen Inkrement und Prüfung — der bestehende Mechanismus war zuvor toter Code (F-70)
 

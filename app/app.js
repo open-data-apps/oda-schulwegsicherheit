@@ -252,6 +252,8 @@ function createRuntime(configdata, rootElement) {
       schoolsFromCache: false,
       accidentsFetchedAt: null,
       accidentsFromCache: false,
+      accidentsTotalCount: null,
+      accidentsDiscardedCount: null,
     },
     layers: {
       school: null,
@@ -341,14 +343,14 @@ function renderShell(runtime) {
           <div class="sws-controls">
             <div class="sws-control sws-control-search">
               <label for="school-search-input-${runtime.uid}">Schule suchen</label>
-              <input id="school-search-input-${runtime.uid}" class="form-control" type="search" placeholder="z.B. Oesterfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results" />
-              <div id="school-search-results" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
+              <input id="school-search-input-${runtime.uid}" class="form-control" type="search" placeholder="z.B. Oesterfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results-${runtime.uid}" />
+              <div id="school-search-results-${runtime.uid}" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
             <div class="sws-control sws-control-address">
               <label for="start-address-input-${runtime.uid}">Startadresse</label>
-              <input id="start-address-input-${runtime.uid}" class="form-control" type="search" placeholder="Strasse, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results" />
-              <div id="start-address-results" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
+              <input id="start-address-input-${runtime.uid}" class="form-control" type="search" placeholder="Strasse, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results-${runtime.uid}" />
+              <div id="start-address-results-${runtime.uid}" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
             <div class="sws-control sws-control-mode">
@@ -361,12 +363,12 @@ function renderShell(runtime) {
             </div>
 
             <div class="sws-actions">
-              <button type="button" class="btn btn-primary" id="apply-start-button">Route berechnen</button>
-              <button type="button" class="btn btn-outline-secondary" id="geo-locate-button" data-default-label="Standort">Standort</button>
+              <button type="button" class="btn btn-primary" id="apply-start-button-${runtime.uid}">Route berechnen</button>
+              <button type="button" class="btn btn-outline-secondary" id="geo-locate-button-${runtime.uid}" data-default-label="Standort">Standort</button>
             </div>
           </div>
 
-          <div class="sws-score-strip" id="score-summary">
+          <div class="sws-score-strip" id="score-summary-${runtime.uid}">
             <div class="sws-score-badge is-neutral">⚪</div>
             <div class="sws-score-copy">
               <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
@@ -378,21 +380,21 @@ function renderShell(runtime) {
             </div>
           </div>
 
-          <div id="route-recommendations" class="sws-recommendations-inline is-empty"></div>
+          <div id="route-recommendations-${runtime.uid}" class="sws-recommendations-inline is-empty"></div>
 
           <div class="sws-share-row">
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-share-link-button">Route teilen</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-share-link-button-${runtime.uid}">Route teilen</button>
           </div>
 
-          <div id="data-freshness" class="text-muted small mt-1"></div>
+          <div id="data-freshness-${runtime.uid}" class="text-muted small mt-1"></div>
         </div>
 
-        <div id="consent-panel" class="alert alert-warning sws-consent" role="region" aria-label="Hinweis zu externen Diensten" hidden></div>
-        <div id="runtime-status" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
+        <div id="consent-panel-${runtime.uid}" class="alert alert-warning sws-consent" role="region" aria-label="Hinweis zu externen Diensten" hidden></div>
+        <div id="runtime-status-${runtime.uid}" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
 
         <div class="sws-map-shell">
-          <div id="map-container" class="sws-map" aria-label="Kartenansicht"></div>
-          <div class="sws-map-overlay" id="hazard-kpis">
+          <div id="map-container-${runtime.uid}" class="sws-map" aria-label="Kartenansicht"></div>
+          <div class="sws-map-overlay" id="hazard-kpis-${runtime.uid}">
             <span>Keine Daten geladen</span>
           </div>
         </div>
@@ -400,19 +402,19 @@ function renderShell(runtime) {
         <div class="sws-detail-grid">
           <section class="sws-panel">
             <h3>Auswahl</h3>
-            <div id="school-details" class="sws-muted">Noch keine Schule ausgewaehlt.</div>
+            <div id="school-details-${runtime.uid}" class="sws-muted">Noch keine Schule ausgewaehlt.</div>
           </section>
 
           <section class="sws-panel">
             <h3>Routenbewertung</h3>
-            <div id="route-mode-note" class="sws-muted">Noch keine Bewertung vorhanden.</div>
-            <div id="route-score-help" class="sws-score-help">${escapeHtml(getScoreExplanation())}</div>
-            <div id="route-alternatives" class="sws-route-list"></div>
+            <div id="route-mode-note-${runtime.uid}" class="sws-muted">Noch keine Bewertung vorhanden.</div>
+            <div id="route-score-help-${runtime.uid}" class="sws-score-help">${escapeHtml(getScoreExplanation())}</div>
+            <div id="route-alternatives-${runtime.uid}" class="sws-route-list"></div>
           </section>
 
           <section class="sws-panel sws-panel-wide">
             <h3>Relevante Unfallpunkte</h3>
-            <div id="hazard-list" class="sws-muted">Nach der Bewertung erscheinen hier die wichtigsten Punkte im Routenkorridor.</div>
+            <div id="hazard-list-${runtime.uid}" class="sws-muted">Nach der Bewertung erscheinen hier die wichtigsten Punkte im Routenkorridor.</div>
           </section>
 
           ${renderMethodikbox(runtime)}
@@ -422,11 +424,11 @@ function renderShell(runtime) {
     </section>
 
     <!-- Modal für die Score-Erklärung -->
-    <div class="modal fade" id="score-info-modal-${runtime.uid}" tabindex="-1" aria-labelledby="scoreInfoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="score-info-modal-${runtime.uid}" tabindex="-1" aria-labelledby="scoreInfoModalLabel-${runtime.uid}" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
           <div class="modal-header bg-light border-bottom-0 pb-2">
-            <h5 class="modal-title fw-bold text-dark h6 mb-0" id="scoreInfoModalLabel">ℹ️ Route-Score Berechnung</h5>
+            <h5 class="modal-title fw-bold text-dark h6 mb-0" id="scoreInfoModalLabel-${runtime.uid}">ℹ️ Route-Score Berechnung</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
           </div>
           <div class="modal-body pt-1 text-start">
@@ -442,25 +444,25 @@ function renderShell(runtime) {
 
   runtime.ui = {
     schoolSearchInput: runtime.rootElement.querySelector(`#school-search-input-${runtime.uid}`),
-    schoolSearchResults: runtime.rootElement.querySelector("#school-search-results"),
-    schoolDetails: runtime.rootElement.querySelector("#school-details"),
-    status: runtime.rootElement.querySelector("#runtime-status"),
-    consentPanel: runtime.rootElement.querySelector("#consent-panel"),
-    mapContainer: runtime.rootElement.querySelector("#map-container"),
-    hazardKpis: runtime.rootElement.querySelector("#hazard-kpis"),
-    dataFreshness: runtime.rootElement.querySelector("#data-freshness"),
-    scoreSummary: runtime.rootElement.querySelector("#score-summary"),
-    routeModeNote: runtime.rootElement.querySelector("#route-mode-note"),
-    routeScoreHelp: runtime.rootElement.querySelector("#route-score-help"),
-    routeAlternatives: runtime.rootElement.querySelector("#route-alternatives"),
-    hazardList: runtime.rootElement.querySelector("#hazard-list"),
-    routeRecommendations: runtime.rootElement.querySelector("#route-recommendations"),
+    schoolSearchResults: runtime.rootElement.querySelector(`#school-search-results-${runtime.uid}`),
+    schoolDetails: runtime.rootElement.querySelector(`#school-details-${runtime.uid}`),
+    status: runtime.rootElement.querySelector(`#runtime-status-${runtime.uid}`),
+    consentPanel: runtime.rootElement.querySelector(`#consent-panel-${runtime.uid}`),
+    mapContainer: runtime.rootElement.querySelector(`#map-container-${runtime.uid}`),
+    hazardKpis: runtime.rootElement.querySelector(`#hazard-kpis-${runtime.uid}`),
+    dataFreshness: runtime.rootElement.querySelector(`#data-freshness-${runtime.uid}`),
+    scoreSummary: runtime.rootElement.querySelector(`#score-summary-${runtime.uid}`),
+    routeModeNote: runtime.rootElement.querySelector(`#route-mode-note-${runtime.uid}`),
+    routeScoreHelp: runtime.rootElement.querySelector(`#route-score-help-${runtime.uid}`),
+    routeAlternatives: runtime.rootElement.querySelector(`#route-alternatives-${runtime.uid}`),
+    hazardList: runtime.rootElement.querySelector(`#hazard-list-${runtime.uid}`),
+    routeRecommendations: runtime.rootElement.querySelector(`#route-recommendations-${runtime.uid}`),
     startAddressInput: runtime.rootElement.querySelector(`#start-address-input-${runtime.uid}`),
-    startAddressResults: runtime.rootElement.querySelector("#start-address-results"),
-    applyStartButton: runtime.rootElement.querySelector("#apply-start-button"),
-    geoLocateButton: runtime.rootElement.querySelector("#geo-locate-button"),
+    startAddressResults: runtime.rootElement.querySelector(`#start-address-results-${runtime.uid}`),
+    applyStartButton: runtime.rootElement.querySelector(`#apply-start-button-${runtime.uid}`),
+    geoLocateButton: runtime.rootElement.querySelector(`#geo-locate-button-${runtime.uid}`),
     routeModeButtons: runtime.rootElement.querySelectorAll("[data-route-mode]"),
-    copyShareLinkButton: runtime.rootElement.querySelector("#copy-share-link-button"),
+    copyShareLinkButton: runtime.rootElement.querySelector(`#copy-share-link-button-${runtime.uid}`),
   };
 }
 
@@ -668,7 +670,7 @@ async function initializeRuntime(runtime) {
   await ensureMapAssets();
   createMap(runtime);
 
-  const [schools, accidents] = await Promise.all([
+  const [schools, accidentAtlas] = await Promise.all([
     loadSchools(runtime),
     loadAccidentAtlas(runtime),
   ]);
@@ -678,7 +680,9 @@ async function initializeRuntime(runtime) {
   }
 
   runtime.data.schools = schools;
-  runtime.data.accidents = accidents;
+  runtime.data.accidents = accidentAtlas.accidents;
+  runtime.data.accidentsTotalCount = accidentAtlas.totalCount;
+  runtime.data.accidentsDiscardedCount = accidentAtlas.discardedCount;
 
   hideSearchResults(runtime);
   renderHazardKpis(runtime, []);
@@ -693,7 +697,7 @@ async function initializeRuntime(runtime) {
   }
 
   if (!appliedSharedState) {
-    setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidents.length} schulwegrelevante Unfallpunkte geladen.`);
+    setStatus(runtime, "success", `${schools.length} eindeutige Schulen und ${accidentAtlas.accidents.length} schulwegrelevante Unfallpunkte geladen.`);
   }
 }
 
@@ -847,7 +851,7 @@ async function loadAccidentAtlas(runtime) {
   if (isCacheEntryFresh(cached, runtime.config.cacheTtlStunden)) {
     runtime.data.accidentsFetchedAt = cached.fetchedAt;
     runtime.data.accidentsFromCache = true;
-    return cached.data;
+    return normalizeAccidentAtlasCacheEntry(cached.data);
   }
 
   await ensureJsZip();
@@ -860,14 +864,36 @@ async function loadAccidentAtlas(runtime) {
   }
 
   const csvText = await csvFile.async("string");
-  const accidents = parseCsv(csvText)
-    .map(normalizeAccident)
-    .filter(isSchoolRouteRelevantAccident);
+  const parsedRows = await parseCsv(csvText);
+  // F-73: alle geparsten Datensaetze werden mitgezaehlt, damit die Anzahl der
+  // durch isSchoolRouteRelevantAccident() verworfenen (nicht schulwegrelevanten)
+  // Unfaelle der Nutzerin/dem Nutzer sichtbar gemacht werden kann.
+  const allAccidents = parsedRows.map(normalizeAccident);
+  const accidents = allAccidents.filter(isSchoolRouteRelevantAccident);
+  const result = {
+    accidents,
+    totalCount: allAccidents.length,
+    discardedCount: allAccidents.length - accidents.length,
+  };
 
   runtime.data.accidentsFetchedAt = Date.now();
   runtime.data.accidentsFromCache = false;
-  await writeCacheEntry(cacheKey, accidents);
-  return accidents;
+  await writeCacheEntry(cacheKey, result);
+  return result;
+}
+
+// Cache-Eintraege aus Versionen vor F-73 speicherten ein reines Array ohne
+// Gesamt-/Verwurfszahlen; diese werden fail-safe ohne Zahlen weiterverwendet,
+// bis der Cache-Eintrag beim naechsten Ablauf der TTL neu geschrieben wird.
+function normalizeAccidentAtlasCacheEntry(cachedData) {
+  if (Array.isArray(cachedData)) {
+    return { accidents: cachedData, totalCount: null, discardedCount: null };
+  }
+  return {
+    accidents: Array.isArray(cachedData?.accidents) ? cachedData.accidents : [],
+    totalCount: Number.isFinite(cachedData?.totalCount) ? cachedData.totalCount : null,
+    discardedCount: Number.isFinite(cachedData?.discardedCount) ? cachedData.discardedCount : null,
+  };
 }
 
 function normalizeAccident(row) {
@@ -932,7 +958,7 @@ function renderSearchResults(runtime, query) {
 
   runtime.ui.schoolSearchResults.innerHTML = schools
     .map((school, index) => `
-      <button type="button" class="sws-result-button ${index === runtime.search.activeSchoolResultIndex ? "is-active" : ""}" data-school-id="${escapeHtml(school.id)}" data-result-index="${index}" id="school-result-${index}" role="option" aria-selected="${index === runtime.search.activeSchoolResultIndex ? "true" : "false"}">
+      <button type="button" class="sws-result-button ${index === runtime.search.activeSchoolResultIndex ? "is-active" : ""}" data-school-id="${escapeHtml(school.id)}" data-result-index="${index}" id="school-result-${runtime.uid}-${index}" role="option" aria-selected="${index === runtime.search.activeSchoolResultIndex ? "true" : "false"}">
         <strong>${escapeHtml(school.name)}</strong>
         <span>${escapeHtml([school.ort, school.schulform].filter(Boolean).join(" · "))}</span>
         <small>${escapeHtml([school.adresse, school.plz, school.ort].filter(Boolean).join(", "))}</small>
@@ -971,7 +997,7 @@ function moveSchoolResultSelection(runtime, direction) {
 
   runtime.search.activeSchoolResultIndex = (runtime.search.activeSchoolResultIndex + direction + resultCount) % resultCount;
   renderSearchResults(runtime, runtime.ui.schoolSearchInput.value);
-  runtime.ui.schoolSearchInput.setAttribute("aria-activedescendant", `school-result-${runtime.search.activeSchoolResultIndex}`);
+  runtime.ui.schoolSearchInput.setAttribute("aria-activedescendant", `school-result-${runtime.uid}-${runtime.search.activeSchoolResultIndex}`);
 }
 
 function selectActiveSchoolResult(runtime) {
@@ -1652,7 +1678,23 @@ function renderDataFreshness(runtime) {
   if (cacheNote) {
     parts.push(cacheNote);
   }
+  // F-73: nicht schulwegrelevante Unfalldatensaetze (isSchoolRouteRelevantAccident-Filter)
+  // wurden bislang kommentarlos verworfen. Sichtbar, aber unaufdringlich als Teil des
+  // ohnehin vorhandenen Datenstand-Hinweises.
+  const discardNote = describeAccidentDiscardCount(runtime);
+  if (discardNote) {
+    parts.push(discardNote);
+  }
   runtime.ui.dataFreshness.textContent = parts.join(" · ");
+}
+
+function describeAccidentDiscardCount(runtime) {
+  const discarded = runtime.data.accidentsDiscardedCount;
+  const total = runtime.data.accidentsTotalCount;
+  if (!Number.isFinite(discarded) || !Number.isFinite(total) || discarded <= 0) {
+    return "";
+  }
+  return `${discarded} von ${total} Unfalldatensätzen waren für die Schulweg-Analyse nicht relevant.`;
 }
 
 function describeCacheFreshness(runtime) {
@@ -2537,6 +2579,13 @@ async function ensureJsZip() {
   await loadScriptOnce("jszip-js", "vendor/jszip/jszip.min.js");
 }
 
+async function ensurePapaparse() {
+  if (globalThis.Papa) {
+    return;
+  }
+  await loadScriptOnce("papaparse-js", "vendor/papaparse/papaparse.min.js");
+}
+
 async function loadStylesheetOnce(id, href) {
   if (document.getElementById(id)) {
     return;
@@ -2579,49 +2628,27 @@ function requireLeaflet() {
   return globalThis.L;
 }
 
-function parseCsv(csvText) {
-  const rows = [];
-  let current = "";
-  let row = [];
-  let inQuotes = false;
+// CSV-Parsen (PapaParse, vendort aus app/vendor/papaparse, F-72). Der Unfallatlas
+// des Statistischen Bundesamts liefert Semikolon-getrennte CSV-Dateien mit
+// deutschem Dezimalkomma (siehe pickNumber); der Delimiter wird deshalb fest
+// vorgegeben statt auto-erkannt.
+async function parseCsv(csvText) {
+  await ensurePapaparse();
+  const result = Papa.parse(csvText, {
+    header: true,
+    delimiter: ";",
+    skipEmptyLines: "greedy",
+    transformHeader: (header) => header.trim(),
+    transform: (value) => (typeof value === "string" ? value.trim() : value),
+  });
 
-  for (let index = 0; index < csvText.length; index += 1) {
-    const char = csvText[index];
-    const next = csvText[index + 1];
-
-    if (char === '"' && next === '"') {
-      current += '"';
-      index += 1;
-    } else if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ";" && !inQuotes) {
-      row.push(current);
-      current = "";
-    } else if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && next === "\n") {
-        index += 1;
-      }
-      row.push(current);
-      rows.push(row);
-      row = [];
-      current = "";
-    } else {
-      current += char;
-    }
+  if (result.errors && result.errors.length > 0) {
+    const error = result.errors[0];
+    const zeile = Number.isFinite(error.row) ? error.row + 1 : "?";
+    throw new Error(`Unfallatlas-CSV ist fehlerhaft (Zeile ${zeile}): ${error.message}`);
   }
 
-  if (current || row.length) {
-    row.push(current);
-    rows.push(row);
-  }
-
-  const header = rows.shift() || [];
-  return rows
-    .filter((cells) => cells.some((cell) => cell.trim()))
-    .map((cells) => header.reduce((record, key, index) => {
-      record[key.trim()] = (cells[index] || "").trim();
-      return record;
-    }, {}));
+  return result.data;
 }
 
 function pickString(source, keys) {
