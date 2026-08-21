@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.37.0 - 2026-08-21
+- **CHG:** Die skalaren Felder `schoolsDataUrl` und `accidentDataUrl` durch das Array-Feld `apiurls` ersetzt (`typ: "array"`, Einträge `schulen`, `unfallatlas`). Neuer Standard portfolioweit; `routeServiceUrl` und `geocodingServiceUrl` bleiben unverändert eigene Felder (Dienst-Endpunkte, keine Datenressourcen). `app.js` liest die beiden Datenquellen jetzt über `getOdasApiUrl(configdata, "<name>")`.
+
 ## 1.36.0 - 2026-08-20
 - Markdown-Metadaten: Paketbeschreibungen auf echtes Markdown umgestellt, exakte Identität Top-Level/Instanz hergestellt, lokale HTML-Fixture semantisch gespiegelt.
 

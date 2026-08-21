@@ -274,8 +274,8 @@ function normalizeConfig(configdata = {}) {
   return {
     titel: String(configdata.titel || SCHULWEGSAFE_DEFAULTS.title).trim() || SCHULWEGSAFE_DEFAULTS.title,
     proxyAktiv: String(configdata.proxyAktiv || "nein").trim().toLowerCase(),
-    schoolsDataUrl: String(configdata.schoolsDataUrl || "").trim(),
-    accidentDataUrl: String(configdata.accidentDataUrl || "").trim(),
+    schoolsDataUrl: getOdasApiUrl(configdata, "schulen"),
+    accidentDataUrl: getOdasApiUrl(configdata, "unfallatlas"),
     routeServiceUrl: String(configdata.routeServiceUrl || "").trim(),
     geocodingServiceUrl: String(configdata.geocodingServiceUrl || "").trim(),
     weiterfuehrendeLinks: String(configdata.weiterfuehrendeLinks || "").trim(),
@@ -2405,6 +2405,20 @@ function isCacheEntryFresh(entry, ttlHours) {
   }
   const ttlMs = Math.max(0, Number(ttlHours) || 0) * 60 * 60 * 1000;
   return Date.now() - entry.fetchedAt < ttlMs;
+}
+
+/**
+ * Löst eine benannte Datenressource aus configdata.apiurls auf.
+ * Neue apiurls-Form (typ: "array"); die früheren skalaren schoolsDataUrl/
+ * accidentDataUrl werden nicht mehr gelesen. routeServiceUrl und
+ * geocodingServiceUrl sind Dienst-Endpunkte, keine Datenressourcen, und
+ * bleiben eigene skalare Felder außerhalb von apiurls.
+ * @returns {string} getrimmte URL, oder "" für den Zustand "keine Quelle konfiguriert"
+ */
+function getOdasApiUrl(configdata, name) {
+  const liste = Array.isArray(configdata && configdata.apiurls) ? configdata.apiurls : [];
+  const treffer = liste.find((eintrag) => eintrag && eintrag.name === name);
+  return String((treffer && treffer.url) || "").trim();
 }
 
 async function fetchJsonResource(url, config) {

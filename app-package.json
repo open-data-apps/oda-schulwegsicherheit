@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "version": "1.36.0",
+  "version": "1.37.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
@@ -261,25 +261,31 @@
       },
       "erforderlich": "nein"
     },
-    "schoolsDataUrl": {
-      "label": "URL Schuldaten",
+    "apiurls": {
+      "label": "URLs zu Datenressourcen",
       "category": "datenherkunft",
-      "hilfe": "URL zu den Baden-Wuerttemberg-Schuldaten als JSON",
-      "default": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
+      "hilfe": "Direkter Download-, Datei- oder API-Endpunkt der tatsächlich verwendeten Datenquelle(n). Mehrere Einträge möglich.",
+      "typ": "array",
       "format": {
-        "typ": "url"
+        "typ": "url",
+        "laenge": 500
       },
-      "erforderlich": "ja"
-    },
-    "accidentDataUrl": {
-      "label": "URL Unfallatlas CSV-ZIP",
-      "category": "datenherkunft",
-      "hilfe": "URL zum Unfallatlas-CSV-ZIP-Download",
-      "default": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
-      "format": {
-        "typ": "url"
-      },
-      "erforderlich": "ja"
+      "urls": [
+        {
+          "name": "schulen",
+          "label": "URL Schuldaten",
+          "default": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
+          "beispiel": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
+          "erforderlich": "ja"
+        },
+        {
+          "name": "unfallatlas",
+          "label": "URL Unfallatlas CSV-ZIP",
+          "default": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
+          "beispiel": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
+          "erforderlich": "ja"
+        }
+      ]
     },
     "routeServiceUrl": {
       "label": "Optionaler Routing-Service",

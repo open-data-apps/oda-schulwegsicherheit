@@ -54,8 +54,8 @@ Die ZIP-Datei wird im Browser mit JSZip gelesen. Der ODAS-Proxy wird derzeit umg
 
 | Konfiguration | Beschreibung | Beispiel |
 | ------------- | ------------ | -------- |
-| `schoolsDataUrl` | JSON-Datensatz mit Schulen in Baden-Wuerttemberg | `https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json` |
-| `accidentDataUrl` | Unfallatlas CSV-ZIP | `https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip` |
+| `apiurls.schulen` | JSON-Datensatz mit Schulen in Baden-Wuerttemberg | `https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json` |
+| `apiurls.unfallatlas` | Unfallatlas CSV-ZIP | `https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip` |
 | `routeServiceUrl` | Optionaler OSRM-kompatibler oder geschuetzter Routing-Service | leer fuer den voreingestellten OSRM-Routingdienst |
 | `geocodingServiceUrl` | Nominatim-kompatible Such-URL fuer die Adressaufloesung | leer fuer den voreingestellten oeffentlichen Dienst |
 
