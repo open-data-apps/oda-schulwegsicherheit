@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.38.0 - 2026-08-22
+- **CHG:** `version` in `app-package.json` zu `app-version` umbenannt.
+- **ENH:** Top-Level-Feld `app-package-version` ergänzt (Wert `"2"`: mehrere benannte API-URLs über `instanz-config.apiurls`).
+
 ## 1.37.0 - 2026-08-21
 - **CHG:** Die skalaren Felder `schoolsDataUrl` und `accidentDataUrl` durch das Array-Feld `apiurls` ersetzt (`typ: "array"`, Einträge `schulen`, `unfallatlas`). Neuer Standard portfolioweit; `routeServiceUrl` und `geocodingServiceUrl` bleiben unverändert eigene Felder (Dienst-Endpunkte, keine Datenressourcen). `app.js` liest die beiden Datenquellen jetzt über `getOdasApiUrl(configdata, "<name>")`.
 
