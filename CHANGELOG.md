@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.39.0 - 2026-08-25
+- **CHG:** Proxy-Aufruf sendet die vollständige Ziel-URL statt nur Pfad+Query, damit die neue Origin-Allowlist-Prüfung der ODAS-Plattform greift (bisher implizite Auflösung gegen den ersten konfigurierten `apiurl`).
+
+
 ## 1.38.0 - 2026-08-22
 - **CHG:** `version` in `app-package.json` zu `app-version` umbenannt.
 - **ENH:** Top-Level-Feld `app-package-version` ergänzt (Wert `"2"`: mehrere benannte API-URLs über `instanz-config.apiurls`).

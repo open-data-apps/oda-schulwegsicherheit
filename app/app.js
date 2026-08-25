@@ -2477,8 +2477,10 @@ function shouldUseProxy(url, config = {}) {
   try {
     const parsedUrl = new URL(url, window.location.origin);
     // Nur Anfragen an die eigene Domain oder relative Pfade sollen ueber den Proxy laufen.
-    // Externe Ressourcen wie GitHub oder OpenGeodata.NRW koennen nicht ueber den ODAS-Portal-Proxy
-    // geladen werden (da dieser die Domain abschneidet) und muessen direkt geladen werden.
+    // Bewusste Einschraenkung dieser App: bei zwei Fremdquellen mit unterschiedlicher
+    // Origin (GitHub, OpenGeodata.NRW) kann der ODAS-Proxy nur eine Origin gleichzeitig
+    // freigeben (Allowlist aus den konfigurierten apiurls) - deshalb bleiben externe
+    // Ressourcen im Direktmodus.
     return parsedUrl.origin === window.location.origin;
   } catch (error) {
     return true;
@@ -2496,7 +2498,7 @@ function extractPathFromUrl(url) {
 
 function getOdasProxyEndpoint(targetUrl) {
   const pathName = window.location.pathname.replace(/\/+$/, "");
-  return `${pathName}/odp-data?path=${encodeURIComponent(extractPathFromUrl(targetUrl))}`;
+  return `${pathName}/odp-data?path=${encodeURIComponent(targetUrl)}`;
 }
 
 async function fetchViaOdasProxy(targetUrl) {
