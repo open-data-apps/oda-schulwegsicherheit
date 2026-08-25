@@ -2474,17 +2474,11 @@ function shouldUseProxy(url, config = {}) {
   if (!isProxyEnabled(config)) {
     return false;
   }
-  try {
-    const parsedUrl = new URL(url, window.location.origin);
-    // Nur Anfragen an die eigene Domain oder relative Pfade sollen ueber den Proxy laufen.
-    // Bewusste Einschraenkung dieser App: bei zwei Fremdquellen mit unterschiedlicher
-    // Origin (GitHub, OpenGeodata.NRW) kann der ODAS-Proxy nur eine Origin gleichzeitig
-    // freigeben (Allowlist aus den konfigurierten apiurls) - deshalb bleiben externe
-    // Ressourcen im Direktmodus.
-    return parsedUrl.origin === window.location.origin;
-  } catch (error) {
-    return true;
-  }
+  // Seit der Proxy-Origin-Allowlist (2026-08-24) darf der ODAS-Proxy mehrere
+  // konfigurierte apiurls-Origins gleichzeitig bedienen. Mit proxyAktiv=ja laufen
+  // deshalb auch die beiden Fremdquellen (GitHub, OpenGeodata.NRW) über den Proxy;
+  // im Direktmodus (Default) bleibt es beim Same-Origin-Gate.
+  return true;
 }
 
 function extractPathFromUrl(url) {

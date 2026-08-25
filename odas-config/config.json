@@ -56,7 +56,7 @@
     "Vor der ersten Übertragung werden Sie gefragt. Ohne Ihre Zustimmung findet keine Übertragung an diese beiden Dienste statt; Adresssuche und Routenberechnung bleiben dann deaktiviert. Kartenansicht, Schulsuche und die Anzeige der Unfallpunkte funktionieren auch ohne Zustimmung. Ihre Entscheidung wird lokal in Ihrem Browser gespeichert und lässt sich jederzeit über den Hinweis oberhalb der Eingabefelder widerrufen.",
     "",
     "<h3>Weitere Datenquellen</h3>",
-    "Die Schul- und Unfalldatensätze sowie die Kartenkacheln werden von externen Servern geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung übermittelt, jedoch keine Angaben zu Ihrer Person, Ihrer Adresse oder Ihrem Schulweg.",
+    "Die Schul- und Unfalldatensätze sowie die Kartenkacheln werden von externen Servern geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung übermittelt, jedoch keine Angaben zu Ihrer Person, Ihrer Adresse oder Ihrem Schulweg. Bei aktiviertem ODAS-Proxy (proxyAktiv: ja) werden diese Abrufe stattdessen über den Server des App-Stores geleitet.",
     "",
     "<h3>Hinweis für Betreiber</h3>",
     "Über die Konfigurationsschlüssel <code>geocodingServiceUrl</code> und <code>routeServiceUrl</code> lassen sich eigene Instanzen hinterlegen. Wird davon Gebrauch gemacht, sind die oben genannten Dienstnamen in dieser Erklärung entsprechend anzupassen.",
@@ -64,6 +64,7 @@
     "<h3>Beim Aufruf kontaktierte Drittanbieter</h3><p>Folgende externe Server werden kontaktiert. Dabei werden IP-Adresse und User-Agent der Besucher:innen an diese Anbieter übertragen:</p><ul><li><strong>tile.openstreetmap.org</strong> — Kartenkacheln (OpenStreetMap)</li><li><strong>nominatim.openstreetmap.org</strong> — Adress-Suche (Geocoding); übertragen: Suchbegriffe, IP-Adresse, User-Agent; Abruf nur nach Einwilligung</li><li><strong>router.project-osrm.org</strong> — Routenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung</li></ul>"
   ],
   "fusszeile": "(C) Copyright 2026 | App: Schulwegsicherheit BW | Daten: JedeSchule und Unfallatlas | ODAS: Open Data App Store",
+  "proxyAktiv": "nein",
   "apiurls": [
     {
       "name": "schulen",

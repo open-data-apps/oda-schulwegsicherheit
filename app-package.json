@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "app-version": "1.39.0",
+  "app-version": "1.40.0",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -16,7 +16,7 @@
     "",
     "## Methodik",
     "",
-    "Die App lädt Schuldaten (`schoolsDataUrl`, JSON von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data)) und Unfallatlas-Daten (`accidentDataUrl`, CSV-ZIP von [OpenGeodata.NRW](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)) direkt im Browser – mit IndexedDB-Zwischenspeicher und konfigurierbarer Gültigkeit (`cacheTtlStunden`, Standard 24 h) – und normalisiert sie clientseitig.",
+    "Die App lädt Schuldaten (`schoolsDataUrl`, JSON von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data)) und Unfallatlas-Daten (`accidentDataUrl`, CSV-ZIP von [OpenGeodata.NRW](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)) im Browser geladen – mit IndexedDB-Zwischenspeicher und konfigurierbarer Gültigkeit (`cacheTtlStunden`, Standard 24 h); Standard ist der Direktabruf, alternativ (`proxyAktiv: ja`) der ODAS-Proxy des App-Stores – und normalisiert sie clientseitig.",
     "",
     "Schuldaten werden dedupliziert, mit Suchindex und fehlertoleranter Suche (Umlaut-, Tippfehler-Normalisierung) aufbereitet; Unfalldaten werden als semikolon-getrennte CSV mit PapaParse geparst, anhand der gelieferten WGS84-Koordinaten normalisiert und zeitlich gefiltert: Berücksichtigt werden ausschließlich schulwegrelevante Einträge mit Fuß- (`IstFuss`) oder Radbezug (`IstRad`) an Werktagen (Wochen­tag 2–6) zu typischen Schulwegzeiten (7–8 Uhr und 15–17 Uhr). Filterung nach 1-km-Umkreis der Schule, Routenkorridor (50 m) und Gewichtung bestimmen den Score.",
     "",
@@ -146,7 +146,7 @@
         "",
         "## Methodik",
         "",
-        "Die App lädt Schuldaten (`schoolsDataUrl`, JSON von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data)) und Unfallatlas-Daten (`accidentDataUrl`, CSV-ZIP von [OpenGeodata.NRW](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)) direkt im Browser – mit IndexedDB-Zwischenspeicher und konfigurierbarer Gültigkeit (`cacheTtlStunden`, Standard 24 h) – und normalisiert sie clientseitig.",
+        "Die App lädt Schuldaten (`schoolsDataUrl`, JSON von [JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data)) und Unfallatlas-Daten (`accidentDataUrl`, CSV-ZIP von [OpenGeodata.NRW](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)) im Browser geladen – mit IndexedDB-Zwischenspeicher und konfigurierbarer Gültigkeit (`cacheTtlStunden`, Standard 24 h); Standard ist der Direktabruf, alternativ (`proxyAktiv: ja`) der ODAS-Proxy des App-Stores – und normalisiert sie clientseitig.",
         "",
         "Schuldaten werden dedupliziert, mit Suchindex und fehlertoleranter Suche (Umlaut-, Tippfehler-Normalisierung) aufbereitet; Unfalldaten werden als semikolon-getrennte CSV mit PapaParse geparst, anhand der gelieferten WGS84-Koordinaten normalisiert und zeitlich gefiltert: Berücksichtigt werden ausschließlich schulwegrelevante Einträge mit Fuß- (`IstFuss`) oder Radbezug (`IstRad`) an Werktagen (Wochen­tag 2–6) zu typischen Schulwegzeiten (7–8 Uhr und 15–17 Uhr). Filterung nach 1-km-Umkreis der Schule, Routenkorridor (50 m) und Gewichtung bestimmen den Score.",
         "",
@@ -222,7 +222,7 @@
         "",
         "### Weitere Datenquellen",
         "",
-        "Die Schul- und Unfalldatensätze sowie die Kartenkacheln werden von externen Servern geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung übermittelt, jedoch keine Angaben zu Ihrer Person, Ihrer Adresse oder Ihrem Schulweg.",
+        "Die Schul- und Unfalldatensätze sowie die Kartenkacheln werden von externen Servern geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung übermittelt, jedoch keine Angaben zu Ihrer Person, Ihrer Adresse oder Ihrem Schulweg. Bei aktiviertem ODAS-Proxy (`proxyAktiv: ja`) werden diese Abrufe stattdessen über den Server des App-Stores geleitet.",
         "",
         "### Hinweis für Betreiber",
         "",
@@ -287,6 +287,17 @@
           "erforderlich": "ja"
         }
       ]
+    },
+    "proxyAktiv": {
+      "label": "ODAS-Proxy aktivieren",
+      "category": "datenherkunft",
+      "hilfe": "Mit ja werden Datenabrufe über den ODAS-Proxy gesendet. Möglich, wenn die Quelle-Origin in den konfigurierten apiurls steht — hier also GitHub-Raw und OpenGeodata.NRW. Der Proxy selbst ist nur im ODAS-Live-System verfügbar; Entwicklung und Standalone verwenden nein.",
+      "default": "nein",
+      "format": {
+        "typ": "dropdown",
+        "optionen": ["nein", "ja"]
+      },
+      "erforderlich": "ja"
     },
     "routeServiceUrl": {
       "label": "Optionaler Routing-Service",

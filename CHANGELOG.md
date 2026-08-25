@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.40.0 - 2026-08-25
+- **CHG:** `proxyAktiv`-Schalter wiedereingeführt (Default `nein`) und `shouldUseProxy()` geöffnet: Der ODAS-Proxy erlaubt seit Plattform-Update 2026-08-24 mehrere konfigurierte Quelle-Origin gleichzeitig, damit laufen mit `proxyAktiv: ja` auch GitHub-Raw und OpenGeodata.NRW über den Proxy. Direktmodus unverändert Standard.
+
+
 ## 1.39.0 - 2026-08-25
 - **CHG:** Proxy-Aufruf sendet die vollständige Ziel-URL statt nur Pfad+Query, damit die neue Origin-Allowlist-Prüfung der ODAS-Plattform greift (bisher implizite Auflösung gegen den ersten konfigurierten `apiurl`).
 

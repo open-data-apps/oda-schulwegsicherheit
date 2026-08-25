@@ -46,7 +46,11 @@ Die App verarbeitet zwei externe Datenquellen:
 - **Schuldaten JSON**: Array oder Objekt mit `schools`, `data` oder `results`; unterstuetzt werden u.a. Felder fuer Name, Adresse, Ort, Schulform und Koordinaten.
 - **Unfallatlas CSV-ZIP**: ZIP-Datei mit einer CSV-Datei. Ausgewertet werden die Kernfelder `UJAHR`, `UWOCHENTAG`, `USTUNDE`, `IstRad`, `IstFuss`, `IstKind`, `XGCSWGS84` und `YGCSWGS84`.
 
-Die ZIP-Datei wird im Browser mit JSZip gelesen. Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit GitHub/OpenGeodata.NRW; ein `proxyAktiv`-Schalter wird deshalb bewusst nicht angeboten — die App laedt beide Quellen ausschliesslich direkt.
+Die ZIP-Datei wird im Browser mit JSZip gelesen. Standard laedt die App beide Quellen
+direkt. Ueber den Konfigurationsschalter `proxyAktiv` (Default `nein`) koennen die Abrufe
+alternativ ueber den ODAS-Proxy laufen: Seit dem Plattform-Update vom 2026-08-24 erlaubt
+der Proxy mehrere konfigurierte Quelle-Origin gleichzeitig, also hier GitHub-Raw und
+OpenGeodata.NRW.
 
 ---
 
