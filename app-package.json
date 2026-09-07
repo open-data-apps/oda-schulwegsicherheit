@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "app-version": "1.40.0",
+  "app-version": "1.40.1",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -276,14 +276,14 @@
           "name": "schulen",
           "label": "Statische Datei – Schuldaten (GitHub JSON)",
           "default": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
-          "beispiel": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schulen.json",
+          "beispiel": "https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json",
           "erforderlich": "ja"
         },
         {
           "name": "unfallatlas",
           "label": "Statische Datei – Unfallatlas (NRW ZIP)",
           "default": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
-          "beispiel": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/unfallatlas.zip",
+          "beispiel": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip",
           "erforderlich": "ja"
         }
       ]

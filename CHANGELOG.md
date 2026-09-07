@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.40.1 - 2026-09-07
+- **FIX:** Frictionless-Härtung: Koordinaten-Typ auf `string` korrigiert (Komma-Dezimaltrennzeichen im Rohwert, App normalisiert); beide 404-Beispiele auf funktionierende Defaults angeglichen; `urlDaten` bewusst nicht ergänzt (App liest es nicht — Config-Minimalismus). ZIP-Slot bleibt (Code entpackt per JSZip; Validator entpackt nicht — dokumentierte Ausnahme).
+
 ## 1.40.0 - 2026-08-25
 - **CHG:** `proxyAktiv`-Schalter wiedereingeführt (Default `nein`) und `shouldUseProxy()` geöffnet: Der ODAS-Proxy erlaubt seit Plattform-Update 2026-08-24 mehrere konfigurierte Quelle-Origin gleichzeitig, damit laufen mit `proxyAktiv: ja` auch GitHub-Raw und OpenGeodata.NRW über den Proxy. Direktmodus unverändert Standard.
 

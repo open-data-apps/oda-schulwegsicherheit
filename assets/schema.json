@@ -58,8 +58,8 @@
     {
       "name": "XGCSWGS84",
       "title": "Laengengrad",
-      "type": "number",
-      "description": "Laengengrad des Unfallorts in WGS84.",
+      "type": "string",
+      "description": "Koordinate als Text mit Komma-Dezimaltrennzeichen (z. B. „9,389075627000068“); die App normalisiert zur Zahl.",
       "constraints": {
         "required": true
       }
@@ -67,12 +67,14 @@
     {
       "name": "YGCSWGS84",
       "title": "Breitengrad",
-      "type": "number",
-      "description": "Breitengrad des Unfallorts in WGS84.",
+      "type": "string",
+      "description": "Koordinate als Text mit Komma-Dezimaltrennzeichen (z. B. „9,389075627000068“); die App normalisiert zur Zahl.",
       "constraints": {
         "required": true
       }
     }
   ],
-  "missingValues": [""]
+  "missingValues": [
+    ""
+  ]
 }
