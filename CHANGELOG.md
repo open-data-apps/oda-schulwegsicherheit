@@ -1,7 +1,9 @@
 # Changelog
 
-## 1.40.1 - 2026-09-07
+## 1.40.2 - 2026-09-08
 - **FIX:** Variante-A-Verdrahtung (F-92): Quellen-Infobox und Typprüfung (csv-zip/statische Datei, beide Quellen) vor dem ersten Fetch über `renderOdasFehler`; eigene Fetch-Architektur unverändert (1.40.1 -> 1.40.2).
+
+## 1.40.1 - 2026-09-07
 - **FIX:** Frictionless-Härtung: Koordinaten-Typ auf `string` korrigiert (Komma-Dezimaltrennzeichen im Rohwert, App normalisiert); beide 404-Beispiele auf funktionierende Defaults angeglichen; `urlDaten` bewusst nicht ergänzt (App liest es nicht — Config-Minimalismus). ZIP-Slot bleibt (Code entpackt per JSZip; Validator entpackt nicht — dokumentierte Ausnahme).
 
 ## 1.40.0 - 2026-08-25
