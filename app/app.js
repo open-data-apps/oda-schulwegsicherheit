@@ -207,8 +207,30 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     istUnkonfiguriert(runtime.config.schoolsDataUrl) ||
     istUnkonfiguriert(runtime.config.accidentDataUrl)
   ) {
-    setStatus(runtime, "info", "Es ist keine Datenquelle konfiguriert.");
+    renderOdasFehler(runtime.rootElement, new Error("Keine Datenquelle konfiguriert."), {
+      url: runtime.config.schoolsDataUrl || runtime.config.accidentDataUrl,
+      label: "Schulen/Unfallatlas-Datenquelle",
+      typLabel: "Statische Datei",
+      erwarteterTyp: "csv-zip",
+    });
     return null;
+  }
+  // Variante A (F-92): Typprüfung vor dem ersten Fetch (beide Quellen).
+  const swsQuellen = [
+    [runtime.config.schoolsDataUrl, "Schulen-Datenquelle"],
+    [runtime.config.accidentDataUrl, "Unfallatlas-Datenquelle"],
+  ];
+  for (const [swsUrl, swsLabel] of swsQuellen) {
+    const swsTypWarn = validateUrlTypErwartung(swsUrl, "csv-zip");
+    if (swsTypWarn) {
+      renderOdasFehler(runtime.rootElement, new Error(swsTypWarn), {
+        url: swsUrl,
+        label: swsLabel,
+        typLabel: "Statische Datei",
+        erwarteterTyp: "csv-zip",
+      });
+      return null;
+    }
   }
 
   setStatus(runtime, "info", "Datenquellen werden geladen.");
