@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.40.3 - 2026-09-10
+- **FIX (SWS-B1):** `assetPromises` behielt eine **abgelehnte** Promise im Modulcache — nach einem fehlgeschlagenen Bibliotheks-Ladevorgang scheiterte jeder weitere Versuch (auch in anderen Instanzen) sofort identisch, ohne erneutes Laden. Fehlversuche werden jetzt verworfen (`loadScriptOnce`, `loadStylesheetOnce`).
+- **FIX (SWS-B2):** IndexedDB-Verbindungen wurden nie geschlossen: `readCacheEntry`/`writeCacheEntry` öffneten je Aufruf eine Verbindung, die für die restliche Sitzung offen blieb. Jetzt `db.close()` im `finally` (Ressourcenleck; offene Verbindungen können in Firefox Versions-Upgrades blockieren).
+- **TECH (SWS-B3):** `isLeerErgebnis` entfernt; `addToHead` gibt `""` statt `undefined` zurück.
+- **Unverändert:** die eigene Fetch-/Consent-Architektur (F-26/F-37, dokumentierte Sonderarchitektur), `renderPageOverride`, `isRuntimeActive`/`requestVersion`-Guards und der Vorgänger-Cleanup.
+
 ## 1.40.2 - 2026-09-08
 - **FIX:** Variante-A-Verdrahtung (F-92): Quellen-Infobox und Typprüfung (csv-zip/statische Datei, beide Quellen) vor dem ersten Fetch über `renderOdasFehler`; eigene Fetch-Architektur unverändert (1.40.1 -> 1.40.2).
 

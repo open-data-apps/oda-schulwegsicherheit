@@ -246,7 +246,9 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   return null;
 }
 
-function addToHead() {}
+function addToHead() {
+  return ``;
+}
 
 function createRuntime(configdata, rootElement) {
   return {
@@ -2393,8 +2395,9 @@ function openSwsCacheDb() {
 }
 
 async function readCacheEntry(key) {
+  let db = null;
   try {
-    const db = await openSwsCacheDb();
+    db = await openSwsCacheDb();
     return await new Promise((resolve, reject) => {
       const transaction = db.transaction(SWS_CACHE_STORE_NAME, "readonly");
       const request = transaction.objectStore(SWS_CACHE_STORE_NAME).get(key);
@@ -2404,12 +2407,22 @@ async function readCacheEntry(key) {
   } catch (error) {
     // Caching ist optional; ohne IndexedDB oder bei Lesefehlern wird einfach neu geladen.
     return null;
+  } finally {
+    // SWS-B2: Verbindung schliessen. Vorher blieb pro Lesevorgang eine offene
+    // IndexedDB-Verbindung bestehen (Ressourcenleck; in Firefox koennen offene
+    // Verbindungen Versions-Upgrades blockieren).
+    if (db && typeof db.close === "function") {
+      try {
+        db.close();
+      } catch (_e) {}
+    }
   }
 }
 
 async function writeCacheEntry(key, data) {
+  let db = null;
   try {
-    const db = await openSwsCacheDb();
+    db = await openSwsCacheDb();
     await new Promise((resolve, reject) => {
       const transaction = db.transaction(SWS_CACHE_STORE_NAME, "readwrite");
       transaction.objectStore(SWS_CACHE_STORE_NAME).put({ data, fetchedAt: Date.now() }, key);
@@ -2418,6 +2431,12 @@ async function writeCacheEntry(key, data) {
     });
   } catch (error) {
     // Quota-Fehler oder fehlende IndexedDB-Unterstuetzung duerfen den Ladevorgang nicht blockieren.
+  } finally {
+    if (db && typeof db.close === "function") {
+      try {
+        db.close();
+      } catch (_e) {}
+    }
   }
 }
 
@@ -2601,15 +2620,6 @@ function renderOdasFehler(container, error, kontext = {}) {
   const titel = kontext.leer ? "Keine Datensätze gefunden." : info.titel;
   const alertClass = kontext.leer ? "alert-info" : info.alertClass;
   container.innerHTML = `<div class="alert ${alertClass}" role="alert"><strong>${escapeHtml(titel)}</strong><p class="mb-1">${escapeHtml(info.hinweis)}</p>${urlZeile}<details class="small"><summary>Details</summary><code>${escapeHtml(info.detail || String(error))}</code></details></div>`;
-}
-
-function isLeerErgebnis(json) {
-  if (!json) return true;
-  if (Array.isArray(json) && json.length === 0) return true;
-  if (Array.isArray(json.records) && json.records.length === 0) return true;
-  if (Array.isArray(json.results) && json.results.length === 0) return true;
-  if (json.result && Array.isArray(json.result.records) && json.result.records.length === 0) return true;
-  return false;
 }
 
 
@@ -2813,7 +2823,13 @@ function loadScriptOnce(id, src) {
     script.src = src;
     script.async = true;
     script.onload = resolve;
-    script.onerror = () => reject(new Error(`Skript ${src} konnte nicht geladen werden.`));
+    script.onerror = () => {
+      // SWS-B1: Fehlversuch nicht im Modulcache behalten — sonst scheitert jeder
+      // weitere Versuch (auch in anderen Instanzen) sofort identisch, ohne
+      // erneutes Laden, bis die Seite neu geladen wird.
+      delete SCHULWEGSAFE_RUNTIME.assetPromises[id];
+      reject(new Error(`Skript ${src} konnte nicht geladen werden.`));
+    };
     document.head.appendChild(script);
   });
   return SCHULWEGSAFE_RUNTIME.assetPromises[id];
