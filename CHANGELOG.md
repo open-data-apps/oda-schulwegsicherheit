@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.40.4 - 2026-10-02
+- ENH: Verwendete ODAS-Dienste in `odas-services` deklariert.
+
 ## 1.40.3 - 2026-09-10
 - **FIX (SWS-B1):** `assetPromises` behielt eine **abgelehnte** Promise im Modulcache — nach einem fehlgeschlagenen Bibliotheks-Ladevorgang scheiterte jeder weitere Versuch (auch in anderen Instanzen) sofort identisch, ohne erneutes Laden. Fehlversuche werden jetzt verworfen (`loadScriptOnce`, `loadStylesheetOnce`).
 - **FIX (SWS-B2):** IndexedDB-Verbindungen wurden nie geschlossen: `readCacheEntry`/`writeCacheEntry` öffneten je Aufruf eine Verbindung, die für die restliche Sitzung offen blieb. Jetzt `db.close()` im `finally` (Ressourcenleck; offene Verbindungen können in Firefox Versions-Upgrades blockieren).
