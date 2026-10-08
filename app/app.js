@@ -64,7 +64,7 @@ function hasConsent(geocodingUrl, routingUrl) {
 
 function drittdienstAbgelehntFehler() {
   return new Error(
-    "Ohne Einwilligung werden keine Daten an externe Dienste uebertragen.",
+    "Ohne Einwilligung werden keine Daten an externe Dienste übertragen.",
   );
 }
 
@@ -99,7 +99,7 @@ function renderConsentPanel(runtime) {
     panel.innerHTML = `
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span class="small mb-0">
-          Adresssuche und Routenberechnung uebertragen Daten an
+          Adresssuche und Routenberechnung übertragen Daten an
           <strong>${geoDienst}</strong> und <strong>${routeDienst}</strong>. Sie haben dem zugestimmt.
         </span>
         <button type="button" class="btn btn-sm btn-outline-secondary" data-consent-action="widerrufen">
@@ -114,15 +114,15 @@ function renderConsentPanel(runtime) {
   panel.innerHTML = `
     <h3 class="h6 mb-2">Adresssuche und Routenberechnung nutzen externe Dienste</h3>
     <p class="small mb-2">
-      Fuer diese beiden Funktionen werden Angaben an Dienste ausserhalb dieser App uebertragen:
+      Für diese beiden Funktionen werden Angaben an Dienste außerhalb dieser App übertragen:
     </p>
     <ul class="small mb-2">
-      <li><strong>${geoDienst}</strong> erhaelt die von Ihnen eingegebene Adresse zusammen mit dem Ort der gewaehlten Schule, um daraus Koordinaten zu ermitteln.</li>
-      <li><strong>${routeDienst}</strong> erhaelt die Koordinaten Ihres Startpunkts und der Schule, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Protokollen des Dienstes.</li>
+      <li><strong>${geoDienst}</strong> erhält die von Ihnen eingegebene Adresse zusammen mit dem Ort der gewählten Schule, um daraus Koordinaten zu ermitteln.</li>
+      <li><strong>${routeDienst}</strong> erhält die Koordinaten Ihres Startpunkts und der Schule, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Protokollen des Dienstes.</li>
     </ul>
     <p class="small mb-2">
-      Wird der Standort-Knopf verwendet, ist der Startpunkt Ihre tatsaechliche Position.
-      Ohne Ihre Zustimmung findet keine dieser Uebertragungen statt. Kartenansicht,
+      Wird der Standort-Knopf verwendet, ist der Startpunkt Ihre tatsächliche Position.
+      Ohne Ihre Zustimmung findet keine dieser Übertragungen statt. Kartenansicht,
       Schulsuche und Unfallpunkte funktionieren auch ohne.
     </p>
     <div class="d-flex flex-wrap gap-2">
@@ -181,20 +181,20 @@ function renderRoutingNotice(runtime) {
   if (panel.hidden) return;
 
   panel.innerHTML = `
-    <h3 class="h6 mb-2">${fallbackActive ? "FOSSGIS-Fallback ausgewaehlt" : "Passenden Routingdienst verwenden"}</h3>
+    <h3 class="h6 mb-2">${fallbackActive ? "FOSSGIS-Fallback ausgewählt" : "Passenden Routingdienst verwenden"}</h3>
     <p class="small mb-2">${escapeHtml(unavailable || (fallbackActive
-      ? "Der oeffentliche Ersatzdienst routing.openstreetmap.de berechnet Fuss-, Rad- und Autorouten mit getrennten Routingprofilen."
+      ? "Der öffentliche Ersatzdienst routing.openstreetmap.de berechnet Fuß-, Rad- und Autorouten mit getrennten Routingprofilen."
       : "Der konfigurierte Routingdienst hat keine nutzbare Route geliefert. Ohne Route wird kein Score angezeigt."))}</p>
     <p class="small mb-2">
-      FOSSGIS erlaubt nur begrenzte Nutzung: hoechstens eine Anfrage pro Sekunde,
+      FOSSGIS erlaubt nur begrenzte Nutzung: höchstens eine Anfrage pro Sekunde,
       kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlicher Teil eines Angebots.
-      Keine Verfuegbarkeitsgarantie. Betreiber muessen die
+      Keine Verfügbarkeitsgarantie. Betreiber müssen die
       <a href="https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/" target="_blank" rel="noopener noreferrer">Nutzungsbedingungen</a>
-      fuer ihren Einsatz pruefen. Die Begrenzung der App gilt pro geoeffneter Seite, nicht zentral fuer alle Besucher.
+      für ihren Einsatz prüfen. Die Begrenzung der App gilt pro geöffneter Seite, nicht zentral für alle Besucher.
     </p>
-    <p class="small mb-2">Start- und Zielkoordinaten gehen erst nach Zustimmung an den ausgewaehlten Dienst.
-      Die Fallback-Auswahl gilt nur fuer diese Ansicht; die Instanzkonfiguration bleibt unveraendert.</p>
-    ${fallbackActive ? "" : '<button type="button" class="btn btn-sm btn-outline-primary" data-routing-fallback>FOSSGIS-Fallback auswaehlen</button>'}
+    <p class="small mb-2">Start- und Zielkoordinaten gehen erst nach Zustimmung an den ausgewählten Dienst.
+      Die Fallback-Auswahl gilt nur für diese Ansicht; die Instanzkonfiguration bleibt unverändert.</p>
+    ${fallbackActive ? "" : '<button type="button" class="btn btn-sm btn-outline-primary" data-routing-fallback>FOSSGIS-Fallback auswählen</button>'}
     <div class="small mt-2">Routing: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener noreferrer">FOSSGIS / OSRM</a> ·
       Daten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap-Mitwirkende (ODbL)</a> ·
       <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Kartenfehler melden</a>
@@ -404,27 +404,27 @@ function renderShell(runtime) {
             <span class="sws-brand-mark" aria-hidden="true">S</span>
             <div>
               <h2>${escapeHtml(appTitle)}</h2>
-              <p>Baden-Wuerttemberg · Schulwege datenbasiert einschaetzen</p>
+              <p>Baden-Württemberg · Schulwege datenbasiert einschätzen</p>
             </div>
           </div>
 
           <div class="sws-controls">
             <div class="sws-control sws-control-search">
               <label for="school-search-input-${runtime.uid}">Schule suchen</label>
-              <input id="school-search-input-${runtime.uid}" class="form-control" type="search" placeholder="z.B. Oesterfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results-${runtime.uid}" />
+              <input id="school-search-input-${runtime.uid}" class="form-control" type="search" placeholder="z.B. Österfeld Vaihingen oder Grundschule Stuttgart" autocomplete="off" aria-expanded="false" aria-controls="school-search-results-${runtime.uid}" />
               <div id="school-search-results-${runtime.uid}" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
             <div class="sws-control sws-control-address">
               <label for="start-address-input-${runtime.uid}">Startadresse</label>
-              <input id="start-address-input-${runtime.uid}" class="form-control" type="search" placeholder="Strasse, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results-${runtime.uid}" />
+              <input id="start-address-input-${runtime.uid}" class="form-control" type="search" placeholder="Straße, Ort oder Haltestelle" autocomplete="off" aria-expanded="false" aria-controls="start-address-results-${runtime.uid}" />
               <div id="start-address-results-${runtime.uid}" class="sws-results is-hidden" role="listbox" aria-live="polite"></div>
             </div>
 
             <div class="sws-control sws-control-mode">
               <label>Wegtyp</label>
-              <div class="sws-mode-toggle" role="group" aria-label="Wegtyp waehlen">
-                <button type="button" class="is-active" data-route-mode="foot">Fussweg</button>
+              <div class="sws-mode-toggle" role="group" aria-label="Wegtyp wählen">
+                <button type="button" class="is-active" data-route-mode="foot">Fußweg</button>
                 <button type="button" data-route-mode="bike">Rad</button>
                 <button type="button" data-route-mode="car">Auto</button>
               </div>
@@ -440,7 +440,7 @@ function renderShell(runtime) {
             <div class="sws-score-badge is-neutral">⚪</div>
             <div class="sws-score-copy">
               <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
-              <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
+              <span class="sws-score-caption">Schule und Startpunkt wählen</span>
             </div>
             <div class="sws-score-value">
               <strong>-</strong>
@@ -459,7 +459,7 @@ function renderShell(runtime) {
 
         <div id="routing-notice-${runtime.uid}" class="alert alert-info sws-consent" role="region" aria-label="Routingdienst" hidden></div>
         <div id="consent-panel-${runtime.uid}" class="alert alert-warning sws-consent" role="region" aria-label="Hinweis zu externen Diensten" hidden></div>
-        <div id="runtime-status-${runtime.uid}" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
+        <div id="runtime-status-${runtime.uid}" class="alert alert-info sws-status" role="status">Initialisierung läuft.</div>
 
         <div class="sws-map-shell">
           <div id="map-container-${runtime.uid}" class="sws-map" aria-label="Kartenansicht"></div>
@@ -471,7 +471,7 @@ function renderShell(runtime) {
         <div class="sws-detail-grid">
           <section class="sws-panel">
             <h3>Auswahl</h3>
-            <div id="school-details-${runtime.uid}" class="sws-muted">Noch keine Schule ausgewaehlt.</div>
+            <div id="school-details-${runtime.uid}" class="sws-muted">Noch keine Schule ausgewählt.</div>
           </section>
 
           <section class="sws-panel">
@@ -551,7 +551,7 @@ function bindUi(runtime) {
     runtime.routingFailed = false;
     renderRoutingNotice(runtime);
     renderConsentPanel(runtime);
-    setStatus(runtime, "info", "Fallback ausgewaehlt. Bitte die Zustimmung zum angezeigten Dienst pruefen und die Route erneut berechnen.");
+    setStatus(runtime, "info", "Fallback ausgewählt. Bitte die Zustimmung zum angezeigten Dienst prüfen und die Route erneut berechnen.");
   });
 
   runtime.ui.schoolSearchInput.addEventListener("input", (event) => {
@@ -606,7 +606,7 @@ function bindUi(runtime) {
     runtime.startAddressLabel = "";
     clearStartMarker(runtime);
     invalidateRoute(runtime);
-    setStatus(runtime, "info", "Startadresse geaendert. Bitte eine Adresse auswaehlen und die Route neu berechnen.");
+    setStatus(runtime, "info", "Startadresse geändert. Bitte eine Adresse auswählen und die Route neu berechnen.");
     queueAddressSearch(runtime, event.target.value);
   });
 
@@ -666,7 +666,7 @@ function bindUi(runtime) {
 
 function copyShareLink(runtime) {
   if (!runtime.selectedSchool || !runtime.startPoint) {
-    setStatus(runtime, "warning", "Bitte zuerst eine Schule und eine Startadresse waehlen, um einen Link zu erstellen.");
+    setStatus(runtime, "warning", "Bitte zuerst eine Schule und eine Startadresse wählen, um einen Link zu erstellen.");
     return;
   }
   if (!navigator.clipboard?.writeText) {
@@ -695,7 +695,7 @@ async function handleGeolocationClick(runtime) {
   }
 
   setGeolocationLoading(runtime, true);
-  setStatus(runtime, "info", "Standort wird gesucht. Bitte Browserfreigabe bestaetigen, falls eine Abfrage erscheint.", { loading: true });
+  setStatus(runtime, "info", "Standort wird gesucht. Bitte Browserfreigabe bestätigen, falls eine Abfrage erscheint.", { loading: true });
 
   try {
     const permissionState = await getGeolocationPermissionState();
@@ -729,7 +729,7 @@ async function handleGeolocationClick(runtime) {
     const latitude = Number(position?.coords?.latitude);
     const longitude = Number(position?.coords?.longitude);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      throw new Error("Keine gueltigen Standortkoordinaten erhalten.");
+      throw new Error("Keine gültigen Standortkoordinaten erhalten.");
     }
 
     const accuracy = Number(position.coords.accuracy);
@@ -740,7 +740,7 @@ async function handleGeolocationClick(runtime) {
       lat: latitude,
       lon: longitude,
       label,
-    }, `${label} uebernommen.`);
+    }, `${label} übernommen.`);
 
     if (runtime.selectedSchool) {
       await evaluateRoute(runtime);
@@ -811,8 +811,8 @@ async function applySharedStateFromUrl(runtime) {
   const lat = Number(params.get("lat"));
   const lon = Number(params.get("lon"));
   if (Number.isFinite(lat) && Number.isFinite(lon)) {
-    const adresse = params.get("adresse") || "Startadresse aus Link uebernommen";
-    updateStartPoint(runtime, { lat, lon, label: adresse }, "Startadresse aus geteiltem Link uebernommen.");
+    const adresse = params.get("adresse") || "Startadresse aus Link übernommen";
+    updateStartPoint(runtime, { lat, lon, label: adresse }, "Startadresse aus geteiltem Link übernommen.");
   }
 
   await selectSchool(runtime, school);
@@ -886,7 +886,7 @@ async function loadSchools(runtime) {
   const rawSchools = Array.isArray(payload) ? payload : payload.schools || payload.data || payload.results;
 
   if (!Array.isArray(rawSchools)) {
-    throw new Error("Schuldaten muessen als Array oder als Objekt mit schools/data/results bereitgestellt werden.");
+    throw new Error("Schuldaten müssen als Array oder als Objekt mit schools/data/results bereitgestellt werden.");
   }
 
   const schools = rawSchools
@@ -980,6 +980,13 @@ async function loadAccidentAtlas(runtime) {
 // Gesamt-/Verwurfszahlen; diese werden fail-safe ohne Zahlen weiterverwendet,
 // bis der Cache-Eintrag beim naechsten Ablauf der TTL neu geschrieben wird.
 function normalizeAccidentAtlasCacheEntry(cachedData) {
+  const accidents = Array.isArray(cachedData) ? cachedData : cachedData?.accidents;
+  for (const accident of Array.isArray(accidents) ? accidents : []) {
+    const title = accident.properties?.titel;
+    if (title === "Unfallpunkt Fussverkehr" || title === "Kinderbeteiligung Fussverkehr") {
+      accident.properties.titel = title.replace("Fussverkehr", "Fußverkehr");
+    }
+  }
   if (Array.isArray(cachedData)) {
     return { accidents: cachedData, totalCount: null, discardedCount: null };
   }
@@ -1044,7 +1051,7 @@ function renderSearchResults(runtime, query) {
     runtime.ui.schoolSearchResults.innerHTML = `
       <div class="sws-result-empty">
         <strong>Keine passende Schule gefunden.</strong>
-        <span>Versuche Name plus Ort, z.B. "Grundschule Stuttgart" oder "Vaihingen Oesterfeld".</span>
+        <span>Versuche Name plus Ort, z.B. "Grundschule Stuttgart" oder "Vaihingen Österfeld".</span>
       </div>
     `;
     return;
@@ -1122,7 +1129,7 @@ function queueAddressSearch(runtime, query) {
   if (!hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
     runtime.data.addressResults = [];
     hideStartAddressResults(runtime);
-    setStatus(runtime, "warning", "Fuer die Adresssuche ist Ihre Zustimmung zur Nutzung des externen Dienstes noetig.");
+    setStatus(runtime, "warning", "Für die Adresssuche ist Ihre Zustimmung zur Nutzung des externen Dienstes nötig.");
     return;
   }
 
@@ -1167,12 +1174,12 @@ async function resolveStartAddressAndRoute(runtime) {
     return;
   }
   if (!hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
-    setStatus(runtime, "warning", "Fuer die Routenberechnung ist Ihre Zustimmung zur Nutzung der externen Dienste noetig.");
+    setStatus(runtime, "warning", "Für die Routenberechnung ist Ihre Zustimmung zur Nutzung der externen Dienste nötig.");
     return;
   }
 
   if (!runtime.selectedSchool) {
-    setStatus(runtime, "warning", "Bitte zuerst eine Schule auswaehlen.");
+    setStatus(runtime, "warning", "Bitte zuerst eine Schule auswählen.");
     return;
   }
 
@@ -1185,7 +1192,7 @@ async function resolveStartAddressAndRoute(runtime) {
     const results = await searchStartAddress(runtime, query);
     if (results === null) return;
     if (!results.length) {
-      setStatus(runtime, "warning", "Fuer diese Startadresse wurde kein Treffer gefunden.");
+      setStatus(runtime, "warning", "Für diese Startadresse wurde kein Treffer gefunden.");
       return;
     }
     selectStartAddress(runtime, results[0], "Startadresse gefunden. Route wird berechnet.");
@@ -1265,7 +1272,7 @@ function renderStartAddressResults(runtime, results = []) {
     button.addEventListener("click", () => {
       const candidate = runtime.data.addressResults[Number(button.dataset.addressIndex)];
       if (candidate) {
-        selectStartAddress(runtime, candidate, "Startadresse uebernommen.");
+        selectStartAddress(runtime, candidate, "Startadresse übernommen.");
         evaluateRoute(runtime).catch((error) => {
           handleRuntimeError(runtime, error, "Die Route konnte nicht berechnet werden.");
         });
@@ -1743,7 +1750,7 @@ function renderKpiKontext(kontext, id, uid) {
   return (
     `<button class="sws-kpi-info-toggle collapsed" type="button" ` +
     `data-bs-toggle="collapse" data-bs-target="#${targetId}" ` +
-    `aria-expanded="false" aria-controls="${targetId}" aria-label="Erklaerung zu diesem Wert">` +
+    `aria-expanded="false" aria-controls="${targetId}" aria-label="Erklärung zu diesem Wert">` +
     `<span class="sws-kpi-info-icon" aria-hidden="true">&#9432;</span>` +
     `</button>` +
     `<div id="${targetId}" class="collapse">` +
@@ -1769,7 +1776,7 @@ function renderHazardKpis(runtime, accidents) {
 
   runtime.ui.hazardKpis.innerHTML =
     renderHazardKpi(`${accidents.length} Punkte im Umfeld`, config.kpiKontext1, "1", runtime.uid) +
-    renderHazardKpi(`${walkCount} Fuss`, config.kpiKontext2, "2", runtime.uid) +
+    renderHazardKpi(`${walkCount} Fuß`, config.kpiKontext2, "2", runtime.uid) +
     renderHazardKpi(`${bikeCount} Rad`, config.kpiKontext3, "3", runtime.uid) +
     renderHazardKpi(`${childCount} Kinder`, config.kpiKontext4, "4", runtime.uid);
 }
@@ -2117,7 +2124,7 @@ function renderScoreSummary(runtime, payload) {
       <div class="sws-score-badge is-neutral">⚪</div>
       <div class="sws-score-copy">
         <span class="sws-score-label">Score <a href="#" data-bs-toggle="modal" data-bs-target="#score-info-modal-${runtime.uid}" onclick="event.preventDefault();" class="text-white-50 ms-1 small" style="text-decoration: none;" title="Berechnung erklären">ℹ️</a></span>
-        <span class="sws-score-caption">Schule und Startpunkt waehlen</span>
+        <span class="sws-score-caption">Schule und Startpunkt wählen</span>
       </div>
       <div class="sws-score-value">
         <strong>-</strong>
@@ -2173,7 +2180,7 @@ function renderScoreSummary(runtime, payload) {
 }
 
 function getCompactScoreLabel(modeLabel = "") {
-  if (modeLabel.includes("Fussweg")) return "Fussweg";
+  if (modeLabel.includes("Fußweg")) return "Fußweg";
   if (modeLabel.includes("Radroute")) return "Radroute";
   if (modeLabel.includes("Autoroute")) return "Autoroute";
   if (modeLabel.includes("Routing")) return "Routenbewertung";
@@ -2182,9 +2189,9 @@ function getCompactScoreLabel(modeLabel = "") {
 
 function getScoreExplanation(score) {
   if (Number.isFinite(Number(score))) {
-    return `Score ${Number(score).toFixed(1)}. 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.`;
+    return `Score ${Number(score).toFixed(1)}. 0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhöht den Wert; Kinderbeteiligung, Fuß-/Radbezug und neuere Unfälle wiegen stärker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.`;
   }
-  return "0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhoeht den Wert; Kinderbeteiligung, Fuss-/Radbezug und neuere Unfaelle wiegen staerker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.";
+  return "0 bedeutet keine relevanten Unfallpunkte im 50-m-Routenkorridor. Jeder Treffer erhöht den Wert; Kinderbeteiligung, Fuß-/Radbezug und neuere Unfälle wiegen stärker. Unter 2 = geringes Risiko, 2 bis unter 6 = erhöhte Aufmerksamkeit, ab 6 = kritisches Risiko.";
 }
 
 function renderScoreGuide(runtime, scoreResult) {
@@ -2216,9 +2223,9 @@ function renderScoreGuide(runtime, scoreResult) {
       </div>
       <div class="sws-score-factors" aria-label="Bewertungsfaktoren">
         <span>50-m-Routenkorridor</span>
-        <span>Kinderbeteiligung staerker</span>
-        <span>Fuss/Rad staerker</span>
-        <span>Neuere Unfaelle staerker</span>
+        <span>Kinderbeteiligung stärker</span>
+        <span>Fuß/Rad stärker</span>
+        <span>Neuere Unfälle stärker</span>
       </div>
       <details class="sws-score-details mt-1 border-top pt-2">
         <summary class="small text-muted" style="cursor: pointer; user-select: none;">Berechnung einblenden</summary>
@@ -2331,7 +2338,7 @@ function buildRouteRecommendations(scoreResult, allScoredRoutes) {
     const topHit = hits[0];
     const countLabel = hits.length === 1 ? "liegt ein Unfallpunkt" : `liegen ${hits.length} Unfallpunkte`;
     return [
-      `Auf dieser Route ${countLabel} im 50-m-Korridor; am auffaelligsten ist ${describeHitLocation(topHit)}.`,
+      `Auf dieser Route ${countLabel} im 50-m-Korridor; am auffälligsten ist ${describeHitLocation(topHit)}.`,
     ];
   }
 
@@ -2344,7 +2351,7 @@ function buildRouteRecommendations(scoreResult, allScoredRoutes) {
   const childHits = hits.filter((hit) => hit.properties.ist_kind);
   if (childHits.length && childHits.length / hits.length > 0.5) {
     recommendations.push(
-      `${childHits.length} von ${hits.length} Unfallpunkten im Korridor betreffen Kinderbeteiligung - Elternlotsen oder Schulweghelfer an dieser Stelle einsetzen, oder das Kind hier zunaechst persoenlich begleiten.`,
+      `${childHits.length} von ${hits.length} Unfallpunkten im Korridor betreffen Kinderbeteiligung - Elternlotsen oder Schulweghelfer an dieser Stelle einsetzen, oder das Kind hier zunächst persönlich begleiten.`,
     );
   }
 
@@ -2353,14 +2360,14 @@ function buildRouteRecommendations(scoreResult, allScoredRoutes) {
   if (bikeHits.length && bikeHits.length > footHits.length) {
     const worstBikeHit = bikeHits[0];
     recommendations.push(
-      `Die Unfallpunkte im Korridor sind ueberwiegend radbezogen, besonders nahe ${describeHitLocation(worstBikeHit)} - dort absteigen und schieben, oder ueber den Wegtyp-Umschalter auf "Fussweg" wechseln.`,
+      `Die Unfallpunkte im Korridor sind überwiegend radbezogen, besonders nahe ${describeHitLocation(worstBikeHit)} - dort absteigen und schieben, oder über den Wegtyp-Umschalter auf "Fußweg" wechseln.`,
     );
   }
 
   const cluster = findDenseHitCluster(hits);
   if (cluster) {
     recommendations.push(
-      `Mehrere Unfallpunkte haeufen sich nahe ${describeHitLocation(cluster)} - diesen Abschnitt nach Moeglichkeit meiden oder besonders aufmerksam und begleitet durchqueren.`,
+      `Mehrere Unfallpunkte häufen sich nahe ${describeHitLocation(cluster)} - diesen Abschnitt nach Möglichkeit meiden oder besonders aufmerksam und begleitet durchqueren.`,
     );
   }
 
@@ -2370,14 +2377,14 @@ function buildRouteRecommendations(scoreResult, allScoredRoutes) {
   const recentWeightShare = totalWeight ? recentHits.reduce((sum, hit) => sum + hit.weight, 0) / totalWeight : 0;
   if (recentHits.length && recentWeightShare > 0.5) {
     recommendations.push(
-      `Ein Grossteil des Risikos stammt aus juengeren Unfaellen (${currentYear - 1}-${currentYear}) - die Route bis auf Weiteres eng begleiten und die Lage vor Ort neu einschaetzen.`,
+      `Ein Großteil des Risikos stammt aus jüngeren Unfällen (${currentYear - 1}-${currentYear}) - die Route bis auf Weiteres eng begleiten und die Lage vor Ort neu einschätzen.`,
     );
   }
 
   if (!recommendations.length) {
     const topHit = hits[0];
     recommendations.push(
-      `Der staerkste Einzelfaktor auf dieser Route ist ein Unfallpunkt bei ${describeHitLocation(topHit)} - hier ist erhoehte Aufmerksamkeit sinnvoll.`,
+      `Der stärkste Einzelfaktor auf dieser Route ist ein Unfallpunkt bei ${describeHitLocation(topHit)} - hier ist erhöhte Aufmerksamkeit sinnvoll.`,
     );
   }
 
@@ -2392,7 +2399,7 @@ function buildRouteRecommendations(scoreResult, allScoredRoutes) {
 
 function buildRouteAlternativesNote(scoreResult, allScoredRoutes) {
   const candidates = Array.isArray(allScoredRoutes) ? allScoredRoutes : [];
-  const contactHint = "Ziehen Sie zusaetzlich einen anderen Wegtyp (Fussweg/Rad/Auto) in Betracht oder wenden Sie sich an Elternlotsen, Schulweghelfer oder die Verkehrswacht vor Ort.";
+  const contactHint = "Ziehen Sie zusätzlich einen anderen Wegtyp (Fußweg/Rad/Auto) in Betracht oder wenden Sie sich an Elternlotsen, Schulweghelfer oder die Verkehrswacht vor Ort.";
 
   if (candidates.length <= 1) {
     return `Es wurde nur eine Routenvariante berechnet. ${contactHint}`;
@@ -2403,10 +2410,10 @@ function buildRouteAlternativesNote(scoreResult, allScoredRoutes) {
   const selectedIsMeaningfullyBetter = nextBest.scoreResult.level !== scoreResult.level || scoreGap >= 1;
 
   if (!selectedIsMeaningfullyBetter) {
-    return `Von ${candidates.length} berechneten Routenvarianten ist keine deutlich sicherer - alle liegen in einem aehnlich kritischen Bereich. ${contactHint}`;
+    return `Von ${candidates.length} berechneten Routenvarianten ist keine deutlich sicherer - alle liegen in einem ähnlich kritischen Bereich. ${contactHint}`;
   }
 
-  return `Von ${candidates.length} berechneten Routenvarianten wurde bereits automatisch die risikoaermste gewaehlt (Score ${scoreResult.score.toFixed(1)}); die naechstbessere Alternative laege bei Score ${nextBest.scoreResult.score.toFixed(1)} (${getLevelLabel(nextBest.scoreResult.level)}). ${contactHint}`;
+  return `Von ${candidates.length} berechneten Routenvarianten wurde bereits automatisch die risikoärmste gewählt (Score ${scoreResult.score.toFixed(1)}); die nächstbessere Alternative läge bei Score ${nextBest.scoreResult.score.toFixed(1)} (${getLevelLabel(nextBest.scoreResult.level)}). ${contactHint}`;
 }
 
 function findDenseHitCluster(hits, clusterRadiusMeters = 150) {
@@ -2482,7 +2489,7 @@ const SWS_CACHE_DB_VERSION = 1;
 
 function openSwsCacheDb() {
   if (!globalThis.indexedDB) {
-    return Promise.reject(new Error("IndexedDB nicht verfuegbar."));
+    return Promise.reject(new Error("IndexedDB nicht verfügbar."));
   }
   return new Promise((resolve, reject) => {
     const request = globalThis.indexedDB.open(SWS_CACHE_DB_NAME, SWS_CACHE_DB_VERSION);
@@ -2492,7 +2499,7 @@ function openSwsCacheDb() {
       }
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error("IndexedDB konnte nicht geoeffnet werden."));
+    request.onerror = () => reject(request.error || new Error("IndexedDB konnte nicht geöffnet werden."));
   });
 }
 
@@ -2822,7 +2829,7 @@ function routingUnavailableReason(url, mode) {
     publicCarService = publicCarService || new URL(url).hostname === "router.project-osrm.org";
   } catch (_error) { /* Leerer Wert verwendet den bisherigen Standard. */ }
   return publicCarService
-    ? "Der voreingestellte Routingdienst liefert nur Autorouten. Fuer Fuss- und Radwege bitte einen geeigneten Dienst konfigurieren oder den FOSSGIS-Fallback bewusst auswaehlen."
+    ? "Der voreingestellte Routingdienst liefert nur Autorouten. Für Fuß- und Radwege bitte einen geeigneten Dienst konfigurieren oder den FOSSGIS-Fallback bewusst auswählen."
     : "";
 }
 
@@ -2911,7 +2918,7 @@ function getOsrmProfile(routeMode) {
 function getRouteModeLabel(routeMode) {
   if (routeMode === "bike") return "Radroute";
   if (routeMode === "car") return "Autoroute";
-  return "Fussweg";
+  return "Fußweg";
 }
 
 async function ensureMapAssets() {
@@ -3045,7 +3052,7 @@ function stableSchoolId(source) {
 
 function buildAccidentTitle(row) {
   const kind = toBooleanFlag(row.IstKind) ? "Kinderbeteiligung" : "Unfallpunkt";
-  const mode = toBooleanFlag(row.IstFuss) ? "Fussverkehr" : toBooleanFlag(row.IstRad) ? "Radverkehr" : "Verkehr";
+  const mode = toBooleanFlag(row.IstFuss) ? "Fußverkehr" : toBooleanFlag(row.IstRad) ? "Radverkehr" : "Verkehr";
   return `${kind} ${mode}`;
 }
 
@@ -3055,7 +3062,7 @@ function describeAccident(properties) {
     parts.push("Kinder");
   }
   if (properties.ist_fuss) {
-    parts.push("Fuss");
+    parts.push("Fuß");
   }
   if (properties.ist_rad) {
     parts.push("Rad");
@@ -3067,7 +3074,7 @@ function describeAccident(properties) {
 }
 
 function getGeolocationUnavailableMessage() {
-  return "Standortbestimmung ist in dieser Umgebung nicht verfuegbar. Viele Desktop-Browser erlauben Standort nur auf HTTPS-Seiten oder localhost. Bitte pruefe die Browserfreigabe oder nutze alternativ Startadresse oder Kartenklick.";
+  return "Standortbestimmung ist in dieser Umgebung nicht verfügbar. Viele Desktop-Browser erlauben Standort nur auf HTTPS-Seiten oder localhost. Bitte prüfe die Browserfreigabe oder nutze alternativ Startadresse oder Kartenklick.";
 }
 
 function isGeolocationSupported() {
@@ -3080,7 +3087,7 @@ function isGeolocationContextAllowed() {
 }
 
 function getGeolocationInsecureContextMessage() {
-  return "Standortbestimmung ist nur in sicheren Browser-Kontexten moeglich. Bitte die App ueber HTTPS oder lokal ueber localhost oeffnen. Alternativ funktionieren Startadresse oder Kartenklick.";
+  return "Standortbestimmung ist nur in sicheren Browser-Kontexten möglich. Bitte die App über HTTPS oder lokal über localhost öffnen. Alternativ funktionieren Startadresse oder Kartenklick.";
 }
 
 async function getGeolocationPermissionState() {
@@ -3115,7 +3122,7 @@ function setGeolocationLoading(runtime, isLoading) {
 
 function getGeolocationErrorMessage(error = {}) {
   const mobileHint = isLikelyMobileDevice()
-    ? " Auf dem Smartphone muessen zusaetzlich die Standortdienste im System aktiviert sein."
+    ? " Auf dem Smartphone müssen zusätzlich die Standortdienste im System aktiviert sein."
     : " Auf dem Desktop hilft oft die Standortfreigabe im Browser oder Betriebssystem.";
 
   if (error.code === 1) {
@@ -3127,7 +3134,7 @@ function getGeolocationErrorMessage(error = {}) {
   if (error.code === 3) {
     return `Die Standortbestimmung hat zu lange gedauert.${mobileHint} Auf schwachem GPS/WLAN kann das passieren; Startadresse oder Kartenklick funktionieren weiterhin.`;
   }
-  return `Der Standort konnte nicht gelesen werden.${mobileHint} Bitte pruefe Berechtigungen oder nutze Startadresse bzw. Kartenklick.`;
+  return `Der Standort konnte nicht gelesen werden.${mobileHint} Bitte prüfe Berechtigungen oder nutze Startadresse bzw. Kartenklick.`;
 }
 
 function isLikelyMobileDevice() {

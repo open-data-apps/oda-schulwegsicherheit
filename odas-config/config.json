@@ -36,7 +36,7 @@
   ],
   "impressum": [
     "Ondics GmbH<br>",
-    "Blumenstrasse 19<br>",
+    "Blumenstraße 19<br>",
     "70182 Stuttgart<br>",
     "<a href='https://www.ondics.de/' target='_blank'>https://www.ondics.de/</a>"
   ],
@@ -81,11 +81,11 @@
   "routeServiceUrl": "",
   "geocodingServiceUrl": "",
   "weiterfuehrendeLinks": "<ul><li><a href='https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/' target='_blank'>Unfallatlas (OpenGeodata.NRW)</a></li><li><a href='https://github.com/Datenschule/schulscraper-data' target='_blank'>Schuldaten JedeSchule/Datenschule</a></li><li><a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap-Mitwirkende</a></li></ul>",
-  "datenquelleHinweis": "<p>Die App kombiniert Schuldaten von <a href=\"https://github.com/Datenschule/schulscraper-data\" target=\"_blank\" rel=\"noopener\">JedeSchule/Datenschule</a> (Baden-Wuerttemberg) mit den punktgenauen Daten des <a href=\"https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/\" target=\"_blank\" rel=\"noopener\">Unfallatlas (OpenGeodata.NRW)</a>.</p><p>Beruecksichtigt werden ausschliesslich schulwegrelevante Unfaelle mit Fuss- oder Radbezug an Werktagen zu typischen Schulwegzeiten. Die App ersetzt keine amtliche Schulwegplanung; Vollstaendigkeit und Aktualitaet haengen von den Quellen ab.</p>",
+  "datenquelleHinweis": "<p>Die App kombiniert Schuldaten von <a href=\"https://github.com/Datenschule/schulscraper-data\" target=\"_blank\" rel=\"noopener\">JedeSchule/Datenschule</a> (Baden-Württemberg) mit den punktgenauen Daten des <a href=\"https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/\" target=\"_blank\" rel=\"noopener\">Unfallatlas (OpenGeodata.NRW)</a>.</p><p>Berücksichtigt werden ausschließlich schulwegrelevante Unfälle mit Fuß- oder Radbezug an Werktagen zu typischen Schulwegzeiten. Die App ersetzt keine amtliche Schulwegplanung; Vollständigkeit und Aktualität hängen von den Quellen ab.</p>",
   "datenStand": "Stand: Unfallatlas 2024; Schuldaten laufend von JedeSchule",
-  "kpiKontext1": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
-  "kpiKontext2": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
-  "kpiKontext3": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
-  "kpiKontext4": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
+  "kpiKontext1": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewählten Schule.",
+  "kpiKontext2": "Unfälle mit Fußgängerbeteiligung im Umfeld - besonders schulwegrelevant.",
+  "kpiKontext3": "Unfälle mit Radfahrerbeteiligung im Umfeld der Schule.",
+  "kpiKontext4": "Unfälle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
   "cacheTtlStunden": "24"
 }

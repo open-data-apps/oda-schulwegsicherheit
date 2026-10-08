@@ -51,6 +51,56 @@ function setup(fetchImpl = async () => ({ ok: true, json: async () => routePaylo
   return { api, runtime, calls, storage, grant };
 }
 
+test('die Oberfläche zeigt deutsche Umlaute in Beschriftungen und Eingabehilfen', () => {
+  const { api, runtime } = setup();
+  runtime.rootElement.querySelector = () => element();
+  api.renderShell(runtime);
+  const html = runtime.rootElement.innerHTML;
+  assert.match(html, /Baden-Württemberg · Schulwege datenbasiert einschätzen/);
+  assert.match(html, /placeholder="z\.B\. Österfeld Vaihingen/);
+  assert.match(html, /placeholder="Straße, Ort oder Haltestelle"/);
+  assert.match(html, /data-route-mode="foot">Fußweg</);
+  assert.match(html, /Schule und Startpunkt wählen/);
+});
+
+test('Einwilligung, Fallback und Erklärungen verwenden Umlaute statt Umschreibungen', () => {
+  const { api, runtime } = setup();
+  api.renderConsentPanel(runtime);
+  assert.match(runtime.ui.consentPanel.innerHTML, /erhält/);
+  assert.match(runtime.ui.consentPanel.innerHTML, /gewählten Schule/);
+  runtime.config.routeServiceUrl = fallback;
+  api.renderRoutingNotice(runtime);
+  assert.match(runtime.ui.routingNotice.innerHTML, /öffentliche Ersatzdienst/);
+  assert.match(runtime.ui.routingNotice.innerHTML, /höchstens eine Anfrage/);
+  assert.match(runtime.ui.routingNotice.innerHTML, /Verfügbarkeitsgarantie/);
+  assert.match(api.getScoreExplanation(1.2), /Fuß-\/Radbezug und neuere Unfälle wiegen stärker/);
+  assert.match(api.getGeolocationInsecureContextMessage(), /über HTTPS/);
+});
+
+for (const format of ['legacy', 'current']) {
+  test(`alte Unfalltitel aus dem ${format}-Cache werden ohne Änderung fremder Namen angezeigt`, () => {
+    const { api } = setup();
+    const accidents = ['Unfallpunkt Fussverkehr', 'Kinderbeteiligung Fussverkehr', 'Goethe-Kreuzung Fussverkehr']
+      .map(titel => ({ properties: { titel } }));
+    const cached = format === 'legacy' ? accidents : { accidents, totalCount: 20, discardedCount: 17 };
+    const result = api.normalizeAccidentAtlasCacheEntry(cached);
+    assert.deepEqual(Array.from(result.accidents, accident => accident.properties.titel), [
+      'Unfallpunkt Fußverkehr', 'Kinderbeteiligung Fußverkehr', 'Goethe-Kreuzung Fussverkehr',
+    ]);
+    assert.equal(result.totalCount, format === 'legacy' ? null : 20);
+    assert.equal(result.discardedCount, format === 'legacy' ? null : 17);
+  });
+}
+
+test('eine berechnete Fußroute hat auch im kompakten Score die korrekte Beschriftung', async () => {
+  const { api, runtime, grant } = setup();
+  grant();
+  await api.evaluateRoute(runtime);
+  assert.match(runtime.ui.scoreSummary.innerHTML, /Fußweg/);
+  assert.doesNotMatch(runtime.ui.scoreSummary.innerHTML, /Fussweg|Routenbewertung/);
+  assert.match(runtime.ui.routeModeNote.textContent, /^Fußweg mit Routing:/);
+});
+
 for (const mode of ['foot', 'bike']) {
   test(`der oeffentliche Auto-Standard darf keine ${mode}-Route liefern`, async () => {
     const { api, runtime, calls, grant } = setup();
@@ -248,6 +298,8 @@ test('bei Schule plus Ort muessen beide Suchwoerter passen', () => {
   const results = api.filterSchools(schools, 'Oesterfeld Vaihingen');
   assert.deepEqual(Array.from(results, record => record.id), ['BW-129123']);
   assert.deepEqual(Array.from(api.filterSchools(schools, 'Osterfeld Vaihingen'), record => record.id), ['BW-129123']);
+  assert.deepEqual(Array.from(api.filterSchools(schools, 'Österfeld Vaihingen'), record => record.id), ['BW-129123']);
+  assert.equal(api.normalizeSchool({ id: 'goethe', name: 'Goethe-Schule' }).name, 'Goethe-Schule');
 });
 
 test('ein alter Schuldaten-Cache behaelt nicht den defekten Namen und Suchindex', async () => {

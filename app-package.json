@@ -3,11 +3,11 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "app-version": "1.40.5",
+  "app-version": "1.40.6",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
-  "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschaetzung moeglicher Schulwege in Baden-Wuerttemberg.",
+  "kurzbeschreibung": "Map-zentrierte ODAS-Webapp zur datenbasierten Einschätzung möglicher Schulwege in Baden-Württemberg.",
   "beschreibung": [
     "_multiline_",
     "SchulwegSafe unterstützt Familien, Schulen und Kommunen in Baden-Württemberg dabei, mögliche Schulwege anhand offener Geodaten zu betrachten.",
@@ -45,7 +45,7 @@
   "tags-funktion": [
     "Karte",
     "Schulweg",
-    "Mobilitaet"
+    "Mobilität"
   ],
   "tags-dateityp": [
     "JSON",
@@ -64,7 +64,7 @@
   "daten": {
     "beschreibung": "Die App verarbeitet externe Schuldaten von JedeSchule/Datenschule und den Unfallatlas-CSV-ZIP-Download von OpenGeodata.NRW.",
     "schema": "assets/schema.json",
-    "beispiel": "Unfallatlas 2024 CSV-ZIP und Baden-Wuerttemberg-Schuldaten von JedeSchule/Datenschule",
+    "beispiel": "Unfallatlas 2024 CSV-ZIP und Baden-Württemberg-Schuldaten von JedeSchule/Datenschule",
     "beispiel-url": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip"
   },
   "branding-css": "",
@@ -96,7 +96,7 @@
     "icon": {
       "label": "Kopfzeilen-Icon",
       "category": "allgemein",
-      "hilfe": "Relativer Pfad oder Bild-URL fuer das Logo in der Kopfzeile",
+      "hilfe": "Relativer Pfad oder Bild-URL für das Logo in der Kopfzeile",
       "default": "assets/odas-app-icon.svg",
       "format": {
         "typ": "image",
@@ -106,7 +106,7 @@
       "erforderlich": "ja"
     },
     "fusszeile": {
-      "label": "Fusszeile",
+      "label": "Fußzeile",
       "category": "kontakt-rechtliches",
       "hilfe": "Text in der Footer-Zeile",
       "default": "(C) Copyright {{jahr}} | App: Schulwegsicherheit BW | Daten: JedeSchule und Unfallatlas | ODAS: {{odas.betreiber.name}}",
@@ -135,7 +135,7 @@
     "beschreibung": {
       "label": "Beschreibung",
       "category": "beschreibung",
-      "hilfe": "Inhalt der Seite Ueber diese App",
+      "hilfe": "Inhalt der Seite Über diese App",
       "format": {
         "typ": "markdown"
       },
@@ -187,7 +187,7 @@
         "## Anbieter",
         "",
         "Ondics GmbH  ",
-        "Blumenstrasse 19  ",
+        "Blumenstraße 19  ",
         "70182 Stuttgart",
         "",
         "Website: [https://www.ondics.de/](https://www.ondics.de/)  ",
@@ -246,7 +246,7 @@
     "brandingCSS": {
       "label": "Branding CSS",
       "category": "sonstiges",
-      "hilfe": "Optionaler direkter CSS-Code fuer Instanz-Anpassungen",
+      "hilfe": "Optionaler direkter CSS-Code für Instanz-Anpassungen",
       "default": "",
       "format": {
         "typ": "string",
@@ -318,7 +318,7 @@
     "geocodingServiceUrl": {
       "label": "Optionaler Geocoding-Dienst",
       "category": "datenherkunft",
-      "hilfe": "Nominatim-kompatible Such-URL fuer die Adressaufloesung. Leer lassen fuer den voreingestellten oeffentlichen Dienst nominatim.openstreetmap.org.",
+      "hilfe": "Nominatim-kompatible Such-URL für die Adressauflösung. Leer lassen für den voreingestellten öffentlichen Dienst nominatim.openstreetmap.org.",
       "default": "",
       "format": {
         "typ": "url"
@@ -326,9 +326,9 @@
       "erforderlich": "nein"
     },
     "weiterfuehrendeLinks": {
-      "label": "Weiterfuehrende Links",
+      "label": "Weiterführende Links",
       "category": "beschreibung",
-      "hilfe": "Verwandte Datensaetze / Hintergrundquellen (HTML/Markdown). Leer = ausgeblendet.",
+      "hilfe": "Verwandte Datensätze / Hintergrundquellen (HTML/Markdown). Leer = ausgeblendet.",
       "default": "- [Unfallatlas (OpenGeodata.NRW)](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/)\n- [Schuldaten JedeSchule/Datenschule](https://github.com/Datenschule/schulscraper-data)\n- [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright)",
       "format": {
         "typ": "markdown"
@@ -358,8 +358,8 @@
     "kpiKontext1": {
       "label": "KPI-Kontext 1 (Punkte im Umfeld)",
       "category": "beschreibung",
-      "hilfe": "Optionaler Erklaertext zum ersten Kennzahlwert. Leer = kein Kontext.",
-      "default": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewaehlten Schule.",
+      "hilfe": "Optionaler Erklärtext zum ersten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Alle Unfallpunkte im aktuell betrachteten Umkreis der ausgewählten Schule.",
       "format": {
         "typ": "string",
         "laenge": 160
@@ -367,10 +367,10 @@
       "erforderlich": "nein"
     },
     "kpiKontext2": {
-      "label": "KPI-Kontext 2 (Fuss)",
+      "label": "KPI-Kontext 2 (Fuß)",
       "category": "beschreibung",
-      "hilfe": "Optionaler Erklaertext zum zweiten Kennzahlwert. Leer = kein Kontext.",
-      "default": "Unfaelle mit Fussgaengerbeteiligung im Umfeld - besonders schulwegrelevant.",
+      "hilfe": "Optionaler Erklärtext zum zweiten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfälle mit Fußgängerbeteiligung im Umfeld - besonders schulwegrelevant.",
       "format": {
         "typ": "string",
         "laenge": 160
@@ -380,8 +380,8 @@
     "kpiKontext3": {
       "label": "KPI-Kontext 3 (Rad)",
       "category": "beschreibung",
-      "hilfe": "Optionaler Erklaertext zum dritten Kennzahlwert. Leer = kein Kontext.",
-      "default": "Unfaelle mit Radfahrerbeteiligung im Umfeld der Schule.",
+      "hilfe": "Optionaler Erklärtext zum dritten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfälle mit Radfahrerbeteiligung im Umfeld der Schule.",
       "format": {
         "typ": "string",
         "laenge": 160
@@ -391,8 +391,8 @@
     "kpiKontext4": {
       "label": "KPI-Kontext 4 (Kinder)",
       "category": "beschreibung",
-      "hilfe": "Optionaler Erklaertext zum vierten Kennzahlwert. Leer = kein Kontext.",
-      "default": "Unfaelle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
+      "hilfe": "Optionaler Erklärtext zum vierten Kennzahlwert. Leer = kein Kontext.",
+      "default": "Unfälle mit Kinderbeteiligung laut Unfallatlas-Merkmal.",
       "format": {
         "typ": "string",
         "laenge": 160
@@ -400,7 +400,7 @@
       "erforderlich": "nein"
     },
     "cacheTtlStunden": {
-      "label": "Cache-Gueltigkeit (Stunden)",
+      "label": "Cache-Gültigkeit (Stunden)",
       "category": "sonstiges",
       "hilfe": "Wie lange Schul- und Unfalldaten im Browser zwischengespeichert werden, bevor sie erneut geladen werden. Leer = Standardwert 24.",
       "default": "24",

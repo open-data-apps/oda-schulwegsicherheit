@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.40.6 - 2026-10-08
+- FIX: App-eigene Oberflächen-, Einwilligungs-, Hilfe- und Standardtexte verwenden ä, ö, ü und ß statt ASCII-Umschreibungen; technische Schlüssel, URLs und fremde Datensatznamen bleiben unverändert.
+- FIX: Bereits zwischengespeicherte, von der App erzeugte Unfalltitel zeigen ebenfalls „Fußverkehr“; andere Titel werden nicht pauschal verändert.
+- TEST: Regressionen für sichtbare Texte, kompakte Fußweg-Bewertung und beide Unfallcache-Formate; die Schulsuche unterstützt weiterhin „Österfeld“, „Oesterfeld“ und „Osterfeld“.
+
 ## 1.40.5 - 2026-10-08
 - FIX: Der oeffentliche OSRM-Autodienst wird nicht mehr als Fuss-/Radrouting ausgegeben; ohne geeignete Route gibt es keinen Score.
 - ENH: Bewusst waehlbarer FOSSGIS-Fallback mit getrennten Fuss-/Rad-/Autoprofilen, eigener Endpunkt-Einwilligung, sichtbaren Nutzungsgrenzen und mindestens einer Sekunde Anfrageabstand je Dokument; kein automatischer Dienstwechsel.
