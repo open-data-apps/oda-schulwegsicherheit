@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.40.5 - 2026-10-08
+- FIX: Der oeffentliche OSRM-Autodienst wird nicht mehr als Fuss-/Radrouting ausgegeben; ohne geeignete Route gibt es keinen Score.
+- ENH: Bewusst waehlbarer FOSSGIS-Fallback mit getrennten Fuss-/Rad-/Autoprofilen, eigener Endpunkt-Einwilligung, sichtbaren Nutzungsgrenzen und mindestens einer Sekunde Anfrageabstand je Dokument; kein automatischer Dienstwechsel.
+- FIX: Adresswechsel und Widerruf verwerfen veraltete Routen und Adressantworten; laufende Routingabrufe werden abgebrochen.
+- FIX: Mehrteilige Schulsuche verlangt alle Suchbegriffe. Der belegte Quellfehler der Oesterfeldschule wird gezielt korrigiert, auch in vorhandenen Schuldaten-Caches.
+- TEST: App-eigene Regressionstests fuer Routing, Fallback, Einwilligung, Ratenbegrenzung, asynchrone Eingabewechsel und Suche; README, Datenschutz und Paket-/Lokalkonfiguration abgeglichen.
+
 ## 1.40.4 - 2026-10-02
 - ENH: Verwendete ODAS-Dienste in `odas-services` deklariert.
 

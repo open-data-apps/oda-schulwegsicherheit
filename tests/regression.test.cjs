@@ -1,0 +1,259 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const source = fs.readFileSync(path.join(__dirname, '../app/app.js'), 'utf8');
+const fallback = 'https://routing.openstreetmap.de';
+const routePayload = {
+  code: 'Ok',
+  routes: [{ distance: 944.7, duration: 673.8, geometry: { type: 'LineString', coordinates: [[9.1131764, 48.7264626], [9.110575, 48.732765]] } }],
+};
+const start = { lat: 48.7264626, lon: 9.1131764 };
+const school = { id: 'BW-129123', name: 'Oesterfeldschule', lat: 48.732765, lon: 9.110575 };
+
+function element() {
+  const listeners = new Map();
+  return {
+    value: '', innerHTML: '', textContent: '', className: '', hidden: false, dataset: {},
+    classList: { add() {}, remove() {}, toggle() {} },
+    addEventListener(type, callback) { listeners.set(type, callback); },
+    removeEventListener() {}, setAttribute() {}, removeAttribute() {}, contains() { return false; },
+    querySelectorAll() { return []; },
+    emit(type, event = {}) { return listeners.get(type)?.({ target: this, ...event }); },
+  };
+}
+
+function setup(fetchImpl = async () => ({ ok: true, json: async () => routePayload })) {
+  const storage = new Map();
+  const calls = [];
+  const layer = () => ({ addTo() { return this; }, remove() {} });
+  const api = vm.createContext({
+    URL, URLSearchParams, AbortController, DOMException, console, setTimeout, clearTimeout,
+    document: { addEventListener() {}, removeEventListener() {} },
+    navigator: {},
+    window: { location: { pathname: '/app/', search: '', hash: '#startseite' }, history: { replaceState() {} } },
+    localStorage: { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+    L: { polyline: layer, circleMarker: layer, marker: layer },
+    fetch: async (...args) => { calls.push({ args, at: Date.now() }); return fetchImpl(...args); },
+  });
+  vm.runInContext(source, api, { filename: 'app.js' });
+  vm.runInContext('this.registerRuntime = r => SCHULWEGSAFE_RUNTIME.activeRuntimes.set(r.rootElement, r);', api);
+  const runtime = api.createRuntime({ routeServiceUrl: 'https://routes.example.test/route' }, element());
+  for (const key of ['schoolSearchInput', 'schoolSearchResults', 'schoolDetails', 'status', 'consentPanel', 'routingNotice', 'mapContainer', 'hazardKpis', 'dataFreshness', 'scoreSummary', 'routeModeNote', 'routeScoreHelp', 'routeAlternatives', 'hazardList', 'routeRecommendations', 'startAddressInput', 'startAddressResults', 'applyStartButton', 'geoLocateButton', 'copyShareLinkButton']) runtime.ui[key] = element();
+  runtime.ui.routeModeButtons = ['foot', 'bike', 'car'].map(mode => Object.assign(element(), { dataset: { routeMode: mode } }));
+  runtime.map = { fitBounds() {}, setView() {}, remove() {} };
+  runtime.selectedSchool = school;
+  runtime.startPoint = { ...start };
+  api.registerRuntime(runtime);
+  const grant = (url = runtime.config.routeServiceUrl) => storage.set(api.consentKey(runtime.config.geocodingServiceUrl, url), 'granted');
+  return { api, runtime, calls, storage, grant };
+}
+
+for (const mode of ['foot', 'bike']) {
+  test(`der oeffentliche Auto-Standard darf keine ${mode}-Route liefern`, async () => {
+    const { api, runtime, calls, grant } = setup();
+    runtime.config.routeServiceUrl = '';
+    grant();
+    await assert.rejects(api.fetchRouteService('', start, school, mode, runtime.config), /Autorouten|Fuss|Rad/);
+    assert.equal(calls.length, 0, 'ungeeigneten Dienst nicht erst abfragen');
+  });
+}
+
+test('der bisherige Standard bleibt fuer Autorouten nutzbar', async () => {
+  const { api, runtime, calls, grant } = setup();
+  runtime.config.routeServiceUrl = '';
+  grant();
+  const result = await api.fetchRouteService('', start, school, 'car', runtime.config);
+  assert.equal(result.code, 'Ok');
+  assert.match(calls[0].args[0], /^https:\/\/router\.project-osrm\.org\/route\/v1\/driving\//);
+});
+
+test('ein ausgefallener eigener Dienst wechselt nicht heimlich zum Fallback', async () => {
+  const { api, runtime, calls, grant } = setup(async () => ({ ok: false, status: 503 }));
+  grant();
+  await assert.rejects(api.fetchRouteService(runtime.config.routeServiceUrl, start, school, 'foot', runtime.config), /503/);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].args[0], 'https://routes.example.test/route');
+});
+
+for (const [mode, suffix] of [['foot', 'routed-foot/route/v1/foot/'], ['bike', 'routed-bike/route/v1/bike/'], ['car', 'routed-car/route/v1/driving/']]) {
+  test(`Fallback verwendet fuer ${mode} den passenden vorbereiteten Routingdienst`, async () => {
+    const { api, runtime, calls, grant } = setup();
+    runtime.config.routeServiceUrl = fallback;
+    grant();
+    const result = await api.fetchRouteService(fallback, start, school, mode, runtime.config);
+    assert.equal(result.code, 'Ok');
+    assert.ok(calls[0].args[0].startsWith(`${fallback}/${suffix}`), calls[0].args[0]);
+    assert.notEqual(calls[0].args[1]?.method, 'POST', 'OSRM erwartet hier eine GET-Anfrage');
+  });
+}
+
+test('Fallback-Auswahl sendet nichts und uebernimmt nicht die Zustimmung zum alten Dienst', () => {
+  const { api, runtime, calls, grant } = setup();
+  grant();
+  api.bindUi(runtime);
+  runtime.ui.routingNotice.emit('click', { target: { closest: () => ({}) } });
+  assert.equal(runtime.config.routeServiceUrl, fallback);
+  assert.equal(api.hasConsent(runtime.config.geocodingServiceUrl, fallback), false);
+  assert.match(runtime.ui.consentPanel.innerHTML, /routing\.openstreetmap\.de/);
+  assert.equal(calls.length, 0);
+});
+
+test('ohne Zustimmung zum Fallback werden keine Koordinaten uebertragen', async () => {
+  const { api, runtime, calls, grant } = setup();
+  grant();
+  runtime.config.routeServiceUrl = fallback;
+  await assert.rejects(api.fetchRouteService(fallback, start, school, 'foot', runtime.config), /Einwilligung/);
+  assert.equal(calls.length, 0);
+});
+
+test('Fallback-Anfragen bleiben auch bei parallelen Aufrufen mindestens eine Sekunde auseinander', async () => {
+  const { api, runtime, calls, grant } = setup();
+  runtime.config.routeServiceUrl = fallback;
+  grant();
+  await Promise.all(['foot', 'bike'].map(mode => api.fetchRouteService(fallback, start, school, mode, runtime.config)));
+  assert.equal(calls.length, 2);
+  assert.ok(calls[1].at - calls[0].at >= 1000, `Abstand: ${calls[1].at - calls[0].at} ms`);
+});
+
+test('eine waehrend der Ratenbegrenzung widerrufene Zustimmung verhindert den Versand', async () => {
+  const { api, runtime, calls, grant, storage } = setup();
+  runtime.config.routeServiceUrl = fallback;
+  grant();
+  await api.fetchRouteService(fallback, start, school, 'foot', runtime.config);
+  const pending = api.fetchRouteService(fallback, start, school, 'bike', runtime.config);
+  storage.clear();
+  await assert.rejects(pending, /Einwilligung/);
+  assert.equal(calls.length, 1);
+});
+
+test('eine abgebrochene wartende Fallback-Anfrage wird nicht versendet', async () => {
+  const { api, runtime, calls, grant } = setup();
+  runtime.config.routeServiceUrl = fallback;
+  grant();
+  await api.fetchRouteService(fallback, start, school, 'foot', runtime.config);
+  const controller = new AbortController();
+  const pending = api.fetchRouteService(fallback, start, school, 'bike', runtime.config, controller.signal);
+  controller.abort();
+  await assert.rejects(pending, { name: 'AbortError' });
+  assert.equal(calls.length, 1);
+});
+
+test('verspaetete Routen setzen nach geaenderter Startadresse weder Score noch Strecke', async () => {
+  let deliver;
+  const { api, runtime, grant } = setup(() => new Promise(resolve => { deliver = resolve; }));
+  grant();
+  api.bindUi(runtime);
+  const pending = api.evaluateRoute(runtime);
+  runtime.ui.startAddressInput.value = '';
+  runtime.ui.startAddressInput.emit('input');
+  deliver({ ok: true, json: async () => routePayload });
+  await pending;
+  assert.equal(runtime.startPoint, null);
+  assert.equal(runtime.data.routeCandidates.length, 0);
+  assert.doesNotMatch(runtime.ui.scoreSummary.innerHTML, /Geringes Risiko/);
+  assert.doesNotMatch(runtime.ui.status.textContent, /bewertet\./);
+});
+
+test('Adressaenderung bricht einen laufenden Routingabruf ab', async () => {
+  let requestSignal;
+  const { api, runtime, grant } = setup((_url, options) => {
+    requestSignal = options.signal;
+    return new Promise(() => {});
+  });
+  grant();
+  api.bindUi(runtime);
+  api.evaluateRoute(runtime);
+  runtime.ui.startAddressInput.emit('input');
+  assert.ok(requestSignal, 'Fetch muss das Abbruchsignal erhalten');
+  assert.equal(requestSignal.aborted, true);
+});
+
+test('verspaetetes Geocoding darf nach Leeren der Adresse keine neue Route beginnen', async () => {
+  let deliver;
+  const { api, runtime, calls, grant } = setup(() => new Promise(resolve => { deliver = resolve; }));
+  grant();
+  api.bindUi(runtime);
+  runtime.startPoint = null;
+  runtime.ui.startAddressInput.value = 'Bahnhof Stuttgart-Vaihingen';
+  const pending = api.resolveStartAddressAndRoute(runtime);
+  runtime.ui.startAddressInput.value = '';
+  runtime.ui.startAddressInput.emit('input');
+  deliver({ ok: true, json: async () => [{ lat: '48.7264626', lon: '9.1131764', display_name: 'Bahnhof Stuttgart-Vaihingen', address: { road: 'Vollmoellerstrasse', city: 'Stuttgart' } }] });
+  // Die Netzattrappe liefert Folgeabrufe sofort, damit auch der fehlerhafte Pfad beendet wird.
+  api.fetch = async () => { calls.push({ args: ['unexpected route'] }); return { ok: true, json: async () => routePayload }; };
+  await pending;
+  assert.equal(runtime.startPoint, null);
+  assert.equal(runtime.data.routeCandidates.length, 0);
+  assert.equal(calls.length, 1);
+});
+
+test('Enter waehrend des Such-Debounce berechnet trotz langsamer Geocodierung eine Route', async () => {
+  const responses = [];
+  const timers = [];
+  const { api, runtime, calls, grant } = setup(url => url.includes('nominatim')
+    ? new Promise(resolve => responses.push(resolve))
+    : Promise.resolve({ ok: true, json: async () => routePayload }));
+  api.setTimeout = callback => { const timer = { callback, cancelled: false }; timers.push(timer); return timer; };
+  api.clearTimeout = timer => { if (timer) timer.cancelled = true; };
+  grant();
+  api.bindUi(runtime);
+  runtime.ui.startAddressInput.value = 'Bahnhof Stuttgart-Vaihingen';
+  runtime.ui.startAddressInput.emit('input');
+  const pending = api.resolveStartAddressAndRoute(runtime);
+  // Der Enter-Abruf ist noch offen, wenn der urspruengliche Vorschlags-Timer faellig wird.
+  for (const timer of [...timers]) if (!timer.cancelled) timer.callback();
+  responses[0]({ ok: true, json: async () => [{ lat: '48.7264626', lon: '9.1131764', display_name: 'Bahnhof Stuttgart-Vaihingen', address: { road: 'Vollmoellerstrasse', city: 'Stuttgart' } }] });
+  await pending;
+  assert.equal(runtime.data.routeCandidates.length, 1);
+  assert.equal(calls.filter(call => call.args[0].includes('nominatim')).length, 1);
+});
+
+test('Fehler einer veralteten Adresssuche ueberschreiben nicht den aktuellen Status', async () => {
+  let rejectSearch;
+  const timers = [];
+  const { api, runtime, grant } = setup(() => new Promise((_resolve, reject) => { rejectSearch = reject; }));
+  api.setTimeout = callback => { timers.push(callback); return timers.length; };
+  api.clearTimeout = () => {};
+  grant();
+  api.bindUi(runtime);
+  runtime.ui.startAddressInput.value = 'Alte Adresse Stuttgart';
+  runtime.ui.startAddressInput.emit('input');
+  timers[0]();
+  runtime.ui.startAddressInput.value = '';
+  runtime.ui.startAddressInput.emit('input');
+  const currentStatus = runtime.ui.status.textContent;
+  rejectSearch(new Error('Antwort der alten Suche'));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(runtime.ui.status.textContent, currentStatus);
+});
+
+const rawSchool = { id: 'BW-129123', name: '…sterfeldschule Grundschule Vaihingen', address: 'Katzenbachstraße 27, 70563 Stuttgart', lat: 48.732765, lon: 9.110575 };
+
+test('der belegte defekte Schulname wird gezielt korrigiert, andere Auslassungszeichen bleiben erhalten', () => {
+  const { api } = setup();
+  assert.equal(api.normalizeSchool(rawSchool).name, 'Österfeldschule Grundschule Vaihingen');
+  assert.equal(api.normalizeSchool({ ...rawSchool, id: 'andere-schule' }).name, rawSchool.name);
+  assert.equal(api.normalizeSchool({ ...rawSchool, name: 'Offiziell neuer Name' }).name, 'Offiziell neuer Name');
+});
+
+test('bei Schule plus Ort muessen beide Suchwoerter passen', () => {
+  const { api } = setup();
+  const schools = [rawSchool,
+    { id: 'hegel', name: 'Hegel-Gymnasium Vaihingen', address: 'Krehlstraße 65, 70563 Stuttgart' },
+    { id: 'pforzheim', name: 'Osterfeld-Grundschule', address: 'Neßlerstraße 10, 75172 Pforzheim' },
+  ].map(record => api.enrichSchoolForSearch(api.normalizeSchool(record)));
+  const results = api.filterSchools(schools, 'Oesterfeld Vaihingen');
+  assert.deepEqual(Array.from(results, record => record.id), ['BW-129123']);
+  assert.deepEqual(Array.from(api.filterSchools(schools, 'Osterfeld Vaihingen'), record => record.id), ['BW-129123']);
+});
+
+test('ein alter Schuldaten-Cache behaelt nicht den defekten Namen und Suchindex', async () => {
+  const { api, runtime } = setup();
+  api.readCacheEntry = async () => ({ fetchedAt: Date.now(), data: [{ ...rawSchool, adresse: rawSchool.address, search: { name: 'sterfeldschule' } }] });
+  const results = await api.loadSchools(runtime);
+  assert.equal(results[0].name, 'Österfeldschule Grundschule Vaihingen');
+  assert.equal(api.filterSchools(results, 'Oesterfeld Vaihingen')[0]?.id, 'BW-129123');
+});

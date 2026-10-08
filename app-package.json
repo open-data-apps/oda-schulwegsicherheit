@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "schulwegsafe",
   "name": "SchulwegSafe",
-  "app-version": "1.40.4",
+  "app-version": "1.40.5",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -20,7 +20,7 @@
     "",
     "Schuldaten werden dedupliziert, mit Suchindex und fehlertoleranter Suche (Umlaut-, Tippfehler-Normalisierung) aufbereitet; Unfalldaten werden als semikolon-getrennte CSV mit PapaParse geparst, anhand der gelieferten WGS84-Koordinaten normalisiert und zeitlich gefiltert: Berücksichtigt werden ausschließlich schulwegrelevante Einträge mit Fuß- (`IstFuss`) oder Radbezug (`IstRad`) an Werktagen (Wochen­tag 2–6) zu typischen Schulwegzeiten (7–8 Uhr und 15–17 Uhr). Filterung nach 1-km-Umkreis der Schule, Routenkorridor (50 m) und Gewichtung bestimmen den Score.",
     "",
-    "Die Route wird nach Einwilligung über einen externen Geocoding-Dienst (`geocodingServiceUrl`, Standard `nominatim.openstreetmap.org`) und einen OSRM-kompatiblen Routingdienst (`routeServiceUrl`, Standard `router.project-osrm.org`, Profile `foot`, `bike`, `driving`) berechnet; Startpunkt und Schule werden als Koordinaten übertragen. Der Risiko-Score summiert Unfallgewichte im 50-m-Korridor (Basis 1, Kind ×2, Fuß ×1,5, Rad ×1,3, Alter −10 % je Jahr, min. 0,5, Summe max. 100, Stufen <2 gering, 2–<6 erhöht, ≥6 kritisch) und färbt Routensegmente sowie Empfehlungen entsprechend – ausdrücklich ohne Sicherheitsgarantie.",
+    "Die Route wird nach Einwilligung über einen externen Geocoding-Dienst (`geocodingServiceUrl`, Standard `nominatim.openstreetmap.org`) und einen geeigneten Routingdienst (`routeServiceUrl`) berechnet; Startpunkt und Schule werden als Koordinaten übertragen. Der voreingestellte Dienst `router.project-osrm.org` wird ausschließlich für Autorouten verwendet. Fuß- und Radwege bleiben dort gesperrt. Als bewusst auswählbarer Fallback bietet `routing.openstreetmap.de` (FOSSGIS) getrennte Fuß-, Rad- und Autoprofile, nur nach dienstbezogener Einwilligung und innerhalb seiner Nutzungsbedingungen. Ohne nutzbare Route gibt es keine Bewertung. Der Risiko-Score summiert Unfallgewichte im 50-m-Korridor (Basis 1, Kind ×2, Fuß ×1,5, Rad ×1,3, Alter −10 % je Jahr, min. 0,5, Summe max. 100, Stufen <2 gering, 2–<6 erhöht, ≥6 kritisch) und färbt Routensegmente sowie Empfehlungen entsprechend – ausdrücklich ohne Sicherheitsgarantie.",
     "",
     "## Datenquelle",
     "",
@@ -30,7 +30,7 @@
     "- **Unfalldaten:** [Unfallatlas der Statistischen Ämter des Bundes und der Länder](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/) – bereitgestellt über [OpenGeodata.NRW](https://www.opengeodata.nrw.de/) unter Datenlizenz Deutschland Namensnennung 2.0, ZIP `{{{appinstanz.apiurls.2}}}`",
     "- **Kartengrundlage:** [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright) (ODbL) – Kacheln `tile.openstreetmap.org`",
     "- **Geocoding (extern, nur nach Einwilligung):** `nominatim.openstreetmap.org` – überträgt Suchbegriffe und Schule-Ort",
-    "- **Routing (extern, nur nach Einwilligung):** `router.project-osrm.org` – überträgt Start- und Zielkoordinaten",
+    "- **Routing (extern, nur nach Einwilligung):** `router.project-osrm.org` für Autorouten; bewusst auswählbarer Fallback [routing.openstreetmap.de / FOSSGIS](https://routing.openstreetmap.de/about.html) mit getrennten Fuß-, Rad- und Autoprofilen. Beide erhalten Start- und Zielkoordinaten. Für FOSSGIS gelten [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/), insbesondere höchstens eine Anfrage pro Sekunde, kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlicher Teil eines Angebots. Keine Verfügbarkeitsgarantie.",
     "",
     "Kartenkacheln, Schul- und Unfalldaten werden als Massendownloads direkt im Browser geladen; Geocoding und Routing übertragen personenbeziehbare Angaben (Adresse, Koordinaten) an externe Dienste. Einzelheiten regelt die Datenschutzseite und die Einwilligung im UI.",
     "",
@@ -151,7 +151,7 @@
         "",
         "Schuldaten werden dedupliziert, mit Suchindex und fehlertoleranter Suche (Umlaut-, Tippfehler-Normalisierung) aufbereitet; Unfalldaten werden als semikolon-getrennte CSV mit PapaParse geparst, anhand der gelieferten WGS84-Koordinaten normalisiert und zeitlich gefiltert: Berücksichtigt werden ausschließlich schulwegrelevante Einträge mit Fuß- (`IstFuss`) oder Radbezug (`IstRad`) an Werktagen (Wochen­tag 2–6) zu typischen Schulwegzeiten (7–8 Uhr und 15–17 Uhr). Filterung nach 1-km-Umkreis der Schule, Routenkorridor (50 m) und Gewichtung bestimmen den Score.",
         "",
-        "Die Route wird nach Einwilligung über einen externen Geocoding-Dienst (`geocodingServiceUrl`, Standard `nominatim.openstreetmap.org`) und einen OSRM-kompatiblen Routingdienst (`routeServiceUrl`, Standard `router.project-osrm.org`, Profile `foot`, `bike`, `driving`) berechnet; Startpunkt und Schule werden als Koordinaten übertragen. Der Risiko-Score summiert Unfallgewichte im 50-m-Korridor (Basis 1, Kind ×2, Fuß ×1,5, Rad ×1,3, Alter −10 % je Jahr, min. 0,5, Summe max. 100, Stufen <2 gering, 2–<6 erhöht, ≥6 kritisch) und färbt Routensegmente sowie Empfehlungen entsprechend – ausdrücklich ohne Sicherheitsgarantie.",
+        "Die Route wird nach Einwilligung über einen externen Geocoding-Dienst (`geocodingServiceUrl`, Standard `nominatim.openstreetmap.org`) und einen geeigneten Routingdienst (`routeServiceUrl`) berechnet; Startpunkt und Schule werden als Koordinaten übertragen. Der voreingestellte Dienst `router.project-osrm.org` wird ausschließlich für Autorouten verwendet. Fuß- und Radwege bleiben dort gesperrt. Als bewusst auswählbarer Fallback bietet `routing.openstreetmap.de` (FOSSGIS) getrennte Fuß-, Rad- und Autoprofile, nur nach dienstbezogener Einwilligung und innerhalb seiner Nutzungsbedingungen. Ohne nutzbare Route gibt es keine Bewertung. Der Risiko-Score summiert Unfallgewichte im 50-m-Korridor (Basis 1, Kind ×2, Fuß ×1,5, Rad ×1,3, Alter −10 % je Jahr, min. 0,5, Summe max. 100, Stufen <2 gering, 2–<6 erhöht, ≥6 kritisch) und färbt Routensegmente sowie Empfehlungen entsprechend – ausdrücklich ohne Sicherheitsgarantie.",
         "",
         "## Datenquelle",
         "",
@@ -161,7 +161,7 @@
         "- **Unfalldaten:** [Unfallatlas der Statistischen Ämter des Bundes und der Länder](https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/) – bereitgestellt über [OpenGeodata.NRW](https://www.opengeodata.nrw.de/) unter Datenlizenz Deutschland Namensnennung 2.0, ZIP `{{{appinstanz.apiurls.2}}}`",
         "- **Kartengrundlage:** [OpenStreetMap-Mitwirkende](https://www.openstreetmap.org/copyright) (ODbL) – Kacheln `tile.openstreetmap.org`",
         "- **Geocoding (extern, nur nach Einwilligung):** `nominatim.openstreetmap.org` – überträgt Suchbegriffe und Schule-Ort",
-        "- **Routing (extern, nur nach Einwilligung):** `router.project-osrm.org` – überträgt Start- und Zielkoordinaten",
+        "- **Routing (extern, nur nach Einwilligung):** `router.project-osrm.org` für Autorouten; bewusst auswählbarer Fallback [routing.openstreetmap.de / FOSSGIS](https://routing.openstreetmap.de/about.html) mit getrennten Fuß-, Rad- und Autoprofilen. Beide erhalten Start- und Zielkoordinaten. Für FOSSGIS gelten [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/), insbesondere höchstens eine Anfrage pro Sekunde, kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlicher Teil eines Angebots. Keine Verfügbarkeitsgarantie.",
         "",
         "Kartenkacheln, Schul- und Unfalldaten werden als Massendownloads direkt im Browser geladen; Geocoding und Routing übertragen personenbeziehbare Angaben (Adresse, Koordinaten) an externe Dienste. Einzelheiten regelt die Datenschutzseite und die Einwilligung im UI.",
         "",
@@ -213,7 +213,8 @@
         "Zwei Funktionen dieser App können ohne externe Dienste nicht arbeiten. Beide übertragen dabei Angaben, die einen Rückschluss auf Wohnort und Schulweg zulassen:",
         "",
         "- **Adresssuche (Geocoding):** Die von Ihnen eingegebene Adresse wird zusammen mit dem Ort der gewählten Schule an den Geocoding-Dienst übertragen, um daraus Koordinaten zu ermitteln. Voreingestellt ist der öffentliche Dienst `nominatim.openstreetmap.org`.",
-        "- **Routenberechnung:** Die Koordinaten Ihres Startpunkts und der ausgewählten Schule werden an den Routing-Dienst übertragen, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Zugriffsprotokollen des Dienstes. Voreingestellt ist `router.project-osrm.org`, eine öffentliche Demonstrationsinstanz des OSRM-Projekts.",
+        "- **Routenberechnung:** Die Koordinaten Ihres Startpunkts und der ausgewählten Schule werden an den Routing-Dienst übertragen, um daraus eine Route zu berechnen. Die Koordinaten sind Bestandteil der aufgerufenen Adresse und erscheinen dadurch in den Zugriffsprotokollen des Dienstes. Voreingestellt ist `router.project-osrm.org`, eine öffentliche Demonstrationsinstanz des OSRM-Projekts, ausschließlich für Autorouten.",
+        "Als Fallback kann ausdrücklich `routing.openstreetmap.de` (FOSSGIS e.V.) ausgewählt werden. Vor der Übertragung gilt eine eigene, an diesen Dienst gebundene Einwilligung; eine Freigabe des bisherigen Dienstes gilt nicht für den Fallback. Übertragen werden Start- und Zielkoordinaten, IP-Adresse und Browserkennung; Routenanfragen werden beim Anbieter protokolliert. Siehe [FOSSGIS-Datenschutz](https://www.fossgis.de/datenschutzerklärung/) und [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/). Die Dienst-Auswahl bleibt nur in der aktuellen Ansicht; die Einwilligung wird wie bisher im Browser gespeichert und ist widerrufbar.",
         "",
         "Wird der Standort-Knopf genutzt, ist der übertragene Startpunkt Ihre tatsächliche Position. Beide Dienste werden von Dritten betrieben; auf deren Protokollierung und Aufbewahrung hat der Betreiber dieser App keinen Einfluss.",
         "",
@@ -237,7 +238,8 @@
         "",
         "- **tile.openstreetmap.org** — Kartenkacheln (OpenStreetMap)",
         "- **nominatim.openstreetmap.org** — Adress-Suche (Geocoding); übertragen: Suchbegriffe, IP-Adresse, User-Agent; Abruf nur nach Einwilligung",
-        "- **router.project-osrm.org** — Routenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung"
+        "- **router.project-osrm.org** — Autoroutenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung",
+        "- **routing.openstreetmap.de** — ausdrücklich wählbarer Fallback für Fuß-, Rad- und Autorouten; übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach dienstbezogener Einwilligung"
       ],
       "erforderlich": "ja"
     },
@@ -306,7 +308,7 @@
     "routeServiceUrl": {
       "label": "Optionaler Routing-Service",
       "category": "datenherkunft",
-      "hilfe": "Optionale OSRM-kompatible Basis-URL oder geschuetzte Service-URL fuer Routen. Leer lassen fuer den voreingestellten OSRM-Routingdienst.",
+      "hilfe": "Eigener Routing-Service mit POST-Feld mode (foot/bike/car) oder passend vorbereitetem OSRM-Endpunkt. Leer: öffentlicher Standard nur für Auto, Fuß/Rad gesperrt. FOSSGIS-Fallback ist in der App ausdrücklich wählbar und nur innerhalb der Nutzungsbedingungen nutzbar. Ein Profilwort in einer OSRM-URL allein wechselt nicht das Wegenetz.",
       "default": "",
       "format": {
         "typ": "url"

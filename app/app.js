@@ -9,6 +9,7 @@ const SCHULWEGSAFE_DEFAULTS = {
   currentYear: 2026,
   geocodingServiceUrl: "https://nominatim.openstreetmap.org/search",
   routingServiceBaseUrl: "https://router.project-osrm.org/route/v1",
+  routingFallbackBaseUrl: "https://routing.openstreetmap.de",
   cacheTtlStunden: 24,
   // Praktischer Referenzwert fuer die Meter-Balken-Anzeige, nicht die technische
   // Score-Obergrenze (100 in calculateRouteHazardScore). Gekoppelt an die
@@ -21,6 +22,8 @@ let swsInstanzZaehler = 0;
 const SCHULWEGSAFE_RUNTIME = {
   activeRuntimes: new Map(),
   assetPromises: {},
+  fallbackQueue: Promise.resolve(),
+  fallbackLastRequestAt: 0,
 };
 
 /*
@@ -157,11 +160,46 @@ function bindConsentPanel(runtime) {
     }
     renderConsentPanel(runtime);
     if (erteilt) {
-      setStatus(runtime, "info", "Danke. Adresssuche und Routenberechnung stehen jetzt zur Verfuegung.");
+      setStatus(runtime, "info", "Danke. Ihre Zustimmung zu den angezeigten Diensten wurde gespeichert.");
     } else {
+      runtime.addressRequestVersion += 1;
+      clearTimeout(runtime.geocodeTimer);
+      runtime.data.addressResults = [];
+      hideStartAddressResults(runtime);
+      invalidateRoute(runtime);
       setStatus(runtime, "info", "Adresssuche und Routenberechnung bleiben deaktiviert.");
     }
   });
+}
+
+function renderRoutingNotice(runtime) {
+  const panel = runtime.ui.routingNotice;
+  if (!panel) return;
+  const fallbackActive = isFossgisRoutingService(runtime.config.routeServiceUrl);
+  const unavailable = routingUnavailableReason(runtime.config.routeServiceUrl, runtime.routeMode);
+  panel.hidden = !fallbackActive && !unavailable && !runtime.routingFailed;
+  if (panel.hidden) return;
+
+  panel.innerHTML = `
+    <h3 class="h6 mb-2">${fallbackActive ? "FOSSGIS-Fallback ausgewaehlt" : "Passenden Routingdienst verwenden"}</h3>
+    <p class="small mb-2">${escapeHtml(unavailable || (fallbackActive
+      ? "Der oeffentliche Ersatzdienst routing.openstreetmap.de berechnet Fuss-, Rad- und Autorouten mit getrennten Routingprofilen."
+      : "Der konfigurierte Routingdienst hat keine nutzbare Route geliefert. Ohne Route wird kein Score angezeigt."))}</p>
+    <p class="small mb-2">
+      FOSSGIS erlaubt nur begrenzte Nutzung: hoechstens eine Anfrage pro Sekunde,
+      kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlicher Teil eines Angebots.
+      Keine Verfuegbarkeitsgarantie. Betreiber muessen die
+      <a href="https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/" target="_blank" rel="noopener noreferrer">Nutzungsbedingungen</a>
+      fuer ihren Einsatz pruefen. Die Begrenzung der App gilt pro geoeffneter Seite, nicht zentral fuer alle Besucher.
+    </p>
+    <p class="small mb-2">Start- und Zielkoordinaten gehen erst nach Zustimmung an den ausgewaehlten Dienst.
+      Die Fallback-Auswahl gilt nur fuer diese Ansicht; die Instanzkonfiguration bleibt unveraendert.</p>
+    ${fallbackActive ? "" : '<button type="button" class="btn btn-sm btn-outline-primary" data-routing-fallback>FOSSGIS-Fallback auswaehlen</button>'}
+    <div class="small mt-2">Routing: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener noreferrer">FOSSGIS / OSRM</a> ·
+      Daten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap-Mitwirkende (ODbL)</a> ·
+      <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Kartenfehler melden</a>
+    </div>
+  `;
 }
 
 /*
@@ -290,6 +328,9 @@ function createRuntime(configdata, rootElement) {
     },
     ui: {},
     requestVersion: 0,
+    addressRequestVersion: 0,
+    routeController: null,
+    routingFailed: false,
     cleanupCallbacks: [],
   };
 }
@@ -333,6 +374,9 @@ function teardownRuntime(rootElement) {
 
 function disposeRuntime(runtime) {
   if (!runtime) return;
+  runtime.requestVersion += 1;
+  runtime.addressRequestVersion += 1;
+  if (runtime.routeController) runtime.routeController.abort();
   if (Array.isArray(runtime.cleanupCallbacks)) {
     runtime.cleanupCallbacks.forEach((cleanup) => cleanup());
     runtime.cleanupCallbacks = [];
@@ -413,6 +457,7 @@ function renderShell(runtime) {
           <div id="data-freshness-${runtime.uid}" class="text-muted small mt-1"></div>
         </div>
 
+        <div id="routing-notice-${runtime.uid}" class="alert alert-info sws-consent" role="region" aria-label="Routingdienst" hidden></div>
         <div id="consent-panel-${runtime.uid}" class="alert alert-warning sws-consent" role="region" aria-label="Hinweis zu externen Diensten" hidden></div>
         <div id="runtime-status-${runtime.uid}" class="alert alert-info sws-status" role="status">Initialisierung laeuft.</div>
 
@@ -472,6 +517,7 @@ function renderShell(runtime) {
     schoolDetails: runtime.rootElement.querySelector(`#school-details-${runtime.uid}`),
     status: runtime.rootElement.querySelector(`#runtime-status-${runtime.uid}`),
     consentPanel: runtime.rootElement.querySelector(`#consent-panel-${runtime.uid}`),
+    routingNotice: runtime.rootElement.querySelector(`#routing-notice-${runtime.uid}`),
     mapContainer: runtime.rootElement.querySelector(`#map-container-${runtime.uid}`),
     hazardKpis: runtime.rootElement.querySelector(`#hazard-kpis-${runtime.uid}`),
     dataFreshness: runtime.rootElement.querySelector(`#data-freshness-${runtime.uid}`),
@@ -492,6 +538,21 @@ function renderShell(runtime) {
 
 function bindUi(runtime) {
   updateRouteModeButtons(runtime);
+  renderRoutingNotice(runtime);
+  runtime.ui.routingNotice.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-routing-fallback]")) return;
+    invalidateRoute(runtime);
+    runtime.addressRequestVersion += 1;
+    clearTimeout(runtime.geocodeTimer);
+    runtime.data.addressResults = [];
+    hideStartAddressResults(runtime);
+    // Nur der abgeleitete Laufzeitwert wird geaendert, nicht die ODAS-Konfiguration.
+    runtime.config.routeServiceUrl = SCHULWEGSAFE_DEFAULTS.routingFallbackBaseUrl;
+    runtime.routingFailed = false;
+    renderRoutingNotice(runtime);
+    renderConsentPanel(runtime);
+    setStatus(runtime, "info", "Fallback ausgewaehlt. Bitte die Zustimmung zum angezeigten Dienst pruefen und die Route erneut berechnen.");
+  });
 
   runtime.ui.schoolSearchInput.addEventListener("input", (event) => {
     runtime.search.activeSchoolResultIndex = -1;
@@ -540,11 +601,12 @@ function bindUi(runtime) {
   runtime.cleanupCallbacks.push(() => document.removeEventListener("click", closeSearchOnOutsideClick));
 
   runtime.ui.startAddressInput.addEventListener("input", (event) => {
+    runtime.addressRequestVersion += 1;
     runtime.startPoint = null;
     runtime.startAddressLabel = "";
     clearStartMarker(runtime);
-    clearRouteVisuals(runtime);
-    renderScoreSummary(runtime, null);
+    invalidateRoute(runtime);
+    setStatus(runtime, "info", "Startadresse geaendert. Bitte eine Adresse auswaehlen und die Route neu berechnen.");
     queueAddressSearch(runtime, event.target.value);
   });
 
@@ -571,6 +633,7 @@ function bindUi(runtime) {
     button.addEventListener("click", () => {
       runtime.routeMode = button.dataset.routeMode || "foot";
       updateRouteModeButtons(runtime);
+      renderRoutingNotice(runtime);
       if (runtime.selectedSchool && runtime.startPoint) {
         evaluateRoute(runtime).catch((error) => {
           handleRuntimeError(runtime, error, "Die Route konnte nicht berechnet werden.");
@@ -815,7 +878,8 @@ async function loadSchools(runtime) {
   if (isCacheEntryFresh(cached, runtime.config.cacheTtlStunden)) {
     runtime.data.schoolsFetchedAt = cached.fetchedAt;
     runtime.data.schoolsFromCache = true;
-    return cached.data;
+    // Auch ein noch gueltiger Cache kann den alten Quellfehler/Suchindex enthalten.
+    return cached.data.map(normalizeSchool).map(enrichSchoolForSearch);
   }
 
   const payload = await fetchJsonResource(runtime.config.schoolsDataUrl, runtime.config);
@@ -856,10 +920,16 @@ function normalizeSchool(rawSchool = {}) {
   }
 
   const id = pickString(source, ["id", "_id", "slug", "schulnummer", "nummer", "uuid"]) || stableSchoolId(source);
+  let name = pickString(source, ["name", "school_name", "schulname", "bezeichnung", "titel"]);
+  // Belegter Quellfehler, keine pauschale Ersetzung von Auslassungszeichen.
+  // https://www.stuttgart.de/organigramm/adresse/oesterfeldschule (08.10.2026)
+  if (id === "BW-129123" && name === "…sterfeldschule Grundschule Vaihingen") {
+    name = "Österfeldschule Grundschule Vaihingen";
+  }
 
   return {
     id,
-    name: pickString(source, ["name", "school_name", "schulname", "bezeichnung", "titel"]),
+    name,
     adresse: pickString(source, ["adresse", "address", "strasse", "street"]),
     plz: pickString(source, ["plz", "zip", "postcode", "postleitzahl"]),
     ort: pickString(source, ["ort", "city", "stadt", "gemeinde"]),
@@ -1071,13 +1141,31 @@ function queueAddressSearch(runtime, query) {
 }
 
 async function searchStartAddress(runtime, query) {
-  const results = await fetchAddressCandidates(query, runtime.selectedSchool, runtime.config);
+  const requestToken = ++runtime.addressRequestVersion;
+  let results;
+  try {
+    results = await fetchAddressCandidates(query, runtime.selectedSchool, runtime.config);
+  } catch (error) {
+    if (!isRuntimeActive(runtime) || requestToken !== runtime.addressRequestVersion) return null;
+    throw error;
+  }
+  if (!isRuntimeActive(runtime) || requestToken !== runtime.addressRequestVersion) return null;
   runtime.data.addressResults = results;
   renderStartAddressResults(runtime, results);
   return results;
 }
 
 async function resolveStartAddressAndRoute(runtime) {
+  // Enter/Route-Klick ersetzt die noch geplante Vorschlagssuche, statt sie zu ueberholen.
+  clearTimeout(runtime.geocodeTimer);
+  runtime.geocodeTimer = null;
+  const unavailable = routingUnavailableReason(runtime.config.routeServiceUrl, runtime.routeMode);
+  if (unavailable) {
+    invalidateRoute(runtime);
+    renderRoutingNotice(runtime);
+    setStatus(runtime, "warning", unavailable);
+    return;
+  }
   if (!hasConsent(runtime.config.geocodingServiceUrl, runtime.config.routeServiceUrl)) {
     setStatus(runtime, "warning", "Fuer die Routenberechnung ist Ihre Zustimmung zur Nutzung der externen Dienste noetig.");
     return;
@@ -1095,6 +1183,7 @@ async function resolveStartAddressAndRoute(runtime) {
       return;
     }
     const results = await searchStartAddress(runtime, query);
+    if (results === null) return;
     if (!results.length) {
       setStatus(runtime, "warning", "Fuer diese Startadresse wurde kein Treffer gefunden.");
       return;
@@ -1236,10 +1325,7 @@ function getSchoolSearchRank(school, queryProfile) {
     }
   });
 
-  if (queryProfile.groups.length === 1 && missedTerms > 0) {
-    return 999;
-  }
-  if (queryProfile.groups.length > 1 && missedTerms > 1) {
+  if (missedTerms > 0) {
     return 999;
   }
 
@@ -1540,14 +1626,13 @@ function uniqueValues(values) {
 
 async function selectSchool(runtime, school) {
   runtime.selectedSchool = school;
-  runtime.requestVersion += 1;
+  runtime.addressRequestVersion += 1;
+  invalidateRoute(runtime);
   const currentRequest = runtime.requestVersion;
 
   renderSchoolDetails(runtime, school);
   syncSchoolMarker(runtime);
-  clearRouteVisuals(runtime);
   clearAccidentLayers(runtime);
-  renderScoreSummary(runtime, null);
   setStatus(runtime, "info", `Unfallpunkte im Umkreis von ${school.name} werden gefiltert.`);
 
   const nearbyAccidents = runtime.data.accidents.filter((accident) => {
@@ -1837,15 +1922,17 @@ async function evaluateRoute(runtime) {
   // increasing token here. After the async gap below, only the call that still
   // owns the latest token is allowed to touch DOM/state; an overtaken call bails
   // out silently instead of overwriting a newer, still-in-flight result.
-  runtime.requestVersion += 1;
+  invalidateRoute(runtime);
   const requestToken = runtime.requestVersion;
-
-  clearRouteVisuals(runtime);
+  const controller = new AbortController();
+  runtime.routeController = controller;
+  runtime.routingFailed = false;
+  renderRoutingNotice(runtime);
   setStatus(runtime, "info", `${getRouteModeLabel(runtime.routeMode)} wird berechnet.`);
 
   let routes = [];
   try {
-    const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode, runtime.config);
+    const routePayload = await fetchRouteService(runtime.config.routeServiceUrl, runtime.startPoint, runtime.selectedSchool, runtime.routeMode, runtime.config, controller.signal);
     if (!isRuntimeActive(runtime) || requestToken !== runtime.requestVersion) {
       return;
     }
@@ -1854,13 +1941,17 @@ async function evaluateRoute(runtime) {
     if (!isRuntimeActive(runtime) || requestToken !== runtime.requestVersion) {
       return;
     }
-    renderScoreSummary(runtime, null);
+    runtime.routingFailed = true;
+    renderRoutingNotice(runtime);
     setStatus(runtime, "warning", `Der Routingdienst konnte keine ${getRouteModeLabel(runtime.routeMode)} berechnen: ${error.message}`);
     return;
+  } finally {
+    if (runtime.routeController === controller) runtime.routeController = null;
   }
 
   if (!routes.length) {
-    renderScoreSummary(runtime, null);
+    runtime.routingFailed = true;
+    renderRoutingNotice(runtime);
     setStatus(runtime, "warning", `Der Routingdienst hat keine ${getRouteModeLabel(runtime.routeMode)} geliefert.`);
     return;
   }
@@ -1980,6 +2071,17 @@ function clearRouteVisuals(runtime) {
   runtime.layers.routeSegments = [];
   runtime.layers.alternatives.forEach((layer) => layer.remove());
   runtime.layers.alternatives = [];
+}
+
+function invalidateRoute(runtime) {
+  runtime.requestVersion += 1;
+  if (runtime.routeController) {
+    runtime.routeController.abort();
+    runtime.routeController = null;
+  }
+  runtime.data.routeCandidates = [];
+  clearRouteVisuals(runtime);
+  renderScoreSummary(runtime, null);
 }
 
 function getLevelLabel(level) {
@@ -2705,19 +2807,59 @@ async function fetchViaOdasProxy(targetUrl, options = {}) {
   return proxyData.content;
 }
 
-async function fetchRouteService(routeServiceUrl, startPoint, school, routeMode, config) {
+function isFossgisRoutingService(url) {
+  try {
+    return new URL(url).origin === SCHULWEGSAFE_DEFAULTS.routingFallbackBaseUrl;
+  } catch (_error) {
+    return false;
+  }
+}
+
+function routingUnavailableReason(url, mode) {
+  if (mode === "car") return "";
+  let publicCarService = !String(url || "").trim();
+  try {
+    publicCarService = publicCarService || new URL(url).hostname === "router.project-osrm.org";
+  } catch (_error) { /* Leerer Wert verwendet den bisherigen Standard. */ }
+  return publicCarService
+    ? "Der voreingestellte Routingdienst liefert nur Autorouten. Fuer Fuss- und Radwege bitte einen geeigneten Dienst konfigurieren oder den FOSSGIS-Fallback bewusst auswaehlen."
+    : "";
+}
+
+async function fetchRouteService(routeServiceUrl, startPoint, school, routeMode, config, signal) {
   // Letzte Instanz vor der Uebertragung: ohne Einwilligung wird nichts gesendet (F-26, F-37).
-  if (!hasConsent(config.geocodingServiceUrl, config.routeServiceUrl)) {
+  if (!hasConsent(config.geocodingServiceUrl, routeServiceUrl)) {
     throw drittdienstAbgelehntFehler();
   }
+  const unavailable = routingUnavailableReason(routeServiceUrl, routeMode);
+  if (unavailable) throw new Error(unavailable);
 
   const serviceUrl = String(routeServiceUrl || "").trim();
+  if (isFossgisRoutingService(serviceUrl)) {
+    // Ein Profilwort im OSRM-Pfad wechselt nicht das vorbereitete Wegenetz.
+    const variant = routeMode === "car" ? "car" : routeMode === "bike" ? "bike" : "foot";
+    const baseUrl = `${SCHULWEGSAFE_DEFAULTS.routingFallbackBaseUrl}/routed-${variant}/route/v1`;
+    const request = SCHULWEGSAFE_RUNTIME.fallbackQueue.then(async () => {
+      // Serialisierung gilt auch fuer mehrere App-Instanzen in diesem Dokument.
+      while (Date.now() - SCHULWEGSAFE_RUNTIME.fallbackLastRequestAt < 1000) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 - (Date.now() - SCHULWEGSAFE_RUNTIME.fallbackLastRequestAt)));
+      }
+      if (signal?.aborted) throw new DOMException("Routenanfrage abgebrochen", "AbortError");
+      if (!hasConsent(config.geocodingServiceUrl, serviceUrl)) throw drittdienstAbgelehntFehler();
+      SCHULWEGSAFE_RUNTIME.fallbackLastRequestAt = Date.now();
+      return fetchOsrmRoutes(baseUrl, startPoint, school, routeMode, signal);
+    });
+    // Ein Fehler darf spaetere, bewusst erneut angeforderte Routen nicht blockieren.
+    SCHULWEGSAFE_RUNTIME.fallbackQueue = request.catch(() => {});
+    return request;
+  }
   if (!serviceUrl || isOsrmRouteService(serviceUrl)) {
-    return fetchOsrmRoutes(serviceUrl || SCHULWEGSAFE_DEFAULTS.routingServiceBaseUrl, startPoint, school, routeMode);
+    return fetchOsrmRoutes(serviceUrl || SCHULWEGSAFE_DEFAULTS.routingServiceBaseUrl, startPoint, school, routeMode, signal);
   }
 
   const response = await fetch(routeServiceUrl, {
     method: "POST",
+    signal,
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
       from: [startPoint.lat, startPoint.lon],
@@ -2736,7 +2878,7 @@ function isOsrmRouteService(routeServiceUrl) {
   return /\/route\/v1\/?$/i.test(routeServiceUrl) || /router\.project-osrm\.org/i.test(routeServiceUrl);
 }
 
-async function fetchOsrmRoutes(routeServiceBaseUrl, startPoint, school, routeMode) {
+async function fetchOsrmRoutes(routeServiceBaseUrl, startPoint, school, routeMode, signal) {
   const profile = getOsrmProfile(routeMode);
   const baseUrl = routeServiceBaseUrl.replace(/\/+$/, "");
   const coordinates = `${startPoint.lon},${startPoint.lat};${school.lon},${school.lat}`;
@@ -2748,6 +2890,7 @@ async function fetchOsrmRoutes(routeServiceBaseUrl, startPoint, school, routeMod
 
   const response = await fetch(url.toString(), {
     headers: { Accept: "application/json" },
+    signal,
   });
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
