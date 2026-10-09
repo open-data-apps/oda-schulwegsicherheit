@@ -2,14 +2,6 @@
   color: #172033;
 }
 
-#offcanvasNavbar:not(.show) {
-  display: none;
-}
-
-#offcanvasNavbar.show {
-  display: block;
-}
-
 .sws-workbench {
   display: grid;
   gap: 0.85rem;

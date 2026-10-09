@@ -224,6 +224,14 @@ Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autar
 node --test tests/*.test.cjs
 ```
 
+Die Menüanimation wird zusätzlich mit einem bereits installierten Playwright und Chrome geprüft (keine zusätzliche App-Abhängigkeit):
+
+```bash
+PLAYWRIGHT_MODULE=/pfad/zur/playwright-installation node --test tests/menu.browser.cjs
+```
+
+Der Browsertest prüft sichtbare Öffnungs-/Schließbewegung auf Desktop und Mobil, reduzierte Bewegung, Fokus, Escape, Hintergrundklick, Menünavigation und wiederholtes Öffnen.
+
 Die Tests verwenden die tatsächliche App-Logik; nur Browser-Oberfläche und externe Netzantworten werden isoliert. Geprüft werden Modus-Sperre, automatische Routing-Fallbacks, Ratenbegrenzung, verworfene oder abgebrochene Routen, Adresssuche sowie Schulsuche und Cache-Aufbereitung.
 
 Die Korrektur des Quellnamens `…sterfeldschule Grundschule Vaihingen` ist auf die bekannte ID `BW-129123` und genau diesen defekten Namen begrenzt. Referenz: [Landeshauptstadt Stuttgart – Österfeldschule](https://www.stuttgart.de/organigramm/adresse/oesterfeldschule), geprüft am 08.10.2026. Andere Namen/Auslassungszeichen werden nicht geraten oder pauschal ersetzt. Mehrteilige Suchanfragen müssen mit allen Begriffen zur Schule passen.

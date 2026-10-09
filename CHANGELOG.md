@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.41.2 - 2026-10-09
+- FIX: Burger-Menü öffnet und schließt mit der nativen Bootstrap-Animation; app-eigene Display-Regeln blockieren die Öffnungsphase nicht mehr.
+- TEST: Browserregression für Desktop, Mobil, reduzierte Bewegung, Fokus, Escape, Hintergrundklick und Menünavigation.
+
 ## 1.41.1 - 2026-10-09
 - FIX: F-126: Proxy-Endpunkt bei /app/index.html ohne HTML-Dateinamen aufbauen; absolute Ziel-URL im path-Parameter erhalten.
 - TEST: Zwölf Proxy-Regressionen für Verzeichnis- und Dateieinstieg, gebuchte Instanzpfade und vollständige Ziel-URLs beider Datenquellen.
