@@ -2561,7 +2561,8 @@ function extractPathFromUrl(url) {
 }
 
 function getOdasProxyEndpoint(targetUrl) {
-  const pathName = window.location.pathname.replace(/\/+$/, "");
+  // F-126: Dateieinstieg und Verzeichniseinstieg verwenden denselben App-Endpunkt.
+  const pathName = window.location.pathname.replace(/\/[^/]+\.[^/]+$/, "").replace(/\/+$/, "");
   return `${pathName}/odp-data?path=${encodeURIComponent(targetUrl)}`;
 }
 

@@ -52,6 +52,30 @@ function setup(fetchImpl = async () => ({ ok: true, json: async () => routePaylo
   return { api, runtime, calls, storage };
 }
 
+const instancePath = '/view/audit-test/schulwegsafe/cmssptza70017o52nta351axt';
+for (const [entry, basePath] of [
+  ['/app/', '/app'], ['/app', '/app'], ['/app/index.html', '/app'],
+  [instancePath + '/', instancePath], [instancePath, instancePath],
+  [instancePath + '/index.html?x=1#startseite', instancePath],
+]) {
+  for (const target of [
+    'https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json?value=a+b%2F&city=Österfeld',
+    'https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip?x=1&y=2',
+  ]) {
+    test(`Proxy erhält Basis und absolute Ziel-URL bei ${entry} für ${new URL(target).hostname}`, async () => {
+      const { api, calls } = setup(async () => ({ ok: true, json: async () => ({ content: 'Quelldaten' }) }));
+      api.window.location = new URL(entry, 'http://odas.example.test');
+      assert.equal(await api.fetchOdasCompatibleText(target, { proxyAktiv: 'ja' }), 'Quelldaten');
+      assert.equal(calls.length, 1);
+      const [endpoint, options] = calls[0].args;
+      const url = new URL(endpoint, api.window.location.href);
+      assert.equal(url.pathname, basePath + '/odp-data');
+      assert.equal(url.searchParams.get('path'), target);
+      assert.equal(options.method, 'POST');
+    });
+  }
+}
+
 test('die Oberfläche zeigt deutsche Umlaute in Beschriftungen und Eingabehilfen', () => {
   const { api, runtime } = setup();
   runtime.rootElement.querySelector = () => element();

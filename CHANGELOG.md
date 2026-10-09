@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.41.1 - 2026-10-09
+- FIX: F-126: Proxy-Endpunkt bei /app/index.html ohne HTML-Dateinamen aufbauen; absolute Ziel-URL im path-Parameter erhalten.
+- TEST: Zwölf Proxy-Regressionen für Verzeichnis- und Dateieinstieg, gebuchte Instanzpfade und vollständige Ziel-URLs beider Datenquellen.
+
 ## 1.41.0 - 2026-10-08
 - CHG: App-spezifische Einwilligungsabfrage und Speicherung eines Einwilligungsstatus entfallen; Nominatim-Vorschläge werden ab vier Zeichen nach 450 ms Tipp-Pause angefragt. Die Browserfreigabe für den Gerätestandort bleibt davon unabhängig.
 - CHG: Der leere `routeServiceUrl`-Standard bleibt bestehen; der öffentliche OSRM-Dienst ist nur für Auto vorgesehen. Fuß- und Radwege überspringen ihn; nach Fehler oder unbrauchbarer Primärroute folgt genau ein automatischer FOSSGIS-Versuch. Abbruch löst keinen Folgeversuch aus; ohne Route gibt es keinen Score und die Instanzkonfiguration bleibt unverändert.
