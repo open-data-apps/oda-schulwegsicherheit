@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.41.0 - 2026-10-08
+- CHG: App-spezifische Einwilligungsabfrage und Speicherung eines Einwilligungsstatus entfallen; Nominatim-Vorschläge werden ab vier Zeichen nach 450 ms Tipp-Pause angefragt. Die Browserfreigabe für den Gerätestandort bleibt davon unabhängig.
+- CHG: Der leere `routeServiceUrl`-Standard bleibt bestehen; der öffentliche OSRM-Dienst ist nur für Auto vorgesehen. Fuß- und Radwege überspringen ihn; nach Fehler oder unbrauchbarer Primärroute folgt genau ein automatischer FOSSGIS-Versuch. Abbruch löst keinen Folgeversuch aus; ohne Route gibt es keinen Score und die Instanzkonfiguration bleibt unverändert.
+- DOC: Aktuelle Beschreibung, Datenschutzangaben, Konfigurationshilfen und README an Routing-Fallback, Datenübertragungen, Cache, Anbieterbedingungen und Kartenhinweise angepasst.
+
 ## 1.40.6 - 2026-10-08
 - FIX: App-eigene Oberflächen-, Einwilligungs-, Hilfe- und Standardtexte verwenden ä, ö, ü und ß statt ASCII-Umschreibungen; technische Schlüssel, URLs und fremde Datensatznamen bleiben unverändert.
 - FIX: Bereits zwischengespeicherte, von der App erzeugte Unfalltitel zeigen ebenfalls „Fußverkehr“; andere Titel werden nicht pauschal verändert.

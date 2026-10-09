@@ -26,7 +26,7 @@ Die Konfiguration wird vom ODAS geladen. Die App zeigt folgende Inhalte:
 - **Filterung**: Schulwegrelevante Unfälle mit Fuß- oder Radbezug an Werktagen zu Schulwegzeiten
 - **Heatmap und Einzelpunkte**: Darstellung der Unfallpunkte im Umfeld einer ausgewählten Schule
 - **Startadresse**: Suche einer Startadresse per Nominatim, Kartenklick oder Standortfunktion
-- **Routing**: Geeigneter eigener Dienst oder bewusst wählbarer FOSSGIS-Fallback mit getrennten Fuß-, Rad- und Autoprofilen; der bisherige öffentliche Standard ist nur für Autorouten freigegeben
+- **Routing**: Konfigurierter Dienst oder öffentlicher OSRM-Autodienst als Primärdienst; bei Fehler oder unbrauchbarer Route folgt automatisch genau ein FOSSGIS-Versuch, Fuß und Rad überspringen den öffentlichen Autodienst
 - **Bewertung**: Score entlang des berechneten Routenkorridors mit Distanz, Dauer und Unfallpunkt-Treffern
 - **Score-Erklärung**: Übersichtlicher Score-Guide mit Skala, Schwellenwerten und Bewertungsfaktoren direkt in der Routenbewertung
 - **Standort-Hinweise**: Ladeanzeige, robuster zweiter Ortungsversuch und verständliche Meldungen bei Browserfreigabe, Desktop-Einschränkungen oder mobilen Standortdiensten
@@ -50,7 +50,9 @@ Die ZIP-Datei wird im Browser mit JSZip gelesen. Standard lädt die App beide Qu
 direkt. Über den Konfigurationsschalter `proxyAktiv` (Default `nein`) können die Abrufe
 alternativ über den ODAS-Proxy laufen: Seit dem Plattform-Update vom 2026-08-24 erlaubt
 der Proxy mehrere konfigurierte Quelle-Origin gleichzeitig, also hier GitHub-Raw und
-OpenGeodata.NRW.
+OpenGeodata.NRW. Die öffentlichen Schul- und Unfalldatensätze werden weiterhin mit
+konfigurierbarer Gültigkeit (`cacheTtlStunden`, Standard 24 Stunden) in IndexedDB
+zwischengespeichert.
 
 ---
 
@@ -60,8 +62,8 @@ OpenGeodata.NRW.
 | ------------- | ------------ | -------- |
 | `apiurls.schulen` | JSON-Datensatz mit Schulen in Baden-Württemberg | `https://raw.githubusercontent.com/Datenschule/schulscraper-data/master/schools/baden-wuerttemberg.json` |
 | `apiurls.unfallatlas` | Unfallatlas CSV-ZIP | `https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/Unfallorte2024_EPSG25832_CSV.zip` |
-| `routeServiceUrl` | Eigener Routing-Service mit `mode` (POST) oder passend vorbereitetem OSRM-Endpunkt | leer: öffentlicher Standard nur für Auto; Fuß/Rad bleiben gesperrt |
-| `geocodingServiceUrl` | Nominatim-kompatible Such-URL für die Adressauflösung | leer für den voreingestellten öffentlichen Dienst |
+| `routeServiceUrl` | Eigener Routing-Service mit `mode` (POST) oder passend vorbereitetem OSRM-Endpunkt | leer: öffentlicher OSRM-Dienst nur für Auto; Fuß/Rad überspringen ihn, FOSSGIS wird direkt genutzt |
+| `geocodingServiceUrl` | Nominatim-kompatible Such-URL für die Adressauflösung | leer für den öffentlichen Standard; Vorschläge ab 4 Zeichen nach 450 ms Tipp-Pause |
 
 ---
 
@@ -159,71 +161,60 @@ Der Inhaltsbereich wird in `app/app.js` erstellt. App-spezifisches Styling liegt
 
 ## Kartenfunktion
 
-Die App verwendet [Leaflet.js](https://leafletjs.com/) und [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat). Die Karte nutzt OpenStreetMap-Kacheln und benötigt keinen Karten-API-Key.
+Die App verwendet [Leaflet.js](https://leafletjs.com/) und [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat). Die Karte nutzt OpenStreetMap-Kacheln und benötigt keinen Karten-API-Key. Hinweise zur Kartengrundlage und zum Routing sowie der kompakte Link [OpenStreetMap-Kartenfehler melden](https://www.openstreetmap.org/fixthemap) stehen direkt unter der Karte.
 
-Für Startadressen wird die Nominatim-Suche von OpenStreetMap genutzt. Der voreingestellte Routingdienst `router.project-osrm.org` berechnet Autorouten. Ein anderer Profilname im OSRM-URL-Pfad ändert das vorbereitete Wegenetz nicht; Fuß- und Radwege bleiben bei diesem Dienst daher gesperrt und erhalten keinen Score.
+Für Adressvorschläge wird die Nominatim-Suche genutzt. Eine Anfrage wird nach mindestens vier eingegebenen Zeichen und einer Tipp-Pause von 450 Millisekunden an den konfigurierten Geocoding-Dienst gesendet; bei leerem `geocodingServiceUrl` ist dies `nominatim.openstreetmap.org`. Suchtext und Ort der gewählten Schule werden übermittelt.
 
-### Bewusst wählbarer Routing-Fallback
+### Routing und automatischer FOSSGIS-Versuch
 
-Bei gesperrtem Fuß-/Radrouting oder einem nicht nutzbaren konfigurierten Routingdienst bietet die App **FOSSGIS-Fallback auswählen** an. Es gibt keinen heimlichen Dienstwechsel.
+Ein gesetztes `routeServiceUrl` wird als primärer Routingdienst verwendet. Bleibt die Einstellung – wie im Standard – leer, nutzt die App `router.project-osrm.org` ausschließlich für Autorouten. Fuß- und Radwege überspringen diesen öffentlichen Autodienst; ein anderes Profilwort in der OSRM-URL ändert das zugrunde liegende Wegenetz nicht.
 
-1. Den Hinweis und die [FOSSGIS-Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/) prüfen und den Fallback ausdrücklich auswählen.
-2. Der Übertragung an `routing.openstreetmap.de` zustimmen. Eine Zustimmung zum bisherigen Dienst gilt nicht für diesen Endpunkt.
-3. Die Route erneut berechnen. Fuß, Rad und Auto nutzen getrennte Serverpfade `routed-foot`, `routed-bike` und `routed-car`.
+- Liefert ein geeigneter Primärdienst einen Fehler oder keine nutzbare Route, versucht die App automatisch genau einmal `routing.openstreetmap.de` (FOSSGIS).
+- Bei leerem `routeServiceUrl` gehen Fuß- und Radwege direkt einmal an den geeigneten FOSSGIS-Dienst, statt den öffentlichen OSRM-Autodienst aufzurufen.
+- Ein abgebrochener Routingaufruf löst keinen Ersatzversuch aus. Gibt auch der FOSSGIS-Versuch keine nutzbare Route zurück, zeigt die App keinen Score.
+- Der automatische Versuch verändert `routeServiceUrl` oder die ODAS-Instanzkonfiguration nicht.
 
-Die Auswahl gilt nur für die aktuelle App-Ansicht und ändert weder Paket noch Live-Konfiguration. Wer einen geteilten Link aufruft, muss seinen Routingdienst ebenfalls bewusst wählen. Bei Ausfall oder fehlender Route zeigt die App keinen ersatzweise erfundenen Score.
+Sobald Schule und Startpunkt vorliegen, kann eine Route berechnet werden – nach Auswahl einer Adresse, Nutzung des Standort-Knopfs, einem Kartenklick oder beim Öffnen eines geteilten Links mit Koordinaten. Die öffentlichen FOSSGIS-Pfade `routed-foot`, `routed-bike` und `routed-car` verwenden getrennte Profile. Ein eigener Nicht-OSRM-Dienst erhält einen JSON-POST mit `from`, `to`, `schoolId` und `mode` (`foot`, `bike`, `car`). Ein eigener OSRM-Endpunkt muss selbst das zum Modus passende Wegenetz bereitstellen.
 
-**Betriebsgrenzen:** Der öffentliche FOSSGIS-Dienst ist kein unbeschränkter Produktionsdienst. Er erlaubt maximal eine Anfrage pro Sekunde, kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlichen Teil eines Onlineangebots; es gibt keine Verfügbarkeitsgarantie. Die App serialisiert Anfragen mit mindestens einer Sekunde Abstand **pro geöffneter Seite**, auch über mehrere Instanzen innerhalb desselben Dokuments. Das begrenzt nicht die Summe aller Besucher/Tabs. Der Betreiber muss daher die Eignung/Freigabe für seinen Einsatz sicherstellen; für größeren produktiven Betrieb ist ein eigener oder entsprechend freigegebener Dienst erforderlich. Bei bewusst gesetzter `routeServiceUrl: "https://routing.openstreetmap.de"` gelten dieselben Profil-, Einwilligungs- und Ratenregeln.
-
-Eigene Nicht-OSRM-Dienste erhalten unverändert einen JSON-POST mit `from`, `to`, `schoolId` und `mode` (`foot`, `bike`, `car`). Ein eigener OSRM-Endpunkt muss tatsächlich das zum Modus passende Wegenetz bereitstellen; allein `/foot` oder `/bike` im Pfad ist kein Nachweis.
+**Nutzungsbedingungen:** Für den öffentlichen [FOSSGIS-Routingdienst](https://routing.openstreetmap.de/about.html) gelten die [FOSSGIS-Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/), unter anderem eine Begrenzung auf höchstens eine Anfrage pro Sekunde, kein hohes Verkehrsaufkommen und keine gewerbliche Nutzung als wesentlicher Teil eines Angebots. Es gibt keine Verfügbarkeitsgarantie. Betreiber müssen die jeweils geltenden Bedingungen und die Eignung für ihren Einsatz selbst prüfen. Die App begrenzt Anfragen pro geöffneter Seite; das begrenzt nicht die Summe über alle Besucher und Browser-Tabs.
 
 ### Übertragung personenbezogener Angaben an Dritte
 
-Beide Funktionen übertragen Angaben, die Rückschlüsse auf Wohnort und Schulweg zulassen:
+Adresssuche und Routenberechnung übertragen Angaben, die Rückschlüsse auf Wohnort und Schulweg zulassen:
 
-| Funktion | Empfänger (Voreinstellung) | Übertragene Daten |
+| Funktion | Empfänger (Standard) | Übertragene Daten |
 | --- | --- | --- |
-| Adresssuche | `nominatim.openstreetmap.org` | Eingegebene Adresse und Ort der gewählten Schule |
-| Autorouten (Standard) | `router.project-osrm.org` | Koordinaten von Startpunkt und Schule, **im Pfad der aufgerufenen Adresse** — sie erscheinen dadurch in den Zugriffsprotokollen des Dienstes |
-| Ausdrücklich gewählter Fallback | `routing.openstreetmap.de` (FOSSGIS) | Start-/Zielkoordinaten im URL-Pfad, IP-Adresse und Browserkennung; Routenanfragen werden beim Anbieter protokolliert |
+| Adressvorschläge | `nominatim.openstreetmap.org` | Suchtext und Ort der gewählten Schule; ab vier Zeichen nach 450 ms Tipp-Pause |
+| Autorouten bei leerem `routeServiceUrl` | `router.project-osrm.org` | Koordinaten von Startpunkt und Schule im URL-Pfad |
+| FOSSGIS-Routing | `routing.openstreetmap.de` | Start- und Zielkoordinaten; Fuß-/Radwege bei leerem `routeServiceUrl` und einmaliger Ersatzversuch nach einem Fehler oder einer unbrauchbaren Route |
+| Eigener Primärdienst | konfigurierte `routeServiceUrl` | Start- und Zielkoordinaten sowie Wegtyp (`foot`, `bike`, `car`) |
 
-Wird der Standort-Knopf genutzt, ist der Startpunkt die tatsächliche Position des Geräts.
-`router.project-osrm.org` ist eine öffentliche Demonstrationsinstanz des OSRM-Projekts und
-nicht für den Produktivbetrieb vorgesehen.
+Sobald Schule und Startpunkt vorliegen, kann die Route durch eine Adressauswahl, den Standort-Knopf, einen Kartenklick oder einen geteilten Link mit Koordinaten ausgelöst werden. Bei Nutzung des Standort-Knopfs ist der Startpunkt die tatsächliche Position des Geräts. Die Browser- beziehungsweise Betriebssystemfreigabe für den Gerätestandort ist davon unabhängig: Sie steuert den Standortzugriff und ist keine gesonderte Freigabe der anschließenden Übertragung an einen Routingdienst.
 
-**Die App fragt vor der ersten Übertragung.** Ohne Zustimmung findet keine dieser
-Übertragungen statt; Adresssuche und Routenberechnung bleiben deaktiviert. Kartenansicht,
-Schulsuche und Unfallpunkte funktionieren auch ohne. Die Entscheidung wird lokal im Browser
-gespeichert (localStorage, an das Endpunktpaar gebunden) und ist jederzeit widerrufbar. Ein Widerruf oder eine Änderung der Startadresse verwirft laufende Routen; verspätete Adressantworten dürfen keine veraltete Route nachladen.
-
-**Für Betreiber:** Über `geocodingServiceUrl` und `routeServiceUrl` lassen sich eigene
-Instanzen hinterlegen; die App nennt dann diese im Hinweis und in der Datenschutzangabe.
-Wer die mitgelieferte `datenschutz`-Angabe übernimmt, ohne eigene Dienste zu setzen,
-übernimmt damit auch die Nennung der beiden öffentlichen Dienste — das ist beabsichtigt
-und muss zur tatsächlichen Konfiguration passen.
+Bei externen Anfragen werden technisch bedingt auch IP-Adresse und Browserkennung übertragen. Die App zeigt keine eigene Einwilligungsabfrage an und legt keinen app-spezifischen Einwilligungsstatus an. Die verantwortliche Stelle jeder konkreten Instanz muss die Rechtsgrundlage für diese Übermittlungen und ihre Informationspflichten selbst prüfen; diese technische Dokumentation nimmt keine rechtliche Bewertung vor.
 
 Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Routenkorridor keine relevanten Unfallpunkte liegen; jeder Treffer erhöht den Wert, wobei Kinderbeteiligung, Fuß-/Radbezug und neuere Unfälle stärker gewichtet werden. Unter `2` gilt als geringes Risiko, `2` bis unter `6` als erhöhte Aufmerksamkeit und ab `6` als kritisches Risiko.
-
----
 
 ## Datenquellen und Attribution
 
 - Schuldaten: JedeSchule / Datenschule, CC0
 - Unfalldaten: Unfallatlas der Statistischen Ämter des Bundes und der Länder, bereitgestellt über OpenGeodata.NRW, Datenlizenz Deutschland Namensnennung 2.0
 - Kartendaten: OpenStreetMap-Mitwirkende, ODbL
-- Geocoding und Routing: OpenStreetMap/Nominatim und OSRM-kompatible Routingdienste; optional [FOSSGIS](https://routing.openstreetmap.de/about.html)
+- Geocoding und Routing: OpenStreetMap/Nominatim und konfigurierbare Routingdienste; automatischer FOSSGIS-Ersatzdienst für Fuß-/Radwege und nach einem fehlgeschlagenen oder unbrauchbaren Primärversuch ([FOSSGIS](https://routing.openstreetmap.de/about.html))
 - [OpenStreetMap-Kartenfehler melden](https://www.openstreetmap.org/fixthemap)
 
 ---
 
 ## Beim Aufruf kontaktierte Drittanbieter
 
-Beim Aufruf dieser App werden folgende externe Server kontaktiert:
+Je nach Nutzung und Instanzkonfiguration werden folgende externe Server kontaktiert:
 
-- `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
-- `nominatim.openstreetmap.org` — Adress-Suche (Geocoding); übertragen: Suchbegriffe, IP-Adresse, User-Agent; Abruf nur nach Einwilligung
-- `router.project-osrm.org` — Autoroutenberechnung (OSRM); übertragen: Start- und Zielkoordinaten, IP-Adresse, User-Agent; Abruf nur nach Einwilligung
-- `routing.openstreetmap.de` — bewusst wählbarer FOSSGIS-Fallback für Fuß-, Rad- und Autorouten; dieselben technischen Angaben, Abruf nur nach dienstbezogener Einwilligung; [Datenschutz](https://www.fossgis.de/datenschutzerklärung/)
+- `tile.openstreetmap.org` — OpenStreetMap-Kartenkacheln
+- `nominatim.openstreetmap.org` — Geocoding-Vorschläge; Suchtext und Ort der gewählten Schule werden ab vier Zeichen nach 450 ms Tipp-Pause übertragen
+- `router.project-osrm.org` — öffentlicher Routingdienst für Autorouten, wenn `routeServiceUrl` leer ist; Fuß- und Radwege überspringen diesen Autodienst
+- `routing.openstreetmap.de` — FOSSGIS-Routing für Fuß-/Radwege bei leerem `routeServiceUrl` sowie als einmaliger automatischer Ersatzversuch; übertragen werden Start- und Zielkoordinaten; [Datenschutz](https://www.fossgis.de/datenschutzerklärung/) und [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/)
+
+Bei externen Anfragen werden technisch bedingt IP-Adresse und Browserkennung übermittelt. Ein eigener Geocoding- oder Routing-Endpunkt kann die jeweiligen öffentlichen Dienste ersetzen. Schul- und Unfalldaten werden abhängig von `proxyAktiv` direkt oder über den ODAS-Proxy geladen.
 
 Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Alle Programmbibliotheken werden lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 
@@ -233,7 +224,7 @@ Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autar
 node --test tests/*.test.cjs
 ```
 
-Die Tests verwenden die tatsächliche App-Logik; nur Browser-Oberfläche und externe Netzantworten werden isoliert. Geprüft werden Modus-Sperre, korrekte Fallback-Pfade, Einwilligung, Ratenbegrenzung, verworfene/abgebrochene Routen und Adressantworten sowie Schulsuche und Cache-Aufbereitung.
+Die Tests verwenden die tatsächliche App-Logik; nur Browser-Oberfläche und externe Netzantworten werden isoliert. Geprüft werden Modus-Sperre, automatische Routing-Fallbacks, Ratenbegrenzung, verworfene oder abgebrochene Routen, Adresssuche sowie Schulsuche und Cache-Aufbereitung.
 
 Die Korrektur des Quellnamens `…sterfeldschule Grundschule Vaihingen` ist auf die bekannte ID `BW-129123` und genau diesen defekten Namen begrenzt. Referenz: [Landeshauptstadt Stuttgart – Österfeldschule](https://www.stuttgart.de/organigramm/adresse/oesterfeldschule), geprüft am 08.10.2026. Andere Namen/Auslassungszeichen werden nicht geraten oder pauschal ersetzt. Mehrteilige Suchanfragen müssen mit allen Begriffen zur Schule passen.
 
