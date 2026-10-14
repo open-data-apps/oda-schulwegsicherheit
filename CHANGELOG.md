@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.41.4 - 2026-10-14
+- DOCS: Datenschutzerklärung (Paket und lokale Config) um den verbindlichen Bibliotheken-Baustein ergänzt; README-Liste der kontaktierten Drittanbieter an die Datenschutzerklärung angeglichen und Proxy-Formulierung ohne Standard-Baustein neu gefasst. Keine Änderung an der App-Logik.
+
 ## 1.41.3 - 2026-10-13
 - FIX: Standard-Fehleranzeige gibt präzisere Tipps: ein „Failed to fetch“ ohne Proxy-Kontext erhält einen Netzwerk-Hinweis statt `proxyAktiv`; der 404-Hinweis gilt nur noch für echte HTTP-404-Antworten und nennt den lokal fehlenden Proxy/Relay statt pauschal „Datensatz auf dem Portal nicht gefunden“.
 

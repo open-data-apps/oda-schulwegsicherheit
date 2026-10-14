@@ -209,12 +209,12 @@ Der Route-Score nutzt eine Skala von 0 bis 100. `0` bedeutet, dass im 50-m-Route
 
 Je nach Nutzung und Instanzkonfiguration werden folgende externe Server kontaktiert:
 
-- `tile.openstreetmap.org` — OpenStreetMap-Kartenkacheln
-- `nominatim.openstreetmap.org` — Geocoding-Vorschläge; Suchtext und Ort der gewählten Schule werden ab vier Zeichen nach 450 ms Tipp-Pause übertragen
-- `router.project-osrm.org` — öffentlicher Routingdienst für Autorouten, wenn `routeServiceUrl` leer ist; Fuß- und Radwege überspringen diesen Autodienst
-- `routing.openstreetmap.de` — FOSSGIS-Routing für Fuß-/Radwege bei leerem `routeServiceUrl` sowie als einmaliger automatischer Ersatzversuch; übertragen werden Start- und Zielkoordinaten; [Datenschutz](https://www.fossgis.de/datenschutzerklärung/) und [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/)
+- `tile.openstreetmap.org` — Kartenkacheln; technisch bedingt werden IP-Adresse und Browserkennung übermittelt.
+- `nominatim.openstreetmap.org` — Geocoding-Vorschläge; Suchtext und Schulort werden nach mindestens vier Zeichen und 450 Millisekunden Tipp-Pause übertragen.
+- `router.project-osrm.org` — öffentliche Autorouten-Instanz, nur für den Wegtyp Auto bei leerem `routeServiceUrl`.
+- `routing.openstreetmap.de` — FOSSGIS-Routing für Fuß- und Radwege bei leerem `routeServiceUrl` sowie als einmaliger automatischer Ersatzversuch nach einem Fehler oder einer unbrauchbaren Route; [Datenschutz](https://www.fossgis.de/datenschutzerklärung/) und [Nutzungsbedingungen](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/).
 
-Bei externen Anfragen werden technisch bedingt IP-Adresse und Browserkennung übermittelt. Ein eigener Geocoding- oder Routing-Endpunkt kann die jeweiligen öffentlichen Dienste ersetzen. Schul- und Unfalldaten werden abhängig von `proxyAktiv` direkt oder über den ODAS-Proxy geladen.
+Bei externen Anfragen werden technisch bedingt IP-Adresse und Browserkennung übermittelt. Ein eigener Geocoding- oder Routing-Endpunkt kann die jeweiligen öffentlichen Dienste ersetzen. Schul- und Unfalldaten werden abhängig von `proxyAktiv` direkt oder über den ODAS-Proxy abgerufen.
 
 Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Alle Programmbibliotheken werden lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 

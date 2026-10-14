@@ -54,7 +54,7 @@
     "<p>Die App trifft keine Aussage dazu, welche Rechtsgrundlage für eine konkrete Nutzung gilt. Die verantwortliche Stelle der jeweiligen App-Instanz muss die Rechtsgrundlage, die erforderlichen Informationen und die Eignung der eingesetzten Dienste eigenständig prüfen und ihre Datenschutzhinweise an die tatsächliche Konfiguration anpassen.</p>",
     "<h3>Weitere Datenquellen</h3>",
     "<p>Schul- und Unfalldaten werden von den in der Instanz konfigurierten Quellen geladen; je nach <code>proxyAktiv</code> direkt aus dem Browser oder über den ODAS-Proxy. Die öffentlichen Datensätze bleiben im IndexedDB-Cache. OpenStreetMap-Kartenkacheln werden von <code>tile.openstreetmap.org</code> geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung an die jeweiligen Server übertragen.</p>",
-    "<p>Die Programmbibliotheken werden mit der App ausgeliefert. Für diese Bibliotheken werden beim Aufruf keine externen Server kontaktiert.</p>",
+    "<p>Alle für die Darstellung benötigten Programmbibliotheken werden mit der App ausgeliefert. Beim Aufruf werden dafür keine externen Server kontaktiert.</p>",
     "<h3>Beim Aufruf kontaktierte Drittanbieter</h3>",
     "<p>Je nach Nutzung und Instanzkonfiguration werden externe Server kontaktiert. Die folgenden öffentlichen Dienste sind die Standarddienste; eigene konfigurierte Endpunkte können sie ersetzen:</p>",
     "<ul>",
