@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.41.5 - 2026-10-15
+- DOCS: Neue Store-Screenshots: je drei Desktop- (1440 × 1000) und Mobile-Aufnahmen (390 × 844) der aktuellen App, aufgenommen auf der Dev-Instanz. Bisherige Bilder nach `docs/screenshots/archive/2026-10-13/` verschoben. Keine Änderung an App-Code oder Konfiguration.
+
 ## 1.41.4 - 2026-10-14
 - DOCS: Datenschutzerklärung (Paket und lokale Config) um den verbindlichen Bibliotheken-Baustein ergänzt; README-Liste der kontaktierten Drittanbieter an die Datenschutzerklärung angeglichen und Proxy-Formulierung ohne Standard-Baustein neu gefasst. Keine Änderung an der App-Logik.
 
